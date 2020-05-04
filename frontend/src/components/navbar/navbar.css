@@ -1,0 +1,44 @@
+#navbar {
+    width: 100%;
+    display: flex;
+    color: white;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+#search {
+    width: 70%;
+    display: flex;
+    align-items: center;
+}
+
+#musiki {
+    font-size: 18pt;
+    margin-right: 3em;
+}
+
+#search-bar {
+    width: 50%;
+    background-color: white;
+    padding: 0.5em 1em;
+    border-radius: 2em;
+}
+
+#search-bar > .search-icon {
+    color: gray;
+    margin-right: 1em;
+}
+
+#search-bar > input {
+    border: none;
+    font-family: inherit;
+    font-size: 12pt;
+}
+
+#search-bar > input:required {
+    box-shadow: none;
+}
+
+.music-icon {
+    font-size: 28pt;
+    margin-right: 0.5em;
+}
