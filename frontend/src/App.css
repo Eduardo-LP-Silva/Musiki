@@ -10,3 +10,7 @@ html, body, #root {
 #content {
   padding: 1em 2em;
 }
+
+#options-nav {
+  display: flex;
+}
