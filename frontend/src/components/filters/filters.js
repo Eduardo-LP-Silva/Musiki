@@ -14,56 +14,56 @@ class Filters extends Component {
     
     render() {
         return (
-            <form id="filters" style={{display: "visible"}}>
+            <div id="filters" style={{display: "visible"}}>
                 <span>Search Filters</span>
-                <label className="filter-container" htmlFor="albuns">
+                <label className="filter-container">
                     Albuns
-                    <input id="albuns" name="filter" type="radio" value="albuns"/>
+                    <input id="albuns" name="filter" type="checkbox" value="albuns"/>
                     <span className="filter-btn"></span>
                 </label>
                 <div className="filter-vertical-div"></div>
-                <label className="filter-container" htmlFor="genre">
+                <label className="filter-container">
                     Genre
-                    <input id="genre" name="filter" type="radio" value="genre"/>
+                    <input id="genre" name="filter" type="checkbox" value="genre"/>
                     <span className="filter-btn"></span>
                 </label>
                 <div className="filter-vertical-div"></div>
-                <label className="filter-container" htmlFor="awards">
+                <label className="filter-container">
                     Awards
-                    <input id="awards" name="filter" type="radio" value="awards"/>
+                    <input id="awards" name="filter" type="checkbox" value="awards"/>
                     <span className="filter-btn"></span>
                 </label>
                 <div className="filter-vertical-div"></div>
-                <label className="filter-container" htmlFor="members">
+                <label className="filter-container">
                     Members
-                    <input id="members" name="filter" type="radio" value="members"/>
+                    <input id="members" name="filter" type="checkbox" value="members"/>
                     <span className="filter-btn"></span>
                 </label>
                 <div className="filter-vertical-div"></div>
-                <label className="filter-container" htmlFor="singles">
+                <label className="filter-container">
                     Singles
-                    <input id="singles" name="filter" type="radio" value="singles"/>
+                    <input id="singles" name="filter" type="checkbox" value="singles"/>
                     <span className="filter-btn"></span>
                 </label>
                 <div className="filter-vertical-div"></div>
-                <label className="filter-container" htmlFor="related-artitsts">
+                <label className="filter-container">
                     Related Artists
-                    <input id="related-artitsts" name="filter" type="radio" value="related-artitsts"/>
+                    <input id="related-artitsts" name="filter" type="checkbox" value="related-artitsts"/>
                     <span className="filter-btn"></span>
                 </label>
                 <div className="filter-vertical-div"></div>
-                <label className="filter-container" htmlFor="upcoming-projects">
+                <label className="filter-container">
                     Upcoming Projects
-                    <input id="upcoming-projects" name="filter" type="radio" value="upcoming-projects"/>
+                    <input id="upcoming-projects" name="filter" type="checkbox" value="upcoming-projects"/>
                     <span className="filter-btn"></span>
                 </label>
                 <div className="filter-vertical-div"></div>
-                <label className="filter-container" htmlFor="misc">
+                <label className="filter-container">
                     Miscellaneous
-                    <input id="misc" name="filter" type="radio" value="misc"/>
+                    <input id="misc" name="filter" type="checkbox" value="misc"/>
                     <span className="filter-btn"></span>
                 </label>
-            </form>
+            </div>
         );
     }
 

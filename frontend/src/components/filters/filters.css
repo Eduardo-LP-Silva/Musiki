@@ -1,18 +1,3 @@
-#filters {
-    position: absolute;
-    background-color: white;
-    width: 40%;
-    border-radius: 0.5em;
-    padding-top: 1em;
-    margin-top: 1.5em;
-    padding-bottom: 1em;
-    padding-left: 1.5em;
-    font-family: 'Roboto Condensed', sans-serif;
-    -webkit-box-shadow: 10px 14px 0px 0px rgba(207,205,205,1);
-    -moz-box-shadow: 10px 14px 0px 0px rgba(207,205,205,1);
-    box-shadow: 10px 14px 0px 0px rgba(207,205,205,1);
-}
-
 #filters > :first-child {
     font-weight: bold;
     margin-bottom: 1em;

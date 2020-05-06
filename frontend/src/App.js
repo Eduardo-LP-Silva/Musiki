@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCog } from '@fortawesome/free-solid-svg-icons';
 import Navbar from './components/navbar/navbar';
-import Filters from './components/filters/filters';
+import Settings from './components/settings/settings';
 import './App.css';
 
 class App extends Component {
@@ -8,20 +10,24 @@ class App extends Component {
     super(props);
 
     this.state = {
-      filters: "none"
+      settings: 0
     };
+
+    this.toggleSettings = this.toggleSettings.bind(this);
   }
 
   render() {
     return (
       <div id="content">
         <Navbar/>
-        <div id="options-nav">
-          
-        </div>
-        <Filters display={this.state.filters}/>
+        <FontAwesomeIcon id="settings-icon" icon={faCog} onClick={this.toggleSettings}/>
+        <Settings opacity={this.state.settings}/>
       </div>
     );
+  }
+
+  toggleSettings() {
+    this.setState({settings: 1 - this.state.settings});
   }
 }
 
