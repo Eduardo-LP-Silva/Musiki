@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValueRequestQueryFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.factory</a> &gt; <span class="el_source">ValueRequestQueryFactory.java</span></div><h1>ValueRequestQueryFactory.java</h1><pre class="source lang-java linenums">package dbpedia.api.factory;
+
+import dbpedia.api.model.RequestModel.Style;
+import dbpedia.api.model.ResourceModel;
+import dbpedia.api.model.ValueRequestModel;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.query.ParameterizedSparqlString;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ValueRequestQueryFactory extends DBpediaQueryFactory&lt;ValueRequestModel&gt; {
+
+  public ValueRequestQueryFactory(OntModel ontology, PrefixMappingImpl prefixMapping) {
+<span class="fc" id="L19">    super(ontology, prefixMapping);</span>
+<span class="fc" id="L20">  }</span>
+
+
+  @Override
+  public Query makeQuery(ValueRequestModel requestModel) {
+<span class="nc" id="L25">    return getValueQuery(requestModel);</span>
+  }
+
+  /**
+   * &lt;p&gt;Generates all value-queries&lt;/p&gt; &lt;p&gt; LF0040 -&gt; should be clear &lt;br&gt; LF0041 -&gt; everything
+   * should be filled &lt;br&gt; LF0042 -&gt; model.getProperties should be empty &lt;br&gt; LF0043 -&gt; MappingBased
+   * must be true &lt;br&gt; &lt;/p&gt;
+   */
+
+  public Query getValueQuery(ValueRequestModel model) {
+<span class="fc" id="L35">    ParameterizedSparqlString sparqlString = new ParameterizedSparqlString();</span>
+<span class="fc" id="L36">    ParameterizedSparqlString valuesString = new ParameterizedSparqlString();</span>
+<span class="fc" id="L37">    ParameterizedSparqlString tripleString = new ParameterizedSparqlString();</span>
+<span class="fc" id="L38">    List&lt;String&gt; returnvalues = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L40" title="All 2 branches covered.">    for (ResourceModel prop : model.getProperties()) {</span>
+<span class="fc" id="L41">      String uri = prefixMap.getNsPrefixURI(prop.getPrefix());</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">      if (uri == null) {</span>
+<span class="nc" id="L43">        throw new IllegalArgumentException(&quot;Prefix &quot; + prop.getPrefix() + &quot; not found!&quot;);</span>
+      } else {
+<span class="fc" id="L45">        sparqlString.setNsPrefix(prop.getPrefix(), prefixMap.getNsPrefixURI(prop.getPrefix()));</span>
+      }
+<span class="fc" id="L47">    }</span>
+<span class="fc" id="L48">    valuesString.append(&quot;VALUES ?entities {&quot;);</span>
+
+<span class="fc" id="L50">    returnvalues.add(&quot;entities&quot;);</span>
+
+<span class="fc bfc" id="L52" title="All 2 branches covered.">    if (!model.getProperties().isEmpty()) {</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">      for (ResourceModel prop : model.getProperties()) {</span>
+<span class="fc" id="L54">        returnvalues.add(prop.getPrefix()+prop.getIdentifier());</span>
+<span class="fc" id="L55">        String propname = prop.getPrefix()+prop.getIdentifier();</span>
+
+<span class="fc" id="L57">        tripleString</span>
+<span class="fc" id="L58">            .append(&quot;OPTIONAL {\n ?entities &quot; + getUnprefixedString(prop) + &quot; ?&quot; + propname + &quot;.\n&quot;);</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (model.getStyle() == Style.NESTED) {</span>
+<span class="fc" id="L60">          tripleString.append(&quot;OPTIONAL {?&quot; + propname + &quot; rdfs:label ?&quot; + propname + &quot;Label.\n&quot;</span>
+              + &quot;FILTER (LANG(?&quot; + propname + &quot;Label)=\&quot;en\&quot;)}&quot;);
+<span class="fc" id="L62">          returnvalues.add(propname + &quot;Label&quot;);</span>
+        }
+<span class="fc" id="L64">        tripleString.append(&quot;}&quot;);</span>
+<span class="fc" id="L65">        String uri = prefixMap.getNsPrefixURI(prop.getPrefix());</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (uri == null) {</span>
+<span class="nc" id="L67">          throw new IllegalArgumentException(&quot;Prefix &quot; + prop.getPrefix() + &quot; not found!&quot;);</span>
+        } else {
+<span class="fc" id="L69">          sparqlString.setNsPrefix(prop.getPrefix(), prefixMap.getNsPrefixURI(prop.getPrefix()));</span>
+        }
+<span class="fc" id="L71">      }</span>
+    } else {
+<span class="fc" id="L73">      tripleString.append(&quot;?entities ?properties ?values.\n&quot;);</span>
+<span class="fc" id="L74">      returnvalues.add(&quot;properties&quot;);</span>
+<span class="fc" id="L75">      returnvalues.add(&quot;values&quot;);</span>
+<span class="fc" id="L76">      tripleString.append(&quot;OPTIONAL {\n?values rdfs:label ?valuesLabel.\n&quot;</span>
+          + &quot;FILTER ( lang(?valuesLabel) = \&quot;en\&quot; )}&quot;);
+    }
+
+<span class="fc bfc" id="L80" title="All 2 branches covered.">    for (String entity : model.getEntities()) {</span>
+<span class="fc" id="L81">      valuesString.append(&quot; &lt;http://dbpedia.org/resource/&quot; + entity+&quot;&gt;&quot;);</span>
+<span class="fc" id="L82">      sparqlString.setNsPrefix(&quot;dbr&quot;, prefixMap.getNsPrefixURI(&quot;dbr&quot;));</span>
+      //model.
+<span class="fc" id="L84">    }</span>
+<span class="fc" id="L85">    valuesString.append(&quot;}&quot;);</span>
+
+<span class="fc" id="L87">    setDefaultPrefixes(sparqlString);</span>
+<span class="fc" id="L88">    sparqlString.setCommandText(</span>
+<span class="fc" id="L89">        queryHead(returnvalues) + &quot;\n&quot; + valuesString + &quot;\n&quot; + tripleString + &quot;\n}&quot;);</span>
+<span class="fc" id="L90">    return QueryFactory.create(sparqlString.asQuery());</span>
+  }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

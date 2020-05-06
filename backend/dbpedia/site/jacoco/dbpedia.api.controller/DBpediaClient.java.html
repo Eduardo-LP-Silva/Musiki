@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DBpediaClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.controller</a> &gt; <span class="el_source">DBpediaClient.java</span></div><h1>DBpediaClient.java</h1><pre class="source lang-java linenums">package dbpedia.api.controller;
+
+import dbpedia.api.configuration.Configuration;
+import dbpedia.api.model.ResultSetWrapper;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
+
+/**
+ * Sends SPARQL Queries to the SPARQL Endpoint
+ */
+@Component
+public class DBpediaClient {
+
+<span class="nc" id="L21">  private static final Logger LOG = LogManager.getLogger(DBpediaClient.class.getName());</span>
+  private final String endpoint;
+
+<span class="nc" id="L24">  public DBpediaClient(Configuration config) {</span>
+<span class="nc" id="L25">    endpoint = config.getSparqlEndpoint();</span>
+<span class="nc" id="L26">  }</span>
+
+  /**
+   * sends query to DB service
+   *
+   * @param query The request query
+   * @return String response from DB service
+   */
+
+  @Cacheable(value = &quot;DBpediaClient.sendQuery&quot;, key = &quot;#query.toString()&quot;)
+  public ResultSetWrapper sendQuery(Query query) {
+    ResultSet resultSet;
+<span class="nc" id="L38">    try (QueryExecution execution = QueryExecutionFactory.sparqlService(endpoint, query)) {</span>
+<span class="nc" id="L39">      resultSet = execution.execSelect();</span>
+<span class="nc" id="L40">      LOG.info(&quot;Query sent to: &quot; + endpoint);</span>
+<span class="nc" id="L41">      return new ResultSetWrapper(ResultSetFactory.copyResults(resultSet));</span>
+<span class="nc" id="L42">    } catch (Exception e) {</span>
+<span class="nc" id="L43">      LOG.warn(&quot;Tried to send the query to the SparqlService... &quot; + e.getMessage());</span>
+<span class="nc" id="L44">      throw e;</span>
+    }
+  }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

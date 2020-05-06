@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>APIKeyHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.controller</a> &gt; <span class="el_source">APIKeyHandler.java</span></div><h1>APIKeyHandler.java</h1><pre class="source lang-java linenums">package dbpedia.api.controller;
+
+import dbpedia.api.configuration.Configuration;
+import dbpedia.api.model.UserModel;
+import dbpedia.api.model.UserModel.userType;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+/**
+ * Class for managing users and API-keys
+ */
+@Component
+public class APIKeyHandler {
+
+  /**
+   * Contains a Set of Keys
+   */
+  private Set&lt;String&gt; data;
+  /**
+   * Contains a HashMap of users
+   */
+  private Map&lt;String, UserModel&gt; map;
+  /**
+   * Necessary for reloading the Apikeyfile on the fly
+   */
+  private Configuration configuration;
+  /**
+   * Quota per day
+   */
+  private int startQuotaDay;
+  /**
+   * Quota per hour
+   */
+  private int startQuotaHour;
+  /**
+   * Quota per minute
+   */
+  private int startQuotaMinute;
+
+  /**
+   * Constructor
+   */
+  public APIKeyHandler(Set keys, Configuration configuration,
+      @Qualifier(&quot;startQuotaDay&quot;) int startQuotaDay,
+      @Qualifier(&quot;startQuotaHour&quot;) int startQuotaHour,
+<span class="fc" id="L50">      @Qualifier(&quot;startQuotaMinute&quot;) int startQuotaMinute) {</span>
+
+<span class="fc" id="L52">    this.data = keys;</span>
+<span class="fc" id="L53">    this.configuration = configuration;</span>
+<span class="fc" id="L54">    this.startQuotaDay = startQuotaDay;</span>
+<span class="fc" id="L55">    this.startQuotaHour = startQuotaHour;</span>
+<span class="fc" id="L56">    this.startQuotaMinute = startQuotaMinute;</span>
+<span class="fc" id="L57">    userMap();</span>
+<span class="fc" id="L58">  }</span>
+
+  /**
+   * Creates a HashMap containing users of all types
+   */
+  private void userMap() {
+<span class="fc" id="L64">    map = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">    for (String s : data) {</span>
+<span class="fc" id="L66">      UserModel user = new UserModel(startQuotaDay, startQuotaHour, startQuotaMinute);</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">      if (s.endsWith(&quot;_ADMIN&quot;)) {</span>
+<span class="fc" id="L68">        user.setUserType(userType.ADMIN);</span>
+      } else {
+<span class="fc" id="L70">        user.setUserType(userType.USER);</span>
+      }
+<span class="fc" id="L72">      map.put(s, user);</span>
+<span class="fc" id="L73">    }</span>
+<span class="fc" id="L74">  }</span>
+
+  /**
+   * Reloads the apikeyfile after a specified amount of time
+   */
+  //TODO change timing
+  @Scheduled(fixedRate = 10000000)
+  public void reloadFile() {
+<span class="nc" id="L82">    this.data = Configuration.loadApiKeys(configuration.getApiKeyFileName());</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">    for (String s : data) {</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">      if (!map.containsKey(s)) {</span>
+<span class="nc" id="L85">        UserModel user = new UserModel(startQuotaDay, startQuotaHour, startQuotaMinute);</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        if (s.endsWith(&quot;_ADMIN&quot;)) {</span>
+<span class="nc" id="L87">          user.setUserType(userType.ADMIN);</span>
+        } else {
+<span class="nc" id="L89">          user.setUserType(userType.USER);</span>
+        }
+<span class="nc" id="L91">        map.put(s, user);</span>
+      }
+<span class="nc" id="L93">    }</span>
+<span class="nc" id="L94">  }</span>
+
+  /**
+   * resets QuotaDay
+   */
+  @Scheduled(fixedRate = 86400000)
+  public void dayReset() {
+<span class="nc bnc" id="L101" title="All 2 branches missed.">    for (String s : data) {</span>
+<span class="nc" id="L102">      map.get(s).resetDay(startQuotaDay);</span>
+<span class="nc" id="L103">    }</span>
+<span class="nc" id="L104">  }</span>
+
+  /**
+   * resets QuotaHour
+   */
+  @Scheduled(fixedRate = 3600000)
+  public void hourReset() {
+<span class="nc bnc" id="L111" title="All 2 branches missed.">    for (String s : data) {</span>
+<span class="nc" id="L112">      map.get(s).resetHour(startQuotaHour);</span>
+<span class="nc" id="L113">    }</span>
+<span class="nc" id="L114">  }</span>
+
+  /**
+   * resets QuotaMinute
+   */
+  @Scheduled(fixedRate = 60000)
+  public void minuteReset() {
+<span class="nc bnc" id="L121" title="All 2 branches missed.">    for (String s : data) {</span>
+<span class="nc" id="L122">      map.get(s).resetMinute(startQuotaMinute);</span>
+<span class="nc" id="L123">    }</span>
+<span class="nc" id="L124">  }</span>
+
+  public Set&lt;String&gt; getData() {
+<span class="nc" id="L127">    return this.data;</span>
+  }
+
+  public Map&lt;String, UserModel&gt; getMap() {
+<span class="fc" id="L131">    return this.map;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

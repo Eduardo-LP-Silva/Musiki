@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Filter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.model</a> &gt; <span class="el_source">Filter.java</span></div><h1>Filter.java</h1><pre class="source lang-java linenums">package dbpedia.api.model;
+
+import java.util.Objects;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+public class Filter implements Comparable {
+
+  private ResourceModel filterProp;
+  /**
+   * This is always the identifier of a Resource with the namespace &lt;http://dbpedia.org/resource/&gt;
+   * if you want to let the user choose, change this to be a ResourceModel and maybe add a filterLiteral of type jena.Literal
+   */
+  private String filterVal;
+  /**
+   * Comparison operator. Can be one of gt,lt,eq,ge,le,sw
+   */
+  private String filterOp;
+  /**
+   * Selects if Filter is Optional or Required
+   */
+  private Bool bool;
+
+  /**
+   * both for builder
+   */
+<span class="fc" id="L26">  public Filter(ResourceModel filterProp, String filterVal, String filterOp, Bool bool) {</span>
+<span class="fc" id="L27">    this.filterProp = filterProp;</span>
+<span class="fc" id="L28">    this.filterVal = filterVal;</span>
+<span class="fc" id="L29">    this.filterOp = filterOp;</span>
+<span class="fc" id="L30">    this.bool = bool;</span>
+<span class="fc" id="L31">  }</span>
+
+  private Filter() {
+  } //for the builder
+
+
+  public ResourceModel getFilterProp() {
+<span class="fc" id="L38">    return filterProp;</span>
+  }
+
+  public String getFilterVal() {
+<span class="fc" id="L42">    return filterVal;</span>
+  }
+
+  public String getFilterOp() {
+<span class="fc" id="L46">    return filterOp;</span>
+  }
+
+  public Bool getBool() {
+<span class="fc" id="L50">    return bool;</span>
+  }
+
+  public boolean validate() {
+<span class="pc bpc" id="L54" title="3 of 4 branches missed.">    return (this.filterVal != null || this.filterProp != null);</span>
+  }
+
+  @Override
+  public boolean equals(Object o) {
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">    if (o == null) {</span>
+<span class="nc" id="L60">      return false;</span>
+    }
+<span class="fc bfc" id="L62" title="All 2 branches covered.">    if (o == this) {</span>
+<span class="fc" id="L63">      return true;</span>
+    }
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">    if (!(o instanceof Filter)) {</span>
+<span class="nc" id="L66">      return false;</span>
+    }
+<span class="fc" id="L68">    Filter filter = (Filter) o;</span>
+<span class="fc" id="L69">    boolean propEquality =</span>
+<span class="fc" id="L70">        Objects.equals(this.filterProp, filter.filterProp);</span>
+<span class="fc" id="L71">    boolean valEquality = Objects.equals(filter.getFilterVal(), this.getFilterVal());</span>
+<span class="fc" id="L72">    boolean opEqualty = Objects.equals(this.filterOp, filter.filterOp);</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">    boolean boolEquality = this.bool == filter.getBool();</span>
+<span class="pc bpc" id="L74" title="4 of 8 branches missed.">    return propEquality &amp;&amp; valEquality &amp;&amp; opEqualty &amp;&amp; boolEquality;</span>
+  }
+
+  public Builder toBuilder() {
+<span class="fc" id="L78">    return new Builder().copy(this);</span>
+  }
+
+  @Override
+  public int hashCode() {
+<span class="fc" id="L83">    return new HashCodeBuilder()</span>
+<span class="fc" id="L84">        .append(this.bool)</span>
+<span class="fc" id="L85">        .append(this.filterOp)</span>
+<span class="fc" id="L86">        .append(this.filterVal)</span>
+<span class="fc" id="L87">        .append(this.filterProp)</span>
+<span class="fc" id="L88">        .build();</span>
+  }
+
+  @Override
+  public String toString() {
+<span class="nc" id="L93">    return &quot;Filter: {property=&quot; + filterProp + &quot; value=&quot; + filterVal + &quot; bool=&quot; + bool</span>
+        + &quot;}&quot;;
+  }
+
+  public static Filter.Builder newBuilder() {
+<span class="fc" id="L98">    return new Builder();</span>
+  }
+
+  @Override
+  public int compareTo(Object o) {
+<span class="fc bfc" id="L103" title="All 4 branches covered.">    if (((Filter)o).getBool() == Bool.AND &amp;&amp; this.bool == Bool.OR) {</span>
+<span class="fc" id="L104">      return 1;</span>
+    }
+<span class="fc bfc" id="L106" title="All 4 branches covered.">    else if (((Filter)o).getBool() == Bool.OR &amp;&amp; this.bool == Bool.AND) {</span>
+<span class="fc" id="L107">      return -1;</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">    } else if (((Filter)o).getBool() == this.bool) {</span>
+<span class="pc bpc" id="L109" title="2 of 4 branches missed.">      if (((Filter)o).getFilterVal() != null &amp;&amp; this.getFilterVal() != null) {</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        if (((Filter)o).getFilterVal().compareTo(this.getFilterVal()) &lt; 0) {</span>
+<span class="fc" id="L111">          return -1;</span>
+        }
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        if (((Filter)o).getFilterVal().compareTo(this.getFilterVal()) &gt; 0) {</span>
+<span class="nc" id="L114">          return 1;</span>
+        } else {
+<span class="nc bnc" id="L116" title="All 4 branches missed.">          if (((Filter)o).getFilterProp() != null &amp;&amp; this.getFilterProp() != null) {</span>
+<span class="nc" id="L117">            if (((Filter) o).getFilterProp().getIdentifier()</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">                .compareTo(this.getFilterProp().getIdentifier()) &lt; 0) {</span>
+<span class="nc" id="L119">              return -1;</span>
+            }
+<span class="nc" id="L121">            if (((Filter) o).getFilterProp().getIdentifier()</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">                .compareTo(this.getFilterProp().getIdentifier()) &gt; 0) {</span>
+<span class="nc" id="L123">              return 1;</span>
+            } else {
+<span class="nc" id="L125">              return 0;</span>
+            }
+          }
+        }
+      }
+    }
+<span class="nc" id="L131">    return 0;</span>
+  }
+
+  /**
+   * creates a ResourceModel with prefix=&quot;dbr&quot; and the filter value as the identifier
+   */
+  public ResourceModel getValueAsResource() {
+<span class="fc" id="L138">    return new ResourceModel(&quot;dbr&quot;, this.getFilterVal());</span>
+  }
+
+  /**
+   * Checks if the value is a resource
+   *
+   * @return true if the value is a resource, otherwise false
+   */
+  public boolean isValueAResource() {
+<span class="fc bfc" id="L147" title="All 2 branches covered.">    return this.filterOp == null;</span>
+  }
+
+<span class="fc" id="L150">  public enum Bool {</span>
+<span class="fc" id="L151">    AND,</span>
+<span class="fc" id="L152">    OR</span>
+  }
+
+  public static class Builder {
+
+<span class="fc" id="L157">    private Filter instance = new Filter();</span>
+
+    //these are used to build the ResourceModel if (if they are not null)
+    private String prefix;
+    private String propName;
+
+<span class="fc" id="L163">    public Builder() {</span>
+<span class="fc" id="L164">      instance.bool = Bool.AND;</span>
+<span class="fc" id="L165">    }</span>
+
+    public Builder copy(Filter filter) {
+<span class="fc" id="L168">      setFilterVal(filter.getFilterVal());</span>
+<span class="fc" id="L169">      setFilterOp(filter.getFilterOp());</span>
+<span class="fc" id="L170">      setFilterProps(filter.getFilterProp());</span>
+<span class="fc" id="L171">      setFilterBool(filter.getBool());</span>
+<span class="fc" id="L172">      return this;</span>
+    }
+
+    public Builder setFilterProps(ResourceModel property) {
+<span class="fc" id="L176">      instance.filterProp = property;</span>
+<span class="fc" id="L177">      this.prefix = null;</span>
+<span class="fc" id="L178">      this.propName = null;</span>
+<span class="fc" id="L179">      return this;</span>
+    }
+
+    public Builder setFilterVal(String val) {
+<span class="fc" id="L183">      instance.filterVal = val;</span>
+<span class="fc" id="L184">      return this;</span>
+    }
+
+    public Builder setFilterOp(String val) {
+<span class="fc" id="L188">      instance.filterOp = val;</span>
+<span class="fc" id="L189">      return this;</span>
+    }
+
+    public Builder setFilterBool(Bool val) {
+<span class="fc" id="L193">      instance.bool = val;</span>
+<span class="fc" id="L194">      return this;</span>
+    }
+
+    /**
+     * Sets a resource as the filter value.
+     * Currently, this ignores the prefix of the resource and just replaces the filter value with
+     * the resource identifier
+     * @param resource
+     * @return
+     */
+    public Builder setResourceValue(ResourceModel resource) {
+<span class="fc" id="L205">      instance.filterVal = resource.getIdentifier();</span>
+<span class="fc" id="L206">      return this;</span>
+    }
+
+    public Builder setPrefix(String val) {
+<span class="fc" id="L210">      this.prefix = val;</span>
+<span class="fc" id="L211">      return this;</span>
+    }
+
+    public Builder setPropName(String val) {
+<span class="fc" id="L215">      this.propName = val;</span>
+<span class="fc" id="L216">      return this;</span>
+    }
+
+    public Filter build() {
+<span class="pc bpc" id="L220" title="1 of 4 branches missed.">      if (this.prefix != null &amp;&amp; this.propName != null) {</span>
+<span class="fc" id="L221">        instance.filterProp = new ResourceModel(this.prefix, this.propName);</span>
+      }
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">      if (!instance.validate()) {</span>
+<span class="nc" id="L224">        throw new IllegalStateException(&quot;Filter is not valid!&quot;);</span>
+      }
+<span class="fc" id="L226">      return instance;</span>
+    }
+
+  }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

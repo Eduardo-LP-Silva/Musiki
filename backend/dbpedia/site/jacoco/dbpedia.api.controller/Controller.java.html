@@ -1,0 +1,712 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Controller.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.controller</a> &gt; <span class="el_source">Controller.java</span></div><h1>Controller.java</h1><pre class="source lang-java linenums">package dbpedia.api.controller;
+
+import dbpedia.api.configuration.Configuration;
+import dbpedia.api.model.EntityRequestModel;
+import dbpedia.api.model.Filter;
+import dbpedia.api.model.Filter.Bool;
+import dbpedia.api.model.LogDataModel;
+import dbpedia.api.model.RequestModel;
+import dbpedia.api.model.RequestModel.AbstractBuilder;
+import dbpedia.api.model.RequestModel.ReturnFormat;
+import dbpedia.api.model.RequestModel.Style;
+import dbpedia.api.model.ResourceModel;
+import dbpedia.api.model.ValueRequestModel;
+import dbpedia.api.model.Window;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UrlPathHelper;
+import springfox.documentation.annotations.ApiIgnore;
+
+@org.springframework.stereotype.Controller
+@RequestMapping(value = &quot;/${uri.path:api}/{version}&quot;)
+@RestController
+@Api(value = &quot;Controller&quot;, description = &quot;Do a Dbpedia request&quot;, tags = &quot;Request Types&quot;)
+public class Controller {
+
+  private RequestHandler requestHandler;
+  private Configuration config;
+<span class="nc" id="L51">  private static final Logger LOG = LogManager.getLogger(Controller.class.getName());</span>
+<span class="nc" id="L52">  private static final Logger QLOG = LogManager.getLogger(&quot;QueryLogger&quot;);</span>
+  private static final String PROPERTY_SEPARATOR = &quot;:&quot;;
+  private LogDataModel logData;
+  private Map mappedProperties;
+
+  //The infotexts for swagger
+<span class="nc" id="L58">  private final String defaultKey = &quot;1234&quot;;</span>
+<span class="nc" id="L59">  private final String formatText = &quot;&lt;b&gt;The desired output format:&lt;/b&gt;&lt;br&gt;&quot;</span>
+      + &quot;- JSON&lt;br&gt;- JSONLD&lt;br&gt;&quot;
+      + &quot;- TSV&lt;br&gt;- RDFJSON&lt;br&gt;- TURTLE&lt;br&gt;- NTRIPLES&lt;br&gt;- RDFXML &lt;br&gt;&quot;
+      + &quot;The format parameter overrides the return type requested in the HTTP accept &quot;
+      + &quot;header in order to use it in applications where it is not easy to set the accept head properly (e.g. web browser)&quot;;
+<span class="nc" id="L64">  private final String formatValues = &quot;JSON,JSONLD,TSV,RDFJSON,TURTLE,NTRIPLES,RDFXML&quot;;</span>
+<span class="nc" id="L65">  private final String prettyText = &quot;&lt;b&gt;Prettification options:&lt;/b&gt;&lt;br&gt;&quot;</span>
+      + &quot;- NONE &lt;br&gt;- NESTED (only works with JSON)&lt;br&gt;- PREFIXED&lt;br&gt;- SHORT&quot;;
+<span class="nc" id="L67">  private final String limitText = &quot;&lt;b&gt;The maximum count of results&lt;/b&gt;&quot;;</span>
+<span class="nc" id="L68">  private final String offsetText = &quot;&lt;b&gt;Number of the elements which should be skipped (counting from the first one)&lt;/b&gt;&quot;;</span>
+<span class="nc" id="L69">  private final String oldversionText = &quot;&lt;b&gt;Allow to use an older API-version or not&lt;/b&gt;&quot;;</span>
+<span class="nc" id="L70">  private final String keyText = &quot;The API-key for authentication&quot;;</span>
+<span class="nc" id="L71">  private final String entityText = &quot;&lt;b&gt;A list entities. In the RDF-graph they are the subjects&quot;;</span>
+<span class="nc" id="L72">  private final String propertyText = &quot;Th attributes of the entities. In the RDF-graph they are the predicates&quot;;</span>
+<span class="nc" id="L73">  private final String oFilterText = &quot;[prefix]:[property],[operator],[value]:&lt;br&gt;&quot;</span>
+      + &quot;The optional filter sorts out for the value, but only if the entity got the property.&lt;br&gt;&quot;
+      + &quot;[prefix]:[property]:&lt;br&gt;&quot;
+      + &quot;Adds the result of the property, but only if the entity got the property&quot;;
+<span class="nc" id="L77">  private final String prettyValues = &quot;PREFIXED,NESTED,SHORT,NONE&quot;;</span>
+<span class="nc" id="L78">  private final String filterText = &quot;With this parameter you can add a filter. It has to be in the &quot;</span>
+      + &quot;form [prefix]:[identifier],[operator],[value] &lt;br&gt;operators: &lt;br&gt; - gt : greater than  &quot;
+      + &quot;&lt;br&gt; - lt : lower than &quot;
+      + &quot;&lt;br&gt; - eq : equals to&quot;
+      + &quot;&lt;br&gt; - ge : equal or greater &quot;
+      + &quot;&lt;br&gt; - le : equal or lower&quot;
+      + &quot;&lt;br&gt; - sw : startswith (only recommended for strings)&lt;br&gt;&quot;
+      + &quot;If there is no such element, the whole instance will be omitted in the output. &quot;;
+<span class="nc" id="L86">  private final String valueText = &quot;With this parameter you specify a value and, optionally, a property. It can have the form [value]  or [value], [prefix]:[identifier] &quot;;</span>
+<span class="nc" id="L87">  private final String versionText =</span>
+      &quot;Specify the API version you want to use. For the latest version check out the info-Page of the API&quot;;
+<span class="nc" id="L89">  private final String classnameText = &quot;Name of the class of which you want to see the instances&quot;;</span>
+<span class="nc" id="L90">  private final String onlyimportantText = &quot;Returns the important properties of the  class.&quot;;</span>
+
+
+  public Controller(RequestHandler requestHandler, Configuration config,
+<span class="nc" id="L94">      @Qualifier(&quot;rml&quot;) Map mappedProperties) {</span>
+<span class="nc" id="L95">    this.requestHandler = requestHandler;</span>
+<span class="nc" id="L96">    this.config = config;</span>
+<span class="nc" id="L97">    this.mappedProperties = mappedProperties;</span>
+<span class="nc" id="L98">  }</span>
+
+  @GetMapping(value = ValueRequestModel.PATH, produces = {&quot;application/JSON;&quot;,
+      &quot;application/JSONLD;&quot;, &quot;application/NTRIPLES;&quot;, &quot;application/TSV;&quot;, &quot;application/RDFJSON&quot;,
+      &quot;application/RDFXML&quot;, &quot;application/TURTLE;&quot;
+  })
+  @ResponseBody
+  @ApiImplicitParams({
+      @ApiImplicitParam(
+          name = &quot;version&quot;, value = versionText,
+          required = true, dataType = &quot;string&quot;,
+          paramType = &quot;path&quot;, defaultValue = &quot;&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;key&quot;, value = keyText,
+          required = false, dataType = &quot;String&quot;,
+          paramType = &quot;query&quot;, defaultValue = defaultKey
+      ),
+      @ApiImplicitParam(
+          name = &quot;oldVersion&quot;, value = oldversionText,
+          required = false, dataType = &quot;boolean&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;false&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;entities&quot;, value = entityText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;Barack_Obama,Hillary_Clinton&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;property&quot;, value = propertyText,
+          required = false, allowMultiple = true, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;foaf:surname&quot; + &quot;\n&quot; + &quot;foaf:gender&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;format&quot;, value = formatText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;&quot;,
+          allowableValues = formatValues
+      ),
+      @ApiImplicitParam(
+          name = &quot;pretty&quot;, value = prettyText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;NONE&quot;,
+          allowableValues = prettyValues
+      ),
+      @ApiImplicitParam(
+          name = &quot;limit&quot;, value = limitText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;100&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;offset&quot;, value = offsetText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;0&quot;
+      )
+
+  })
+  @ApiOperation(value = &quot;Value Request&quot;, notes = &quot;Set up a request for one or more entities. &quot;
+      + &quot;If no property is given, all the properties of the entity and their values will be returned. &quot;
+      + &quot;If a property is given, only the values of this property are returned. &lt;br&gt;&quot;
+      + &quot; Press the 'Try out' button with the default values to see a request for the gender and surname properties of Barack Obama and Hillary Clinton.&quot;
+  )
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = &quot;Success&quot;),
+      @ApiResponse(code = 400, message = &quot;Bad Request&quot;),
+      @ApiResponse(code = 500, message = &quot;Internal Server Error&quot;)})
+  public ResponseEntity valueRequest(
+      //@PathVariable String path,
+      @PathVariable String version,
+      @RequestParam(value = ValueRequestModel.URI_ENTITY) @ApiIgnore List&lt;String&gt; entities,
+      @RequestParam(value = &quot;key&quot;, defaultValue = &quot;&quot;) String key,
+      @RequestParam(value = RequestModel.URI_OLD_VERSION, defaultValue = &quot;false&quot;) boolean oldVersion,
+      @RequestParam() @ApiIgnore MultiValueMap&lt;String, String&gt; parameters,
+      @RequestHeader(&quot;Accept&quot;) @ApiIgnore String header,
+      HttpServletRequest request
+  ) {
+<span class="nc" id="L174">    logData = new LogDataModel();</span>
+<span class="nc" id="L175">    logData.setQuery(ValueRequestModel.PATH + &quot;?&quot; + request.getQueryString());</span>
+<span class="nc" id="L176">    logData.setRequestKey(key);</span>
+
+<span class="nc" id="L178">    UrlPathHelper helper = new UrlPathHelper();</span>
+<span class="nc" id="L179">    LinkedMultiValueMap&lt;String, String&gt; map =</span>
+<span class="nc" id="L180">        (LinkedMultiValueMap&lt;String, String&gt;) helper.decodeMatrixVariables(request, parameters);</span>
+
+<span class="nc" id="L182">    ValueRequestModel.Builder builder =</span>
+<span class="nc" id="L183">        initBuilder(new ValueRequestModel.Builder(), version, key, oldVersion, map, header);</span>
+
+<span class="nc" id="L185">    Set&lt;ResourceModel&gt; propertySet = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">    if (map.containsKey(ValueRequestModel.URI_PROPERTY)) {</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">      for (String property : map.get(ValueRequestModel.URI_PROPERTY)) {</span>
+<span class="nc" id="L188">        propertySet.add(parsePropertyString(property));</span>
+<span class="nc" id="L189">      }</span>
+    }
+<span class="nc" id="L191">    builder.setEntities(new HashSet&lt;&gt;(entities));</span>
+<span class="nc" id="L192">    builder.setProperties(propertySet);</span>
+<span class="nc" id="L193">    builder.setMapping(false);</span>
+
+    try {
+<span class="nc" id="L196">      return requestHandler.handle(builder.build(), logData);</span>
+<span class="nc" id="L197">    } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L198">      return illegalArgument(e.getMessage());</span>
+    }
+  }
+  @GetMapping(value = EntityRequestModel.PATH, produces = {&quot;application/JSON;&quot;,
+      &quot;application/JSONLD;&quot;, &quot;application/NTRIPLES;&quot;, &quot;application/TSV;&quot;, &quot;application/RDFJSON&quot;,
+      &quot;application/RDFXML&quot;, &quot;application/TURTLE;&quot;
+  })//{&quot;your/ContentType&quot;,&quot;your/type2&quot;})
+  @ResponseBody
+
+  @ApiImplicitParams({
+      @ApiImplicitParam(
+          name = &quot;version&quot;, value = versionText,
+          required = true, dataType = &quot;string&quot;,
+          paramType = &quot;path&quot;, defaultValue = &quot;&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;key&quot;, value = keyText,
+          required = false, dataType = &quot;String&quot;,
+          paramType = &quot;query&quot;, defaultValue = defaultKey
+      ),
+      @ApiImplicitParam(
+          name = &quot;oldVersion&quot;, value = oldversionText,
+          required = false, dataType = &quot;boolean&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;false&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;value&quot;, value = valueText,
+          required = false, allowMultiple = true, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;Donald_Trump,dbp:nominee&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;filter&quot;, value = filterText,
+          required = false, allowMultiple = true, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;ofilter&quot;, value = oFilterText,
+          required = false, allowMultiple = true, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;dbo:startDate&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;format&quot;, value = formatText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;&quot;,
+          allowableValues = formatValues
+      ),
+      @ApiImplicitParam(
+          name = &quot;pretty&quot;, value = prettyText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;NONE&quot;,
+          allowableValues = prettyValues
+      ),
+      @ApiImplicitParam(
+          name = &quot;limit&quot;, value = limitText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;100&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;offset&quot;, value = offsetText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;0&quot;
+      )
+  })
+  @ApiOperation(value = &quot;Entity Request&quot;, notes = &quot;Set up an entity request: Enter one or more &quot;
+      + &quot;entities and optionally a property. You'll get all the entities, that share this given entity as the value of a property. &quot;
+      + &quot; The results can also be filtered by a certain condition.&quot;
+      + &quot; For an example with the default values press the 'Try out'-button. You'll see the entities &quot;
+      + &quot;where Donald Trump has been 'nominee' and the 'startDay' if they have one. &quot;
+      + &quot;Additionally you can filter entities using the filter parameter&quot;
+  )
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = &quot;Success&quot;),
+      @ApiResponse(code = 400, message = &quot;Bad Request&quot;),
+      @ApiResponse(code = 500, message = &quot;Internal Server Error&quot;)})
+  public ResponseEntity entityRequest(
+      @PathVariable String version,
+      @RequestParam(value = &quot;key&quot;, defaultValue = &quot;&quot;) String key,
+      @RequestParam(value = RequestModel.URI_OLD_VERSION, defaultValue = &quot;false&quot;) boolean oldVersion,
+      @RequestParam @ApiIgnore MultiValueMap&lt;String, String&gt; parameters,
+      @RequestHeader(&quot;Accept&quot;) @ApiIgnore String header,
+      HttpServletRequest request
+  ) {
+
+//   get type from produces
+//    request.getHeader(&quot;Accept&quot;);
+
+<span class="nc" id="L284">    logData = new LogDataModel();</span>
+<span class="nc" id="L285">    logData.setQuery(EntityRequestModel.PATH + &quot;?&quot; + request.getQueryString());</span>
+<span class="nc" id="L286">    logData.setRequestKey(key);</span>
+
+<span class="nc" id="L288">    UrlPathHelper helper = new UrlPathHelper();</span>
+<span class="nc" id="L289">    LinkedMultiValueMap&lt;String, String&gt; map =</span>
+<span class="nc" id="L290">        (LinkedMultiValueMap&lt;String, String&gt;) helper.decodeMatrixVariables(request, parameters);</span>
+
+<span class="nc" id="L292">    EntityRequestModel.Builder builder =</span>
+<span class="nc" id="L293">        initBuilder(new EntityRequestModel.Builder(), version, key, oldVersion, map, header);</span>
+<span class="nc" id="L294">    Set&lt;Filter&gt; filterSet = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">    if (map.containsKey(EntityRequestModel.URI_FILTER)) {</span>
+<span class="nc" id="L296">      filterSet.addAll(parseFilterString(map.get(EntityRequestModel.URI_FILTER), Bool.AND));</span>
+    }
+<span class="nc bnc" id="L298" title="All 2 branches missed.">    if (map.containsKey(EntityRequestModel.URI_OPTIONAL_FILTER)) {</span>
+<span class="nc" id="L299">      filterSet.addAll(parseFilterString(map.get(EntityRequestModel.URI_OPTIONAL_FILTER), Bool.OR));</span>
+    }
+<span class="nc bnc" id="L301" title="All 2 branches missed.">    if (map.containsKey(EntityRequestModel.URI_VALUE)) {</span>
+<span class="nc" id="L302">      filterSet.addAll(</span>
+<span class="nc" id="L303">          parsePropertyValuePair(map.get(EntityRequestModel.URI_VALUE)));</span>
+    }
+<span class="nc bnc" id="L305" title="All 2 branches missed.">    if (!map.containsKey(EntityRequestModel.URI_FILTER)</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">        &amp;&amp; !map.containsKey(EntityRequestModel.URI_OPTIONAL_FILTER)</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">        &amp;&amp; !map.containsKey(EntityRequestModel.URI_VALUE)) {</span>
+<span class="nc" id="L308">      throw new IllegalArgumentException(&quot;Query parameters must be specified&quot;);</span>
+    }
+<span class="nc" id="L310">    builder.setFilterList(filterSet);</span>
+
+    try {
+<span class="nc" id="L313">      return requestHandler.handle(builder.build(), logData);</span>
+<span class="nc" id="L314">    } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L315">      return illegalArgument(e.getMessage());</span>
+    }
+  }
+
+
+  @GetMapping(value = &quot;/instances/{classname}&quot;, produces = {&quot;application/JSON;&quot;,
+      &quot;application/JSONLD;&quot;, &quot;application/NTRIPLES;&quot;, &quot;application/TSV;&quot;, &quot;application/RDFJSON&quot;,
+      &quot;application/RDFXML&quot;, &quot;application/TURTLE;&quot;
+  })
+  @ResponseBody
+
+  @ApiImplicitParams({
+      @ApiImplicitParam(
+          name = &quot;key&quot;, value = keyText,
+          required = false, dataType = &quot;String&quot;,
+          paramType = &quot;query&quot;, defaultValue = defaultKey,
+          example = &quot;dadasd&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;classname&quot;, value = classnameText,
+          required = true, dataType = &quot;string&quot;,
+          paramType = &quot;path&quot;, defaultValue = &quot;SpaceStation&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;onlyImportant&quot;, value = onlyimportantText,
+          required = false, dataType = &quot;boolean&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;false&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;oldVersion&quot;, value = oldversionText,
+          required = false, dataType = &quot;boolean&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;false&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;version&quot;, value = versionText,
+          required = true, dataType = &quot;string&quot;,
+          paramType = &quot;path&quot;, defaultValue = &quot;&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;filter&quot;, value = filterText,
+          required = false, allowMultiple = true, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;ofilter&quot;, value = oFilterText,
+          required = false, allowMultiple = true, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;dbp:launch\ndbp:orbits,gt,50000&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;value&quot;, value = valueText,
+          required = false, allowMultiple = true, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;format&quot;, value = formatText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;&quot;,
+          allowableValues = formatValues
+      ),
+      @ApiImplicitParam(
+          name = &quot;pretty&quot;, value = prettyText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;NONE&quot;,
+          allowableValues = prettyValues
+      ),
+      @ApiImplicitParam(
+          name = &quot;limit&quot;, value = limitText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;100&quot;
+      ),
+      @ApiImplicitParam(
+          name = &quot;offset&quot;, value = offsetText,
+          required = false, dataType = &quot;string&quot;,
+          paramType = &quot;query&quot;, defaultValue = &quot;0&quot;
+      ),
+
+  })
+  @ApiOperation(value = &quot;Instances Request&quot;, notes =
+      &quot;Set up a request for all instances of a certain class.&quot;
+          + &quot; You can add filters for the desired results and also specify values you want the results to contain. &quot;
+          + &quot; For an example use the 'Try out'-button with the default values. This will show you all &quot;
+          + &quot;instances of the class 'Space_Station' that orbited more than 500000 times, and their launch date. &quot;
+          + &quot;To understand the difference between  'filter' and  'ofilter', add the property dbp:crew, &quot;
+          + &quot;one time at 'filter' and the other time at 'ofilter'.&quot;
+  )
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = &quot;Success&quot;),
+      @ApiResponse(code = 400, message = &quot;Bad Request&quot;),
+      @ApiResponse(code = 500, message = &quot;Internal Server Error&quot;)})
+  public ResponseEntity instancesRequest(
+      @PathVariable String version,
+      @PathVariable(&quot;classname&quot;) String classname,
+      @RequestParam(value = &quot;key&quot;, defaultValue = &quot;&quot;) String key,
+      @RequestParam(value = RequestModel.URI_OLD_VERSION, defaultValue = &quot;false&quot;) boolean oldVersion,
+      @RequestParam() @ApiIgnore MultiValueMap&lt;String, String&gt; parameters,
+      @RequestHeader(&quot;Accept&quot;) @ApiIgnore  String header,
+      HttpServletRequest request
+  ) {
+
+<span class="nc" id="L414">    logData = new LogDataModel();</span>
+<span class="nc" id="L415">    logData.setQuery(&quot;/instances/&quot; + classname + &quot;?&quot; + request.getQueryString());</span>
+<span class="nc" id="L416">    logData.setRequestKey(key);</span>
+
+<span class="nc" id="L418">    UrlPathHelper helper = new UrlPathHelper();</span>
+<span class="nc" id="L419">    LinkedMultiValueMap&lt;String, String&gt; map =</span>
+<span class="nc" id="L420">        (LinkedMultiValueMap&lt;String, String&gt;) helper.decodeMatrixVariables(request, parameters);</span>
+
+<span class="nc" id="L422">    EntityRequestModel.Builder builder =</span>
+<span class="nc" id="L423">        initBuilder(new EntityRequestModel.Builder(), version, key, oldVersion, map, header);</span>
+<span class="nc" id="L424">    Set&lt;Filter&gt; filterSet = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L425" title="All 2 branches missed.">    if (map.containsKey(EntityRequestModel.URI_FILTER)) {</span>
+<span class="nc" id="L426">      filterSet.addAll(parseFilterString(map.get(EntityRequestModel.URI_FILTER), Bool.AND));</span>
+    }
+<span class="nc bnc" id="L428" title="All 2 branches missed.">    if (map.containsKey(EntityRequestModel.URI_OPTIONAL_FILTER)) {</span>
+<span class="nc" id="L429">      filterSet.addAll(parseFilterString(map.get(EntityRequestModel.URI_OPTIONAL_FILTER), Bool.OR));</span>
+    }
+<span class="nc bnc" id="L431" title="All 2 branches missed.">    if (map.containsKey(EntityRequestModel.URI_VALUE)) {</span>
+<span class="nc" id="L432">      filterSet</span>
+<span class="nc" id="L433">          .addAll(parsePropertyValuePair(map.get(EntityRequestModel.URI_VALUE)));</span>
+      // this is hardcoded with 'intersection' because otherwise there would be no effect
+      // (the value wouldn't filter anything)
+    }
+
+<span class="nc bnc" id="L438" title="All 2 branches missed.">    if (map.containsKey(&quot;onlyImportant&quot;)) {</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">      if (map.getFirst(&quot;onlyImportant&quot;).toLowerCase().equals(&quot;true&quot;)) {</span>
+<span class="nc" id="L440">        builder.setonlyImportant(Boolean.TRUE);</span>
+<span class="nc" id="L441">        importantProperties(classname, filterSet);</span>
+      } else {
+<span class="nc" id="L443">        builder.setonlyImportant(Boolean.FALSE);</span>
+      }
+    }
+
+<span class="nc" id="L447">    builder.setFilterList(filterSet);</span>
+<span class="nc" id="L448">    builder.setClassname(classname);</span>
+    try {
+<span class="nc" id="L450">      return requestHandler.handle(builder.build(), logData);</span>
+<span class="nc" id="L451">    } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L452">      return illegalArgument(e.getMessage());</span>
+    }
+  }
+
+  /**
+   * Method for requesting all instances and their &quot;important&quot; properties
+   *
+   * @param classname name of the class (instance)
+   * @param filterSet set containing the propertynames
+   */
+  private void importantProperties(String classname, Set&lt;Filter&gt; filterSet) {
+<span class="nc bnc" id="L463" title="All 2 branches missed.">    if (mappedProperties.containsKey(classname)) {</span>
+<span class="nc" id="L464">      List&lt;String&gt; list = (List&lt;String&gt;) mappedProperties.get(classname);</span>
+<span class="nc bnc" id="L465" title="All 2 branches missed.">      for (String prop : list) {</span>
+<span class="nc" id="L466">        Filter.Builder filterBuilder = new Filter.Builder();</span>
+<span class="nc" id="L467">        filterBuilder.setFilterProps(parsePropertyString(prop));</span>
+<span class="nc" id="L468">        filterBuilder.setFilterBool(Bool.OR);</span>
+<span class="nc" id="L469">        filterBuilder.setFilterOp(null);</span>
+<span class="nc" id="L470">        filterBuilder.setFilterVal(null);</span>
+<span class="nc" id="L471">        filterSet.addAll(buildTheFilter(filterBuilder));</span>
+<span class="nc" id="L472">      }</span>
+    }
+<span class="nc" id="L474">  }</span>
+
+  /**
+   * parses common parameters which occur at each request type
+   */
+  private &lt;T extends AbstractBuilder&gt; T initBuilder(T builder, String version, String key,
+      boolean useOldVersion, LinkedMultiValueMap&lt;String, String&gt; map, String accHeader) {
+<span class="nc" id="L481">    String format = map.getFirst(RequestModel.URI_FORMAT);</span>
+<span class="nc" id="L482">    String style = map.getFirst(RequestModel.URI_PRETTY);</span>
+<span class="nc" id="L483">    String limit = map.getFirst(RequestModel.URI_LIMIT);</span>
+<span class="nc" id="L484">    String offset = map.getFirst(RequestModel.URI_OFFSET);</span>
+
+<span class="nc" id="L486">    builder.setVersion(version);</span>
+<span class="nc" id="L487">    builder.setAllowIncompatibleVersion(useOldVersion);</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">    if (format != null) {</span>
+<span class="nc" id="L489">      builder.setFormat(ReturnFormat.valueOf(format.toUpperCase()));</span>
+<span class="nc bnc" id="L490" title="All 2 branches missed.">    } else if (accHeader != null) {</span>
+<span class="nc" id="L491">      builder.setFormat(ReturnFormat.valueOf(accHeader.split(&quot;/&quot;)[1].toUpperCase()));</span>
+    }
+<span class="nc bnc" id="L493" title="All 2 branches missed.">    if (style != null) {</span>
+<span class="nc" id="L494">      builder.setStyle(Style.valueOf(style.toUpperCase()));</span>
+    }
+<span class="nc" id="L496">    builder.setKey(key);</span>
+
+    // Windowing Logic
+    // if both values are not null
+<span class="nc bnc" id="L500" title="All 4 branches missed.">    if (limit != null &amp;&amp; offset != null) {</span>
+      // limit must be less than maxWindowLimit
+<span class="nc bnc" id="L502" title="All 2 branches missed.">      if (Integer.valueOf(limit) &lt; config.getMaxWindowLimit()) {</span>
+<span class="nc" id="L503">        builder.setWindow(new Window(Integer.valueOf(offset), Integer.valueOf(limit)));</span>
+      } else {
+<span class="nc" id="L505">        LOG.warn(&quot;Limit exceeds maximum window limit! limit is set to maximum value&quot;);</span>
+<span class="nc" id="L506">        builder.setWindow(new Window(Integer.valueOf(offset), config.getMaxWindowLimit()));</span>
+      }
+      // only limit is given, set offset to 0
+<span class="nc bnc" id="L509" title="All 2 branches missed.">    } else if (limit != null) {</span>
+<span class="nc bnc" id="L510" title="All 2 branches missed.">      if (Integer.valueOf(limit) &lt; config.getMaxWindowLimit()) {</span>
+<span class="nc" id="L511">        builder.setWindow(new Window(0, Integer.valueOf(limit)));</span>
+      } else {
+<span class="nc" id="L513">        LOG.warn(&quot;Limit exceeds maximum window limit! limit is set to maximum value&quot;);</span>
+<span class="nc" id="L514">        builder.setWindow(new Window(0, config.getMaxWindowLimit()));</span>
+      }
+      // only offset is given, set limit to maxwindowLimit
+<span class="nc bnc" id="L517" title="All 2 branches missed.">    } else if (offset != null) {</span>
+<span class="nc" id="L518">      builder.setWindow(new Window(Integer.valueOf(offset), config.getMaxWindowLimit()));</span>
+    } else {
+<span class="nc" id="L520">      builder.setWindow(new Window(0, config.getMaxWindowLimit()));</span>
+    }
+<span class="nc" id="L522">    return builder;</span>
+  }
+
+  /**
+   * Properties given as composition of a prefix and an identifier, separated by &quot;:&quot;
+   *
+   * @param property something like dbo:netIncome
+   * @return a ResourceModel containing the Property
+   */
+
+  public ResourceModel parsePropertyString(String property) {
+<span class="nc" id="L533">    ResourceModel model = null;</span>
+<span class="nc" id="L534">    String[] splittedProperty = property.split(PROPERTY_SEPARATOR);</span>
+<span class="nc bnc" id="L535" title="All 2 branches missed.">    if (splittedProperty.length != 2) {</span>
+<span class="nc" id="L536">      throw new IllegalArgumentException(</span>
+          &quot;Properties must contain a namespace prefix &quot; + &quot;and an identifier, seperated by ':'&quot;);
+    } else {
+<span class="nc" id="L539">      model = new ResourceModel(splittedProperty[0], splittedProperty[1]);</span>
+    }
+<span class="nc" id="L541">    return model;</span>
+  }
+
+  /**
+   * Parses a String that contains commaseparated values and creates a List of Filters, eacht Filter
+   * containing only a value and the given Bool Used only for values in /instances request
+   *
+   * @param values RDF Objects, used as filter for instances of a certain class, like
+   * Barack_Obama,Bill_Clinton
+   * @param bool use optional in sparql query for the selection of this entity
+   * @return Set of Filtermodels
+   */
+
+  public Set&lt;Filter&gt; parseValue(String values, Bool bool) {
+<span class="nc" id="L555">    Set&lt;Filter&gt; filterList = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">    if (values != null) {</span>
+<span class="nc" id="L557">      String[] valuelist = values.split(&quot;,&quot;);</span>
+<span class="nc bnc" id="L558" title="All 2 branches missed.">      for (int i = 0; i &lt; valuelist.length; i++) {</span>
+<span class="nc" id="L559">        Filter.Builder filterBuilder = new Filter.Builder();</span>
+<span class="nc" id="L560">        filterBuilder.setFilterOp(null);</span>
+<span class="nc" id="L561">        filterBuilder.setFilterBool(bool);</span>
+<span class="nc" id="L562">        filterBuilder.setFilterVal(valuelist[i]);</span>
+<span class="nc" id="L563">        filterList.add(filterBuilder.build());</span>
+      }
+    }
+<span class="nc" id="L566">    return filterList;</span>
+  }
+
+
+  /**
+   * Parses a List of parameters intended as triplestring for sparql selection and returns them as a
+   * set of Filtermodels.
+   *
+   * @param values Can contain only values (rdf objects) like value=Barack_Obama, or a combination
+   * of value and property, like Barack_Obama,dbp:nominee
+   * @return contains the Filtermodels (with or without property set)
+   */
+
+  public Set&lt;Filter&gt; parsePropertyValuePair(List&lt;String&gt; values) {
+<span class="nc" id="L580">    HashSet&lt;Filter&gt; filterList = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L581" title="All 2 branches missed.">    if (!values.isEmpty()) {</span>
+<span class="nc bnc" id="L582" title="All 2 branches missed.">      for (String valueList : values) {</span>
+<span class="nc" id="L583">        Filter.Builder filterBuilder = new Filter.Builder();</span>
+<span class="nc" id="L584">        filterBuilder.setFilterOp(null);</span>
+<span class="nc" id="L585">        filterBuilder.setFilterBool(Bool.AND);</span>
+<span class="nc" id="L586">        String[] splitPropertyValuePair = valueList.split(&quot;,&quot;);</span>
+<span class="nc" id="L587">        filterBuilder.setFilterVal(splitPropertyValuePair[0]);</span>
+<span class="nc bnc" id="L588" title="All 2 branches missed.">        if (splitPropertyValuePair.length == 2) {</span>
+<span class="nc" id="L589">          ResourceModel property = parsePropertyString(splitPropertyValuePair[1]);</span>
+<span class="nc" id="L590">          filterBuilder.setFilterProps(property);</span>
+        }
+<span class="nc" id="L592">        filterList.add(filterBuilder.build());</span>
+<span class="nc" id="L593">      }</span>
+    }
+<span class="nc" id="L595">    return filterList;</span>
+  }
+
+  /**
+   * Builds a Filter
+   *
+   * @param filter something like filter=dbo:numberOfEmployees,gt,48000000 or filter=dbo:netIncome
+   * @return The filter
+   * @throws IllegalArgumentException When the filterString or the built filter is invalid
+   */
+
+  public Set&lt;Filter&gt; parseFilterString(List&lt;String&gt; filter, Bool bool)
+      throws IllegalArgumentException {
+<span class="nc" id="L608">    HashSet&lt;Filter&gt; filterSet = new HashSet&lt;&gt;();</span>
+
+<span class="nc bnc" id="L610" title="All 2 branches missed.">    for (String filterString : filter) {</span>
+<span class="nc" id="L611">      Filter.Builder filterBuilder = new Filter.Builder();</span>
+<span class="nc" id="L612">      String[] splittedFilter = filterString.split(&quot;,&quot;);</span>
+<span class="nc bnc" id="L613" title="All 4 branches missed.">      if (splittedFilter.length == 2 || splittedFilter.length &gt; 3) {</span>
+<span class="nc" id="L614">        throw new IllegalArgumentException(&quot;Filter must contain either a property or, &quot;</span>
+            + &quot;commaseparated, a property, an operator and a value&quot;);
+      } else {
+<span class="nc" id="L617">        filterBuilder.setFilterProps(parsePropertyString(splittedFilter[0]));</span>
+<span class="nc" id="L618">        filterBuilder.setFilterOp(null);</span>
+<span class="nc bnc" id="L619" title="All 2 branches missed.">        if (splittedFilter.length == 3) {</span>
+<span class="nc" id="L620">          filterBuilder.setFilterOp(determineFilterOperator(splittedFilter[1]));</span>
+<span class="nc" id="L621">          filterBuilder.setFilterVal(splittedFilter[2]);</span>
+        }
+      }
+
+<span class="nc" id="L625">      filterBuilder.setFilterBool(bool);</span>
+<span class="nc" id="L626">      filterSet.addAll(buildTheFilter(filterBuilder));</span>
+<span class="nc" id="L627">    }</span>
+<span class="nc" id="L628">    return filterSet;</span>
+  }
+
+  /**
+   * keeps exception handling from main logic, trying to build the Filter
+   *
+   * @param builder containing a property or property+operator+value
+   * @return a Set of Filters
+   */
+
+  public Set&lt;Filter&gt; buildTheFilter(Filter.Builder builder) {
+<span class="nc" id="L639">    HashSet&lt;Filter&gt; set = new HashSet&lt;&gt;();</span>
+    try {
+<span class="nc" id="L641">      set.add(builder.build());</span>
+<span class="nc" id="L642">    } catch (IllegalStateException e) {</span>
+<span class="nc" id="L643">      throw new IllegalArgumentException(&quot;Filter &quot; + builder + &quot; is invalid!&quot;);</span>
+<span class="nc" id="L644">    }</span>
+<span class="nc" id="L645">    return set;</span>
+  }
+
+
+  /**
+   * Transforms the String in the URI into the Strings for the SPARQL Statements:&lt;br&gt; eq  -&gt; '='
+   * &lt;br&gt; lt  -&gt; '&lt;' &lt;br&gt; gt  -&gt; '&gt;' &lt;br&gt;
+   *
+   * @param uriOperator can be eq, lt,gt
+   * @return can be =,&lt;,&gt;, defaults to null
+   */
+  private String determineFilterOperator(String uriOperator) {
+    String sparqlOperator;
+<span class="nc bnc" id="L658" title="All 2 branches missed.">    uriOperator = uriOperator == null ? &quot;null&quot; : uriOperator;</span>
+
+<span class="nc bnc" id="L660" title="All 8 branches missed.">    switch (uriOperator) {</span>
+      case (&quot;eq&quot;):
+<span class="nc" id="L662">        sparqlOperator = &quot;=&quot;;</span>
+<span class="nc" id="L663">        break;</span>
+      case (&quot;gt&quot;):
+<span class="nc" id="L665">        sparqlOperator = &quot;&gt;&quot;;</span>
+<span class="nc" id="L666">        break;</span>
+      case (&quot;lt&quot;):
+<span class="nc" id="L668">        sparqlOperator = &quot;&lt;&quot;;</span>
+<span class="nc" id="L669">        break;</span>
+      case (&quot;null&quot;):
+<span class="nc" id="L671">        sparqlOperator = null;</span>
+<span class="nc" id="L672">        break;</span>
+      case (&quot;le&quot;):
+<span class="nc" id="L674">        sparqlOperator = &quot;&lt;=&quot;;</span>
+<span class="nc" id="L675">        break;</span>
+      case (&quot;ge&quot;):
+<span class="nc" id="L677">        sparqlOperator = &quot;&gt;=&quot;;</span>
+<span class="nc" id="L678">        break;</span>
+      case (&quot;sw&quot;):
+<span class="nc" id="L680">        sparqlOperator = &quot;startswith&quot;;</span>
+<span class="nc" id="L681">        break;</span>
+      default:
+<span class="nc" id="L683">        throw new IllegalArgumentException(&quot;Filter operator must be one of gt,lt,eq,ge,le or sw&quot;);</span>
+    }
+<span class="nc" id="L685">    return sparqlOperator;</span>
+  }
+
+  // response entities for errors
+
+  /**
+   * Creates a Response when an IllegalArgumentException occures
+   *
+   * @param logMsg The message that is logged
+   */
+  private ResponseEntity&lt;String&gt; illegalArgument(String logMsg) {
+<span class="nc" id="L696">    LOG.error(logMsg);</span>
+<span class="nc" id="L697">    logData.setException(logMsg + &quot; - Illegal argument in URI&quot;);</span>
+<span class="nc" id="L698">    QLOG.error(logData.toString());</span>
+<span class="nc" id="L699">    return new ResponseEntity&lt;&gt;(&quot;Illegal Argument in URI.&quot;, HttpStatus.BAD_REQUEST);</span>
+  }
+
+  /**
+   * Creates a 404 Response
+   */
+  private ResponseEntity&lt;String&gt; pathNotFound(String path) {
+<span class="nc" id="L706">    return new ResponseEntity&lt;&gt;(path + &quot; not found.&quot;, HttpStatus.NOT_FOUND);</span>
+  }
+
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

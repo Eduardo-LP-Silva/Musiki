@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SwaggerConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.configuration</a> &gt; <span class="el_source">SwaggerConf.java</span></div><h1>SwaggerConf.java</h1><pre class="source lang-java linenums">package dbpedia.api.configuration;
+
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.Contact;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+@Configuration
+@EnableSwagger2
+<span class="nc" id="L19">public class SwaggerConf {</span>
+
+  
+<span class="nc" id="L22">  private String infoText = null;</span>
+  
+  @Bean
+  public Docket api() {
+<span class="nc" id="L26">    return new Docket(DocumentationType.SWAGGER_2)</span>
+<span class="nc" id="L27">        .select()</span>
+<span class="nc" id="L28">        .apis(RequestHandlerSelectors.basePackage(&quot;dbpedia.api.controller&quot;))</span>
+<span class="nc" id="L29">        .paths(PathSelectors.any())</span>
+<span class="nc" id="L30">        .build()</span>
+<span class="nc" id="L31">        .apiInfo(apiInfo());</span>
+  }
+
+
+  private void infoTexter() {
+    
+<span class="nc" id="L37">    URL formats = null;   </span>
+    try {
+<span class="nc" id="L39">      formats = new URL( &quot;https://jena.apache.org/documentation/io/#formats&quot;);</span>
+<span class="nc" id="L40">    } catch (MalformedURLException e) {</span>
+      // TODO Auto-generated catch block
+<span class="nc" id="L42">      e.printStackTrace();</span>
+<span class="nc" id="L43">    }</span>
+   
+<span class="nc" id="L45">    infoText = &quot;DBpedia is one of the largest, open and freely accessible knowledge graphs about &quot;</span>
+        + &quot;entities (such as movies, actors, athletes, politicians, places, ...) of our everyday &quot;
+        + &quot;life. Information contained in Wikipedia articles are extracted into DBpedia as RDF, &quot;
+        + &quot;using mappings between Wikipedia infoboxes and the DBpedia Ontology to become accessible &quot;
+        + &quot;for complex requests. \n&quot;
+        + &quot;\n&quot;
+        + &quot;This API provides a REST-conform interface. The API uses the DBpedia Ontology and &quot;
+        + &quot;transforms HTTP requests into SPARQL queries, which are then sent to the DBpedia &quot;
+        + &quot;endpoint (https://dbpedia.org/sparql). The results can be returned in a range of formats, &quot;
+        + &quot;such as JSON, JSON-LD, TSV, and different styles (that means more or less human readable,&quot;
+        + &quot; e.g. nested JSON).\n\n&quot;
+
+        + &quot;There are three requests types: &quot;
+        + &quot;&lt;br&gt;&lt;b&gt; Value&lt;/b&gt;&lt;br&gt; Say you're interested in the properties of an entity that is represented &quot;
+        + &quot;as a DBpedia resource: you can query either all the properties that are stored in the &quot;
+        + &quot;DBpedia for this entity or you can ask for a specific property that you have in mind &quot;
+        + &quot;(and that exists in the DBpedia). &quot;
+        + &quot;In any case you will get the values of the properties (that is, the object in RDF terms). &quot;
+        + &quot;A value can be either a literal (e.g. a number) or another entity. For example, you&quot;
+        + &quot; can just give the entity 'Barack_Obama' and will get all the properties, or, &quot;
+        + &quot;additionally to 'Barack_Obama', you ask for the property 'gender' and will get the value 'male'. &quot;
+        + &quot;&lt;br&gt; &lt;b&gt;Entity&lt;/b&gt;&lt;br&gt; Similar to the values request, but the other way around: here, you're &quot;
+        + &quot;interested in all the entities, that share the value of the property that you have at hand. &quot;
+        + &quot;For example you ask for all the events, where Barack_Obama was 'nominee'.&quot;
+        + &quot;&lt;br&gt; &lt;b&gt;Instance&lt;/b&gt;&lt;br&gt; Here, you're interested in the instances of an ontology class,&quot;
+        + &quot; e.g. 'Actor' or 'Company'. You can filter those instances by certain criteria. For example, &quot;
+        + &quot;you can ask for all the instances of the class 'Company' that have more than 48000 employees. &lt;br&gt;&quot;
+        + &quot;&lt;br&gt;&quot;
+
+        + &quot;We also provide different output and prettyfication options:&lt;br&gt;&lt;br&gt;&quot;
+        + &quot;&lt;b&gt;Returnformats&lt;/b&gt;:&lt;br&gt;&quot;
+        + &quot;-JSON (default)&lt;br&gt;&quot;
+        + &quot;-JSONLD&lt;br&gt;&quot;
+        + &quot;-TSV&lt;br&gt;&quot;
+        + &quot;-RDFJSON&lt;br&gt;&quot;
+        + &quot;-TURTLE&lt;br&gt;&quot;
+        + &quot;-NTRIPLES&lt;br&gt;&quot;
+        + &quot;-RDFXML&lt;br&gt;&quot;
+        + &quot; For more information about the different formats, visit &quot; + formats +&quot;&lt;br&gt;&lt;br&gt;&quot;
+
+        + &quot;&lt;b&gt;Prettyfications&lt;/b&gt;(only for TSV and JSON):&lt;br&gt;&quot;
+        + &quot;-PREFIXED replaces the DBpediaUris of the objects with their prefixes&lt;br&gt;&quot;
+        + &quot;-NESTED every entity has its own JSON-Object with all the related properties. Only works with JSON.&lt;br&gt; &quot;
+        + &quot;-SHORT no prefixes or DBpedia-URIs for http://dbpedia.org/ontology/ and http://dbpedia.org/resource/, everything else is prefixed &lt;br&gt;&quot;
+        + &quot;-NONE (default) no prettyfication &lt;br&gt;&lt;br&gt;&quot;
+        + &quot;&lt;b&gt;Note:&lt;br&gt;&lt;/b&gt; You need a proper APIKey to use this service (contact the Admin)&lt;br&gt;&lt;br&gt;&quot;
+
+        + &quot;You can explore all three request types below. Note that there are query parameters &quot;
+        + &quot;that occur in every request type (such as key, version, format, pretty, limit, offset), &quot;
+        + &quot;and some that differ between the request types. &lt;br&gt;&lt;br&gt;&quot;
+
+        + &quot;Use the http://dbpedia.org/page/ pages for information about &quot;
+        + &quot;which entries exist for properties in DBpedia (e.g. http://dbpedia.org/page/Space_Station &quot;
+        + &quot;for the resource 'http://dbpedia.org/resource/Space_Station').&quot;;
+
+<span class="nc" id="L100">  }</span>
+  
+  private ApiInfo apiInfo() {
+
+<span class="nc" id="L104">    infoTexter();</span>
+<span class="nc" id="L105">    return new ApiInfo(</span>
+        &quot;Rest API for DBpedia&quot;,
+        infoText,
+        &quot;1.0.0&quot;,
+        &quot;&quot;,
+        new Contact(&quot;jf17a, students group at Universität Leipzig&quot;, &quot;http://pcai042.informatik.uni-leipzig.de/~jf17a/&quot;,
+            &quot;&quot;),
+        &quot;&quot;,
+<span class="nc" id="L113">        &quot;&quot;, Collections.emptyList()</span>
+    );
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

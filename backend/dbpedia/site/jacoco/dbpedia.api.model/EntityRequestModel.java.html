@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EntityRequestModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.model</a> &gt; <span class="el_source">EntityRequestModel.java</span></div><h1>EntityRequestModel.java</h1><pre class="source lang-java linenums">package dbpedia.api.model;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+public class EntityRequestModel extends RequestModel {
+
+  public static final String PATH = &quot;/entities&quot;;
+<span class="fc" id="L11">  public static final Boolean DEFAULT_ONLY_IMPORANT_VALUE = false;</span>
+  public static final String URI_VALUE = &quot;value&quot;;
+  public static final String URI_FILTER = &quot;filter&quot;;
+  public static final String URI_OPTIONAL_FILTER = &quot;ofilter&quot;;
+
+
+  private Set&lt;Filter&gt; filterList;
+  private String classname;
+  private boolean onlyImportant;
+
+  private EntityRequestModel() {
+  } //for the builder
+
+<span class="fc" id="L24">  public EntityRequestModel(Set&lt;Filter&gt; filterList, boolean onlyImportant, String classname) {</span>
+<span class="fc" id="L25">    this.classname = classname;</span>
+<span class="fc" id="L26">    this.filterList = filterList;</span>
+<span class="fc" id="L27">    this.onlyImportant = onlyImportant;</span>
+<span class="fc" id="L28">  } //for testing, can be deleted later</span>
+
+  @Override
+  public boolean validate() {
+<span class="pc bpc" id="L32" title="2 of 4 branches missed.">    return super.validate() &amp;&amp;</span>
+<span class="pc bpc" id="L33" title="3 of 4 branches missed.">        ((this.filterList != null &amp;&amp; !this.filterList.isEmpty()) || this.classname != null);</span>
+
+  }
+
+  public Builder toBuilder() {
+<span class="fc" id="L38">    return new Builder().copy(this);</span>
+  }
+
+  @Override
+  public boolean equals(Object o) {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">    if (o == null) {</span>
+<span class="nc" id="L44">      return false;</span>
+    }
+<span class="nc bnc" id="L46" title="All 2 branches missed.">    if (!(o instanceof EntityRequestModel)) {</span>
+<span class="nc" id="L47">      return false;</span>
+    }
+<span class="nc" id="L49">    EntityRequestModel other = (EntityRequestModel) o;</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">    return super.equals(o)</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        &amp;&amp; Objects.equals(other.filterList, filterList)</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        &amp;&amp; Objects.equals(other.onlyImportant, onlyImportant);</span>
+  }
+
+  @Override
+  public int hashCode() {
+<span class="nc" id="L57">    return super.hashCode(); //TODO generate hashCode based on the equals method</span>
+  }
+
+  @Override
+  public String getPath() {
+<span class="nc" id="L62">    return PATH;</span>
+  }
+
+  public Set&lt;Filter&gt; getFilterList() {
+<span class="fc" id="L66">    return Collections.unmodifiableSet(filterList);</span>
+  }
+
+
+  public String getClassName() {
+<span class="fc" id="L71">    return this.classname;</span>
+  }
+
+  public boolean getonlyImportant() {
+<span class="fc" id="L75">    return onlyImportant;</span>
+  }
+
+  public static class Builder extends
+      AbstractBuilder&lt;EntityRequestModel, Builder&gt; {
+
+
+    public Builder() {
+<span class="fc" id="L83">      super();</span>
+<span class="fc" id="L84">      this.instance.onlyImportant = DEFAULT_ONLY_IMPORANT_VALUE;</span>
+<span class="fc" id="L85">    }</span>
+
+
+    @Override
+    protected EntityRequestModel createModelInstance() {
+<span class="fc" id="L90">      return new EntityRequestModel();</span>
+    }
+
+    @Override
+    Builder getSubclassInstance() {
+<span class="fc" id="L95">      return this;</span>
+    }
+
+    @Override
+    public Builder copy(EntityRequestModel model) {
+<span class="fc" id="L100">      setonlyImportant(model.getonlyImportant());</span>
+<span class="fc" id="L101">      setFilterList(model.getFilterList());</span>
+      //set attributes in RequestModel and return this builder
+<span class="fc" id="L103">      return super.copy(model);</span>
+    }
+
+    public Builder setonlyImportant(Boolean onlyImportant) {
+<span class="fc" id="L107">      instance.onlyImportant = onlyImportant;</span>
+<span class="fc" id="L108">      return this;</span>
+    }
+
+    public Builder setFilterList(Set&lt;Filter&gt; filterList) {
+<span class="fc" id="L112">      instance.filterList = new HashSet&lt;&gt;(filterList);</span>
+<span class="fc" id="L113">      return this;</span>
+    }
+
+    public Builder setClassname(String classname) {
+<span class="fc" id="L117">      instance.classname = classname;</span>
+<span class="fc" id="L118">      return this;</span>
+    }
+
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

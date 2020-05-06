@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValueRequestModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.model</a> &gt; <span class="el_source">ValueRequestModel.java</span></div><h1>ValueRequestModel.java</h1><pre class="source lang-java linenums">package dbpedia.api.model;
+
+import java.util.Collections;
+import java.util.Set;
+
+public class ValueRequestModel extends RequestModel {
+
+
+  public static final String PATH = &quot;/values&quot;;
+  public static final String URI_ENTITY = &quot;entities&quot;;
+  public static final String URI_PROPERTY = &quot;property&quot;;
+
+  private Set&lt;String&gt; entities;
+  private Set&lt;ResourceModel&gt; properties;
+  private boolean mapping;
+
+  private ValueRequestModel() {
+  } // for the builder
+
+
+<span class="fc" id="L21">  public ValueRequestModel(Set&lt;String&gt; entities, Set&lt;ResourceModel&gt; properties, boolean mapping) {</span>
+<span class="fc" id="L22">    this.entities = entities;</span>
+<span class="fc" id="L23">    this.properties = properties;</span>
+<span class="fc" id="L24">    this.mapping = mapping;</span>
+<span class="fc" id="L25">  } //for testing, can be deleted later</span>
+
+
+  public boolean validate() {
+<span class="pc bpc" id="L29" title="2 of 4 branches missed.">    return super.validate() &amp;&amp;</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        (this.entities != null &amp;&amp; !this.entities.isEmpty());</span>
+  }
+
+  public Set&lt;String&gt; getEntities() {
+<span class="fc" id="L34">    return Collections.unmodifiableSet(entities);</span>
+  }
+
+  public Builder toBuilder() {
+<span class="fc" id="L38">    return new Builder().copy(this);</span>
+  }
+
+  public Set&lt;ResourceModel&gt; getProperties() {
+<span class="fc" id="L42">    return Collections.unmodifiableSet(properties);</span>
+  }
+
+  public Boolean getMapping() {
+<span class="fc" id="L46">    return mapping;</span>
+  }
+
+
+  @Override
+  public String getPath() {
+<span class="nc" id="L52">    return PATH;</span>
+  }
+
+<span class="fc" id="L55">  public static class Builder extends</span>
+      AbstractBuilder&lt;ValueRequestModel, Builder&gt; {
+
+    @Override
+    protected ValueRequestModel createModelInstance() {
+<span class="fc" id="L60">      return new ValueRequestModel();</span>
+    }
+
+    @Override
+    Builder getSubclassInstance() {
+<span class="fc" id="L65">      return this;</span>
+    }
+
+    @Override
+    public Builder copy(ValueRequestModel model) {
+<span class="fc" id="L70">      setEntities(model.getEntities());</span>
+<span class="fc" id="L71">      setProperties(model.getProperties());</span>
+<span class="fc" id="L72">      setMapping(model.getMapping());</span>
+<span class="fc" id="L73">      return super.copy(model);</span>
+    }
+
+    public Builder setEntities(Set&lt;String&gt; entities) {
+<span class="fc" id="L77">      instance.entities = entities;</span>
+<span class="fc" id="L78">      return this;</span>
+    }
+
+    public Builder setProperties(Set&lt;ResourceModel&gt; properties) {
+<span class="fc" id="L82">      instance.properties = properties;</span>
+<span class="fc" id="L83">      return this;</span>
+    }
+
+    public Builder setMapping(boolean mapping) {
+<span class="fc" id="L87">      instance.mapping = mapping;</span>
+<span class="fc" id="L88">      return this;</span>
+    }
+
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

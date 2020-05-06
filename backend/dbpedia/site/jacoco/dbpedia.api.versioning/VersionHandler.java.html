@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VersionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.versioning</a> &gt; <span class="el_source">VersionHandler.java</span></div><h1>VersionHandler.java</h1><pre class="source lang-java linenums">package dbpedia.api.versioning;
+
+import dbpedia.api.model.ApiVersion;
+import dbpedia.api.model.EntityRequestModel;
+import dbpedia.api.model.Filter;
+import dbpedia.api.model.RequestModel;
+import dbpedia.api.model.ResourceModel;
+import dbpedia.api.model.ValueRequestModel;
+import java.util.HashSet;
+import java.util.Set;
+import org.springframework.stereotype.Component;
+
+
+@Component
+public class VersionHandler {
+
+  /**
+   * Contains all versions
+   */
+  private SemanticVersionSet&lt;ApiVersion&gt; versions;
+
+<span class="fc" id="L22">  public VersionHandler(SemanticVersionSet&lt;ApiVersion&gt; versions) {</span>
+<span class="fc" id="L23">    this.versions = versions;</span>
+<span class="fc" id="L24">  }</span>
+
+  /**
+   * Checks if it is possible to patch an request to the current version of the api according to
+   * semantic versioning
+   *
+   * @return true if the major version of the request equals the current major, otherwise false
+   */
+  public boolean canPatchToLatest(RequestModel model) throws VersionNotFoundException {
+<span class="fc" id="L33">    ApiVersion version = getVersionByModel(model);</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">    return version.getMajor() == versions.getLatest().getMajor();</span>
+  }
+
+  /**
+   * Patches a ValueRequestModel by applying the replacements of all version up to the latest
+   *
+   * @param oldModel The old request (contains the old version number)
+   * @return The updated request
+   * @throws VersionNotFoundException When the version is not found
+   */
+  public ValueRequestModel patchValueRequestModel(ValueRequestModel oldModel)
+      throws VersionNotFoundException {
+
+<span class="fc" id="L47">    ApiVersion version = getVersionByModel(oldModel);</span>
+    //make a copy of the property list where the replacements will be done
+<span class="fc" id="L49">    Set&lt;ResourceModel&gt; updatedProperties = new HashSet&lt;&gt;(oldModel.getProperties());</span>
+<span class="fc" id="L50">    Set&lt;String&gt; updatedEntities = new HashSet&lt;&gt;(oldModel.getEntities());</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    for (ApiVersion v : versions.iterateToLatest(version)) {</span>
+<span class="fc" id="L52">      replaceResourceSet(updatedProperties, v);</span>
+<span class="fc" id="L53">      replaceEntitiesSet(updatedEntities, v);</span>
+<span class="fc" id="L54">    }</span>
+
+<span class="fc" id="L56">    return oldModel.toBuilder()</span>
+<span class="fc" id="L57">        .setProperties(updatedProperties)</span>
+<span class="fc" id="L58">        .setVersion(versions.getLatest().getSementicVersioningString())</span>
+<span class="fc" id="L59">        .setEntities(updatedEntities)</span>
+<span class="fc" id="L60">        .build();</span>
+  }
+
+  /**
+   * checks if the api version of a request is the current version of the API
+   *
+   * @return true or false
+   */
+  public boolean isLatest(RequestModel model) throws VersionNotFoundException {
+<span class="nc" id="L69">    ApiVersion modelVersion = getVersionByModel(model);</span>
+<span class="nc" id="L70">    return versions.getLatest().equals(modelVersion);</span>
+  }
+
+  /**
+   * patches an entity request model to the current version
+   */
+  public EntityRequestModel patchEntityRequestModel(EntityRequestModel oldModel)
+      throws VersionNotFoundException {
+<span class="fc" id="L78">    ApiVersion version = getVersionByModel(oldModel);</span>
+    //make a copy of the property list where the replacements will be done
+<span class="fc" id="L80">    Set&lt;Filter&gt; updatedFilters = new HashSet&lt;&gt;(oldModel.getFilterList());</span>
+<span class="fc" id="L81">    String updatedClassName = oldModel.getClassName();</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">    for (ApiVersion v : versions.iterateToLatest(version)) {</span>
+<span class="fc" id="L83">      updateFilterSet(updatedFilters, v);</span>
+<span class="fc" id="L84">      updatedClassName = updateClassName(updatedClassName, v);</span>
+<span class="fc" id="L85">    }</span>
+<span class="fc" id="L86">    return oldModel.toBuilder()</span>
+<span class="fc" id="L87">        .setVersion(versions.getLatest().getSementicVersioningString())</span>
+<span class="fc" id="L88">        .setFilterList(updatedFilters)</span>
+<span class="fc" id="L89">        .setClassname(updatedClassName)</span>
+<span class="fc" id="L90">        .build();</span>
+  }
+
+  private static void updateFilterSet(Set&lt;Filter&gt; filterSet, ApiVersion version) {
+<span class="fc" id="L94">    Set&lt;Filter&gt; toRemove = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L95">    Set&lt;Filter&gt; toAdd = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">    for (Filter filter : filterSet) {</span>
+<span class="fc" id="L97">      Filter updatedFilter = updateFilter(filter, version);</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">      if (updatedFilter != null) {</span>
+<span class="fc" id="L99">        toRemove.add(filter);</span>
+<span class="fc" id="L100">        toAdd.add(updatedFilter);</span>
+      }
+<span class="fc" id="L102">    }</span>
+<span class="fc" id="L103">    filterSet.removeAll(toRemove);</span>
+<span class="fc" id="L104">    filterSet.addAll(toAdd);</span>
+<span class="fc" id="L105">  }</span>
+
+  /**
+   * Replaces the property and value resources according to the replacement map
+   *
+   * @return null if no replacements were made (so there is no need to check this with equals() )
+   */
+  private static Filter updateFilter(Filter filter, ApiVersion version) {
+<span class="fc" id="L113">    ResourceModel updatedPropertyOrNull = null;</span>
+<span class="fc" id="L114">    ResourceModel updatedValOrNull = null;</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">    if (filter.isValueAResource()) {</span>
+<span class="fc" id="L116">      updatedValOrNull = updateResourceModel(filter.getValueAsResource(), version);</span>
+    }
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">    if (filter.getFilterProp() != null) {</span>
+<span class="fc" id="L119">      updatedPropertyOrNull = updateResourceModel(filter.getFilterProp(), version);</span>
+    }
+<span class="fc bfc" id="L121" title="All 4 branches covered.">    if (updatedPropertyOrNull == null &amp;&amp; updatedValOrNull == null) {</span>
+<span class="fc" id="L122">      return null;</span>
+    }
+<span class="fc" id="L124">    Filter.Builder builder = filter.toBuilder();</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">    if (updatedPropertyOrNull != null) {</span>
+<span class="fc" id="L126">      builder.setFilterProps(updatedPropertyOrNull);</span>
+    }
+<span class="fc bfc" id="L128" title="All 2 branches covered.">    if (updatedValOrNull != null) {</span>
+<span class="fc" id="L129">      builder.setResourceValue(updatedValOrNull);</span>
+    }
+<span class="fc" id="L131">    return builder.build();</span>
+  }
+
+  /**
+   * Creates the updated version of a resource model according to the replacements of an ApiVersion
+   *
+   * @return null if the ResourceModel is not modified. So a check with equals() is not needed.
+   */
+  private static ResourceModel updateResourceModel(ResourceModel old, ApiVersion version) {
+    //if there is a direct replacement for the old resource model, return the updated version from the map
+<span class="fc bfc" id="L141" title="All 2 branches covered.">    if (version.getResourceReplacements().containsKey(old)) {</span>
+<span class="fc" id="L142">      return version.getResourceReplacements().get(old);</span>
+    }
+    // otherwise check if the prefix has to get replaced
+<span class="fc bfc" id="L145" title="All 2 branches covered.">    if (version.getPrefixReplacements().containsKey(old.getPrefix())) {</span>
+<span class="fc" id="L146">      String newPrefix = version.getPrefixReplacements().get(old.getPrefix());</span>
+<span class="fc" id="L147">      return new ResourceModel(newPrefix, old.getIdentifier());</span>
+    }
+    //otherwise return null (= no changes are made)
+    //so the calling method does not need to check this with equals()
+<span class="fc" id="L151">    return null;</span>
+  }
+
+  private static String updateClassName(String oldClassName, ApiVersion version) {
+<span class="fc" id="L155">    ResourceModel classAsDboResource = new ResourceModel(&quot;dbo&quot;, oldClassName);</span>
+<span class="fc" id="L156">    ResourceModel updatedModel = updateResourceModel(classAsDboResource, version);</span>
+    // (maybe in a future release)
+<span class="fc bfc" id="L158" title="All 2 branches covered.">    if (updatedModel != null) {</span>
+<span class="fc" id="L159">      return updatedModel.getIdentifier();</span>
+    }
+<span class="fc" id="L161">    return oldClassName;</span>
+  }
+
+  /**
+   * Replaces all resources in a set according to the replacements of a version
+   */
+  private static void replaceResourceSet(Set&lt;ResourceModel&gt; set,
+      ApiVersion version) {
+    // apply changes at the end of each version iteration to avoid conflicts
+    // e.g. for a replacementMap like: A --replacedBy--&gt; B and B --replacedBy--&gt; A
+<span class="fc" id="L171">    Set&lt;ResourceModel&gt; toRemove = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L172">    Set&lt;ResourceModel&gt; toAdd = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">    for (ResourceModel model : set) {</span>
+<span class="fc" id="L174">      ResourceModel updatedOrNull = updateResourceModel(model, version);</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">      if (updatedOrNull != null) {</span>
+<span class="fc" id="L176">        toAdd.add(updatedOrNull);</span>
+<span class="fc" id="L177">        toRemove.add(model);</span>
+      }
+<span class="fc" id="L179">    }</span>
+<span class="fc" id="L180">    set.removeAll(toRemove);</span>
+<span class="fc" id="L181">    set.addAll(toAdd);</span>
+<span class="fc" id="L182">  }</span>
+
+  /**
+   * Replaces all entity Strings in a version according to the replacements of a version The
+   * entities are handled as resources with the prefix dbr
+   */
+  private static void replaceEntitiesSet(Set&lt;String&gt; set, ApiVersion version) {
+<span class="fc" id="L189">    Set&lt;String&gt; toRemove = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L190">    Set&lt;String&gt; toAdd = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">    for (String entity : set) {</span>
+<span class="fc" id="L192">      ResourceModel entityResourceModel = new ResourceModel(&quot;dbr&quot;, entity);</span>
+<span class="fc" id="L193">      ResourceModel updatedOrNull = updateResourceModel(entityResourceModel, version);</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">      if (updatedOrNull != null) {</span>
+<span class="fc" id="L195">        toRemove.add(entityResourceModel.getIdentifier());</span>
+<span class="fc" id="L196">        toAdd.add(updatedOrNull.getIdentifier());</span>
+      }
+<span class="fc" id="L198">    }</span>
+<span class="fc" id="L199">    set.removeAll(toRemove);</span>
+<span class="fc" id="L200">    set.addAll(toAdd);</span>
+<span class="fc" id="L201">  }</span>
+
+  /**
+   * returns the version of a model by parsing its version name
+   */
+  private ApiVersion getVersionByModel(RequestModel model) throws VersionNotFoundException {
+<span class="fc" id="L207">    String versionName = model.getVersion();</span>
+<span class="pc bpc" id="L208" title="1 of 2 branches missed.">    if (!isSemanticVersioningString(versionName)) {</span>
+<span class="nc" id="L209">      throw new VersionNotFoundException();</span>
+    }
+<span class="fc" id="L211">    return getVersionByName(versionName);</span>
+  }
+
+
+  /**
+   * Parses a version name and returns the corresponding version in the version set
+   *
+   * @throws VersionNotFoundException if the version was not found
+   * @throws IndexOutOfBoundsException if the versionName is bad formatted
+   * @throws NumberFormatException if the versionName is bad formatted
+   */
+  public ApiVersion getVersionByName(String versionName) throws VersionNotFoundException {
+<span class="fc" id="L223">    String[] numbers = versionName.split(&quot;\\.&quot;);</span>
+<span class="fc" id="L224">    return versions.get(</span>
+<span class="fc" id="L225">        Integer.valueOf(numbers[0]), //major</span>
+<span class="fc" id="L226">        Integer.valueOf(numbers[1]), //minor</span>
+<span class="fc" id="L227">        Integer.valueOf(numbers[2]) //patch</span>
+    );
+  }
+
+  /**
+   * checks if the versionName matches the format &quot;[number].[number].[number]&quot;
+   */
+  public static boolean isSemanticVersioningString(String versionName) {
+<span class="fc" id="L235">    return versionName.matches(&quot;\\d*\\.\\d*\\.\\d*&quot;);</span>
+  }
+
+  public String getLatest() {
+<span class="nc" id="L239">    return versions.getLatest().getSemanticVersioningString();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

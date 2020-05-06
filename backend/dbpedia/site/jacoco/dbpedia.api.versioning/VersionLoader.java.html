@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VersionLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.versioning</a> &gt; <span class="el_source">VersionLoader.java</span></div><h1>VersionLoader.java</h1><pre class="source lang-java linenums">package dbpedia.api.versioning;
+
+import dbpedia.api.model.ApiVersion;
+import dbpedia.api.model.ResourceModel;
+import dbpedia.api.versioning.SemanticVersionSet.Builder;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.io.FileUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+/**
+ * Reads the version files from a directory
+ */
+<span class="fc" id="L20">public class VersionLoader {</span>
+
+<span class="fc" id="L22">  private String extension = &quot;version.json&quot;;</span>
+
+  /**
+   * Reads all files with a specific extension from a path and creates a ApiVersion for each of it
+   */
+  public SemanticVersionSet&lt;ApiVersion&gt; loadFromDirectory(File path) throws IOException {
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">    if (!path.isDirectory()) {</span>
+<span class="nc" id="L29">      throw new IllegalArgumentException(&quot;The path must exist and must be a directory!&quot;);</span>
+    }
+<span class="fc" id="L31">    Collection&lt;File&gt; versionFiles = FileUtils.listFiles(path, new String[]{extension}, false);</span>
+<span class="fc" id="L32">    SemanticVersionSet.Builder&lt;ApiVersion&gt; builder = new Builder&lt;&gt;();</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">    for (File versionFile : versionFiles) {</span>
+<span class="fc" id="L34">      String json = FileUtils.readFileToString(versionFile, Charset.defaultCharset());</span>
+      try {
+<span class="fc" id="L36">        builder.add(createVersionFromJson(json));</span>
+<span class="nc" id="L37">      } catch (JSONException e) {</span>
+<span class="nc" id="L38">        throw new IOException(&quot;File &quot; + versionFile + &quot; has bad json. &quot; + e.getMessage());</span>
+<span class="fc" id="L39">      }</span>
+<span class="fc" id="L40">    }</span>
+<span class="fc" id="L41">    return builder.build();</span>
+  }
+
+  /**
+   * Parses JSON to ApiVersion
+   */
+  public static ApiVersion createVersionFromJson(String jsonString) throws JSONException {
+<span class="fc" id="L48">    JSONObject json = new JSONObject(jsonString);</span>
+<span class="fc" id="L49">    int major = json.getInt(&quot;major&quot;);</span>
+<span class="fc" id="L50">    int minor = json.getInt(&quot;minor&quot;);</span>
+<span class="fc" id="L51">    int patch = json.getInt(&quot;patch&quot;);</span>
+
+<span class="fc" id="L53">    Map&lt;ResourceModel, ResourceModel&gt; resourceReplacements = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">    if (json.has(&quot;resourceReplacements&quot;)) {</span>
+<span class="fc" id="L55">      JSONArray replacements = json.getJSONArray(&quot;resourceReplacements&quot;);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">      for (int i = 0; i &lt; replacements.length(); i++) {</span>
+<span class="fc" id="L57">        JSONObject replacement = replacements.getJSONObject(i);</span>
+<span class="fc" id="L58">        ResourceModel before = new ResourceModel(</span>
+<span class="fc" id="L59">            replacement.getString(&quot;prefixBefore&quot;),</span>
+<span class="fc" id="L60">            replacement.getString(&quot;identifierBefore&quot;));</span>
+<span class="fc" id="L61">        ResourceModel after = new ResourceModel(</span>
+<span class="fc" id="L62">            replacement.getString(&quot;prefixNow&quot;),</span>
+<span class="fc" id="L63">            replacement.getString(&quot;identifierNow&quot;));</span>
+<span class="fc" id="L64">        resourceReplacements.put(before, after);</span>
+      }
+    }
+
+<span class="fc" id="L68">    Map&lt;String, String&gt; prefixReplacements = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">    if (json.has(&quot;prefixReplacements&quot;)) {</span>
+<span class="fc" id="L70">      JSONObject obj = json.getJSONObject(&quot;prefixReplacements&quot;);</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">      for (String key : obj.keySet()) {</span>
+<span class="fc" id="L72">        prefixReplacements.put(key, obj.getString(key));</span>
+<span class="fc" id="L73">      }</span>
+    }
+
+<span class="fc" id="L76">    return new ApiVersion(major, minor, patch, resourceReplacements, prefixReplacements);</span>
+  }
+
+  public String getExtension() {
+<span class="nc" id="L80">    return extension;</span>
+  }
+
+  public void setExtension(String extension) {
+<span class="nc" id="L84">    this.extension = extension;</span>
+<span class="nc" id="L85">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EntityRequestQueryFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.factory</a> &gt; <span class="el_source">EntityRequestQueryFactory.java</span></div><h1>EntityRequestQueryFactory.java</h1><pre class="source lang-java linenums">package dbpedia.api.factory;
+
+import dbpedia.api.model.EntityRequestModel;
+import dbpedia.api.model.Filter;
+import dbpedia.api.model.RequestModel.Style;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.query.ParameterizedSparqlString;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.springframework.stereotype.Component;
+
+@Component
+public class EntityRequestQueryFactory extends DBpediaQueryFactory&lt;EntityRequestModel&gt; {
+
+  public EntityRequestQueryFactory(OntModel ontology, PrefixMappingImpl prefixMapping) {
+<span class="fc" id="L23">    super(ontology, prefixMapping);</span>
+<span class="fc" id="L24">  }</span>
+
+
+  @Override
+  public Query makeQuery(EntityRequestModel model) {
+
+<span class="nc" id="L30">    return getEntitiesQuery(model);</span>
+  }
+
+  /**
+   * Gets the whole String which can be appended in the filterString, like str(?label)=str(&quot;Moon&quot;)
+   */
+  private String getFullFilterstring(Filter filter) {
+    String fullValue;
+    RDFDatatype type;
+<span class="fc" id="L39">    String propname = filter.getFilterProp().getPrefix() + filter.getFilterProp().getIdentifier();</span>
+
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">    if (!filter.getFilterOp().equals(&quot;startswith&quot;)) {</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">      if (getRdfDataType(filter.getFilterProp().getIdentifier()) == null) {</span>
+
+<span class="fc" id="L44">        fullValue =</span>
+<span class="fc" id="L45">            &quot;str( ?&quot; + propname + &quot; ) &quot; + filter.getFilterOp() + &quot; str(\&quot;&quot;</span>
+<span class="fc" id="L46">                + filter.getFilterVal() + &quot;\&quot;)&quot;;</span>
+
+      } else {
+<span class="fc" id="L49">        type = getRdfDataType(filter.getFilterProp().getIdentifier());</span>
+<span class="fc" id="L50">        Literal filterLiteral = ResourceFactory.createTypedLiteral(</span>
+<span class="fc" id="L51">            filter.getFilterVal(),</span>
+            type);
+<span class="fc" id="L53">        String[] splittedLiteral = filterLiteral.toString().split(&quot;\\^\\^&quot;);</span>
+<span class="fc" id="L54">        fullValue = &quot;?&quot; + propname + &quot; &quot; + filter.getFilterOp() + &quot;\&quot;&quot;</span>
+            + splittedLiteral[0] + &quot;\&quot;^^&lt;&quot; + splittedLiteral[1] + &quot;&gt;&quot;;
+
+<span class="fc" id="L57">      }</span>
+    } else {
+<span class="nc" id="L59">      fullValue = &quot;STRSTARTS ( str( ?&quot;+filter.getFilterProp().getIdentifier()+&quot; ), \&quot;&quot;+filter.getFilterVal()+&quot;\&quot; )&quot;;</span>
+    }
+<span class="fc" id="L61">    return fullValue;</span>
+  }
+
+  /**
+   * &lt;p&gt; Generates all EntitiesQueries and Instance-Queries If you want to filter for sth filterOP
+   * MUST be != null If you want all Properties, the ResourceModel in Filter MUST BE null &lt;/p&gt; &lt;p&gt;
+   * LF0050 -&gt; filter.getProperty must be null &lt;br&gt; LF0051 -&gt; filterValue should be the Entity,
+   * dataType should be dbr &lt;br&gt; LF0060 -&gt; filterValue should be the class, dataType=class &lt;br&gt;
+   * LF0061 -&gt; filterValue should be empty (exept you want to filter for sth) &lt;br&gt; LF0062 -&gt;
+   * filterValue should be the Value for what you want to filter, e.g. &quot;1966-03-22&quot; &lt;br&gt; LF0063 -&gt;
+   * get the important Things &lt;br&gt; LF0070 -&gt; just combine 50 and 60 &lt;br&gt; &lt;/p&gt;
+   */
+
+  public Query getEntitiesQuery(EntityRequestModel model) {
+<span class="fc" id="L75">    ParameterizedSparqlString sparqlString = new ParameterizedSparqlString();</span>
+<span class="fc" id="L76">    ParameterizedSparqlString reqString = new ParameterizedSparqlString();</span>
+<span class="fc" id="L77">    ParameterizedSparqlString optionalString = new ParameterizedSparqlString();</span>
+<span class="fc" id="L78">    ParameterizedSparqlString reqFilterString = new ParameterizedSparqlString();</span>
+<span class="fc" id="L79">    ArrayList&lt;String&gt; returnvalues = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L81">    returnvalues.add(&quot;entities&quot;);</span>
+
+<span class="fc" id="L83">    setDefaultPrefixes(sparqlString);</span>
+<span class="fc" id="L84">    List&lt;Filter&gt; filterList = sortFilterSet(model.getFilterList());</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">    for (Filter filter : filterList) {</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">      if (filter.getFilterProp() != null) {</span>
+<span class="fc" id="L87">        sparqlString.setNsPrefix(filter.getFilterProp().getPrefix(),</span>
+<span class="fc" id="L88">            prefixMap.getNsPrefixURI(filter.getFilterProp().getPrefix()));</span>
+      }
+<span class="fc" id="L90">    }</span>
+
+<span class="fc" id="L92">    boolean filterInit = false;</span>
+<span class="fc" id="L93">    boolean reqOptionalLabel = false;</span>
+
+<span class="fc bfc" id="L95" title="All 2 branches covered.">    if (model.getClassName() != null) {</span>
+<span class="fc" id="L96">      reqString.append(&quot; ?entities rdf:type &lt;http://dbpedia.org/ontology/&quot; + model.getClassName() + &quot;&gt;.\n&quot;);</span>
+    }
+
+<span class="fc bfc" id="L99" title="All 2 branches covered.">    for (Filter filter : filterList) {</span>
+<span class="fc" id="L100">      String propname = &quot;&quot;;</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">      if (!(filter.getFilterProp() == null)) {</span>
+<span class="fc" id="L102">        propname =</span>
+<span class="fc" id="L103">            filter.getFilterProp().getPrefix() + filter.getFilterProp().getIdentifier();</span>
+      }
+
+<span class="pc bpc" id="L106" title="1 of 3 branches missed.">      switch (filter.getBool()) {</span>
+        case AND:
+<span class="fc" id="L108">          reqString.append(getTripleString(filter, returnvalues)+&quot;\n&quot;);</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">          if (filter.getFilterOp() != null) {</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">            if (filterInit) {</span>
+<span class="nc" id="L111">              reqFilterString.append(&quot;&amp;&amp; &quot; + getFullFilterstring(filter));</span>
+            } else {
+<span class="fc" id="L113">              reqFilterString.append(&quot;\nFILTER (&quot; + getFullFilterstring(filter));</span>
+<span class="fc" id="L114">              filterInit = true;</span>
+            }
+          }
+<span class="pc bpc" id="L117" title="7 of 8 branches missed.">          if (model.getStyle() == Style.NESTED &amp;&amp; (filter.getFilterVal() == null || (!(filter.getFilterVal()==null) &amp;&amp; !(filter.getFilterOp() == null)))) {</span>
+<span class="nc" id="L118">            optionalString.append(&quot;\nOPTIONAL {\n?&quot;+propname + &quot; rdfs:label ?&quot; + propname+&quot;Label.\nFILTER ( lang( ?&quot;+propname+&quot;Label ) = \&quot;en\&quot; )}&quot;);</span>
+<span class="nc" id="L119">            returnvalues.add(propname+&quot;Label&quot;);</span>
+          }
+          break;
+        case OR:
+<span class="fc" id="L123">          String sparqlOP = &quot;OPTIONAL&quot;;</span>
+<span class="fc" id="L124">          optionalString</span>
+<span class="fc" id="L125">              .append(sparqlOP + &quot; { &quot; + getTripleString(filter, returnvalues));</span>
+
+<span class="pc bpc" id="L127" title="5 of 8 branches missed.">          if (model.getStyle() == Style.NESTED &amp;&amp; (filter.getFilterVal() == null || (!(filter.getFilterVal()==null) &amp;&amp; !(filter.getFilterOp() == null)))) {</span>
+<span class="fc" id="L128">            optionalString.append(&quot;\nOPTIONAL {\n?&quot;+ propname + &quot; rdfs:label ?&quot; + propname+&quot;Label.\nFILTER ( lang( ?&quot;+propname+&quot;Label ) = \&quot;en\&quot; )}&quot;);</span>
+<span class="fc" id="L129">            returnvalues.add(propname+&quot;Label&quot;);</span>
+          }
+<span class="fc" id="L131">          optionalString.append(&quot;}&quot;);</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">          if (filter.getFilterOp() != null) {</span>
+<span class="fc" id="L133">            optionalString.append(&quot;\nFILTER ( &quot;+ &quot;bound(?&quot;+ propname+&quot;)=false || bound(?&quot;+ propname+</span>
+<span class="fc" id="L134">                &quot;)=true &amp;&amp;&quot;+getFullFilterstring(filter) + &quot; ) \n&quot;);</span>
+          }
+          break;
+      }
+<span class="fc" id="L138">    }</span>
+<span class="fc" id="L139">    sparqlString.setNsPrefix(&quot;dbr&quot;, prefixMap.getNsPrefixURI(&quot;dbr&quot;));</span>
+<span class="fc" id="L140">    sparqlString.setNsPrefix(&quot;dbo&quot;, prefixMap.getNsPrefixURI(&quot;dbo&quot;));</span>
+
+<span class="fc" id="L142">    sparqlString.append(queryHead(returnvalues));</span>
+<span class="fc" id="L143">    sparqlString.append(&quot; \n&quot;);</span>
+<span class="fc" id="L144">    sparqlString.append(reqString);</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">    if (filterInit) {</span>
+<span class="fc" id="L146">      reqFilterString.append(&quot; )\n &quot;);</span>
+<span class="fc" id="L147">      sparqlString.append(reqFilterString);</span>
+    }
+<span class="fc" id="L149">    sparqlString.append(optionalString);</span>
+
+<span class="fc" id="L151">    sparqlString.append(&quot; } &quot;);</span>
+
+<span class="fc" id="L153">    return QueryFactory.create(sparqlString.asQuery());</span>
+  }
+
+
+
+  /**
+   * Sorts the Filterset so that getEntitiesQuery() works properly
+   */
+
+  private List&lt;Filter&gt; sortFilterSet(Set&lt;Filter&gt; filterSet) {
+<span class="fc" id="L163">    ArrayList&lt;Filter&gt; sortedList = new ArrayList&lt;&gt;(filterSet);</span>
+<span class="fc" id="L164">    java.util.Collections.sort(sortedList);</span>
+<span class="fc" id="L165">    return sortedList;</span>
+  }
+
+  /**
+   * Returns the SPARQL-Triple from a Filter
+   * @param filter
+   * @param returnvalues
+   * @return
+   */
+  public String getTripleString(Filter filter, ArrayList&lt;String&gt; returnvalues) {
+    String result;
+
+<span class="fc bfc" id="L177" title="All 2 branches covered.">    if (filter.getFilterProp() == null) {</span>
+<span class="fc" id="L178">      result = &quot;?entities ?properties &lt;http://dbpedia.org/resource/&quot; + filter.getFilterVal() + &quot;&gt;.\n&quot;;</span>
+<span class="fc" id="L179">      returnvalues.add(&quot;properties&quot;);</span>
+
+    } else {
+<span class="fc bfc" id="L182" title="All 4 branches covered.">      if (filter.getFilterOp() == null &amp;&amp; filter.getFilterVal() != null) {</span>
+<span class="fc" id="L183">        result = &quot;\n?entities &quot; + filter.getFilterProp().toString() + &quot; &lt;http://dbpedia.org/resource/&quot; + filter</span>
+<span class="fc" id="L184">            .getFilterVal()</span>
+            + &quot;&gt;.&quot;;
+      } else {
+<span class="fc" id="L187">        String propname = filter.getFilterProp().getPrefix() + filter.getFilterProp().getIdentifier();</span>
+<span class="fc" id="L188">        result = &quot;?entities &quot; + getUnprefixedString(filter.getFilterProp()) + &quot; ?&quot; + propname + &quot;.&quot;;</span>
+<span class="fc" id="L189">        returnvalues.add(propname);</span>
+
+      }
+    }
+<span class="fc" id="L193">    return result;</span>
+  }
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

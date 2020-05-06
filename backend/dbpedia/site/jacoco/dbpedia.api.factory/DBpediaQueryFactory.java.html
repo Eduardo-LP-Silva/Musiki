@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DBpediaQueryFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.factory</a> &gt; <span class="el_source">DBpediaQueryFactory.java</span></div><h1>DBpediaQueryFactory.java</h1><pre class="source lang-java linenums">package dbpedia.api.factory;
+
+
+import dbpedia.api.model.Filter;
+import dbpedia.api.model.RequestModel;
+import dbpedia.api.model.RequestModel.Style;
+import dbpedia.api.model.ResourceModel;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.ontology.DatatypeProperty;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntResource;
+import org.apache.jena.query.ParameterizedSparqlString;
+import org.apache.jena.query.Query;
+import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.springframework.core.GenericTypeResolver;
+import org.springframework.stereotype.Component;
+
+@Component
+public abstract class DBpediaQueryFactory&lt;T extends RequestModel&gt; {
+
+  private final Class&lt;T&gt; genericType;
+  protected OntModel ontology;
+  protected ParameterizedSparqlString prefix;
+  protected final PrefixMappingImpl prefixMap;
+
+<span class="fc" id="L29">  public DBpediaQueryFactory(OntModel ontology, PrefixMappingImpl prefixMapping) {</span>
+<span class="fc" id="L30">    this.ontology = ontology;</span>
+    //this is needed because java cannot determine the class of a generic type at runtime
+    //only spring can do this
+<span class="fc" id="L33">    this.genericType = (Class&lt;T&gt;) GenericTypeResolver</span>
+<span class="fc" id="L34">        .resolveTypeArgument(getClass(), DBpediaQueryFactory.class);</span>
+<span class="fc" id="L35">    this.prefixMap = prefixMapping;</span>
+<span class="fc" id="L36">  }</span>
+
+  /**
+   * generates the &quot;SELECT ?a, ?b, ?c... WHERE {&quot; part
+   *
+   * @param returnValues The ?a, ?b, ?c... variables
+   * @return The correct Select statement and beginning of the &quot;where-clause&quot;as SparqlString
+   */
+
+  protected ParameterizedSparqlString queryHead(List&lt;String&gt; returnValues) {
+<span class="fc" id="L46">    return queryHead(new ParameterizedSparqlString(), returnValues);</span>
+  }
+
+  protected ParameterizedSparqlString queryHead(ParameterizedSparqlString builder,
+      List&lt;String&gt; returnValues) {
+<span class="fc" id="L51">    builder.append(&quot;SELECT distinct&quot;);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">    for (String value : returnValues) {</span>
+<span class="fc" id="L53">      builder.append(&quot; ?&quot; + value + &quot; &quot;);</span>
+<span class="fc" id="L54">    }</span>
+<span class="fc" id="L55">    builder.append(&quot;WHERE {&quot;);</span>
+<span class="fc" id="L56">    return builder;</span>
+  }
+
+  protected ParameterizedSparqlString queryShoulder(ParameterizedSparqlString shoulder,
+      List&lt;String&gt; entities) {
+<span class="nc" id="L61">    shoulder.append(&quot;VALUES ?entities {&quot;);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">    for (String entity : entities) {</span>
+<span class="nc" id="L63">      shoulder.append(&quot; &quot; + entity);</span>
+<span class="nc" id="L64">    }</span>
+<span class="nc" id="L65">    shoulder.append(&quot;}&quot;);</span>
+<span class="nc" id="L66">    return shoulder;</span>
+  }
+
+  /**
+   * looks in the ontology to get the range of a DatatypeProperty
+   **/
+  protected RDFDatatype getRdfDataType(String property) {
+<span class="fc" id="L73">    DatatypeProperty prop = ontology.getDatatypeProperty(&quot;http://dbpedia.org/ontology/&quot; + property);</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">    if (prop == null) {</span>
+<span class="fc" id="L75">      return null;</span>
+    } else {
+<span class="fc" id="L77">      OntResource range = prop.getRange();</span>
+<span class="fc" id="L78">      return NodeFactory.getType(range.toString());</span>
+    }
+  }
+
+  abstract public Query makeQuery(T model);
+
+  public Class&lt;T&gt; getGenericType() {
+<span class="nc" id="L85">    return genericType;</span>
+  }
+
+  /**
+   * Defines the prefixes which are needed in a lot of queries.
+   *
+   * @param sparqlString The main String which contains the prefix definition
+   */
+  protected final void setDefaultPrefixes(ParameterizedSparqlString sparqlString) {
+<span class="fc" id="L94">    sparqlString.setNsPrefix(&quot;rdfs&quot;, prefixMap.getNsPrefixURI(&quot;rdfs&quot;));</span>
+<span class="fc" id="L95">    sparqlString.setNsPrefix(&quot;rdf&quot;, prefixMap.getNsPrefixURI(&quot;rdf&quot;));</span>
+<span class="fc" id="L96">    sparqlString.setNsPrefix(&quot;dbo&quot;, prefixMap.getNsPrefixURI(&quot;dbo&quot;));</span>
+<span class="fc" id="L97">    sparqlString.setNsPrefix(&quot;dbr&quot;, prefixMap.getNsPrefixURI(&quot;dbr&quot;));</span>
+<span class="fc" id="L98">  }</span>
+
+  public PrefixMappingImpl getPrefixMap() {
+<span class="nc" id="L101">    return this.prefixMap;</span>
+  }
+
+  protected String getUnprefixedString (ResourceModel model){
+<span class="fc" id="L105">    return &quot;&lt;&quot;+prefixMap.getNsPrefixURI(model.getPrefix())+model.getIdentifier()+&quot;&gt;&quot;;</span>
+  }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

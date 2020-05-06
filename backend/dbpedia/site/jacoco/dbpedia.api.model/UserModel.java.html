@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.model</a> &gt; <span class="el_source">UserModel.java</span></div><h1>UserModel.java</h1><pre class="source lang-java linenums">package dbpedia.api.model;
+
+/**
+ * Class for displaying a User
+ */
+public class UserModel {
+
+  /**
+   * Quota limit per day
+   */
+  private int quotaDay;
+  /**
+   * Quota limit per hour
+   */
+  private int quotaHour;
+  /**
+   * Quota limit per minute
+   */
+  private int quotaMinute;
+  /**
+   * Type of User, USER or ADMIN
+   */
+<span class="fc" id="L23">  private userType type = userType.USER;</span>
+
+  /**
+   * Constructor
+   */
+  public UserModel(int startQuotaDay,
+      int startQuotaHour,
+<span class="fc" id="L30">      int startQuotaMinute) {</span>
+
+<span class="fc" id="L32">    this.quotaDay = startQuotaDay;</span>
+<span class="fc" id="L33">    this.quotaHour = startQuotaHour;</span>
+<span class="fc" id="L34">    this.quotaMinute = startQuotaMinute;</span>
+
+<span class="fc" id="L36">  }</span>
+
+  /**
+   * Getter for the Quota left for this day
+   *
+   * @return quota
+   */
+  public int getQuotaDay() {
+<span class="nc" id="L44">    return quotaDay;</span>
+  }
+
+  /**
+   * Getter for the Quota left this hour
+   *
+   * @return quotaHour
+   */
+  public int getQuotaHour() {
+<span class="nc" id="L53">    return quotaHour;</span>
+  }
+
+  /**
+   * Getter for the Quota left this minute
+   *
+   * @return quotaMinute
+   */
+  public int getQuotaMinute() {
+<span class="nc" id="L62">    return quotaMinute;</span>
+  }
+
+  /**
+   * Decreases the Quota left after a query
+   */
+  public void decrease() {
+<span class="nc" id="L69">    this.quotaDay = quotaDay - 1;</span>
+<span class="nc" id="L70">    this.quotaHour = quotaHour - 1;</span>
+<span class="nc" id="L71">    this.quotaMinute = quotaMinute - 1;</span>
+<span class="nc" id="L72">  }</span>
+
+  /**
+   * Getter for the userType
+   *
+   * @return type
+   */
+  public userType getUserType() {
+<span class="nc" id="L80">    return type;</span>
+  }
+
+  /**
+   * Setter for the userType, if the userType isn't the default-type
+   */
+  public void setUserType(userType type) {
+<span class="fc" id="L87">    this.type = type;</span>
+<span class="fc" id="L88">  }</span>
+
+  /**
+   * The possible userTypes
+   */
+<span class="fc" id="L93">  public enum userType {</span>
+<span class="fc" id="L94">    ADMIN, USER</span>
+  }
+
+  /**
+   * Method for Resetting the Qutoas per day
+   */
+  public void resetDay(int startQuotaDay) {
+<span class="nc" id="L101">    quotaDay = startQuotaDay;</span>
+<span class="nc" id="L102">  }</span>
+
+  /**
+   * Method for Resetting the Qutoas per hour
+   */
+  public void resetHour(int startQuotaHour) {
+<span class="nc" id="L108">    quotaHour = startQuotaHour;</span>
+<span class="nc" id="L109">  }</span>
+
+  /**
+   * Method for Resetting the Qutoas per minute
+   */
+  public void resetMinute(int startQuotaMinute) {
+<span class="nc" id="L115">    quotaMinute = startQuotaMinute;</span>
+<span class="nc" id="L116">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

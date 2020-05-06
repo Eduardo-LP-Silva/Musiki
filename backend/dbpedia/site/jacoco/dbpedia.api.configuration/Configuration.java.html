@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Configuration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.configuration</a> &gt; <span class="el_source">Configuration.java</span></div><h1>Configuration.java</h1><pre class="source lang-java linenums">package dbpedia.api.configuration;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dbpedia.api.factory.DBpediaQueryFactory;
+import dbpedia.api.model.ApiVersion;
+import dbpedia.api.model.RequestModel;
+import dbpedia.api.versioning.SemanticVersionSet;
+import dbpedia.api.versioning.VersionLoader;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.apache.commons.io.FileUtils;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+
+@org.springframework.context.annotation.Configuration
+@EnableCaching
+@Component
+<span class="fc" id="L38">public class Configuration {</span>
+
+<span class="fc" id="L40">  private static final Logger LOG = LogManager.getLogger(Configuration.class.getName());</span>
+
+  @Value(&quot;${ontology.file}&quot;)
+  private String ontologyFile;
+
+  @Value(&quot;${keys.file}&quot;)
+  private String apiKeyFile;
+
+  @Value(&quot;${window.maxWindowLimit}&quot;)
+  public int maxWindowLimit;
+
+  public int getMaxWindowLimit() {
+<span class="nc" id="L52">    return maxWindowLimit;</span>
+  }
+
+  public String getApiKeyFileName() {
+<span class="nc" id="L56">    return apiKeyFile;</span>
+  }
+
+
+  @Value(&quot;${keys.usingKeys}&quot;)
+  private boolean usingKeys;
+
+  @Bean()
+  public boolean getUsingKeys() {
+<span class="nc" id="L65">    return usingKeys;</span>
+  }
+
+  @Value(&quot;${prefixes.file}&quot;)
+  private String prefixesFile;
+
+  @Value(&quot;${versions.dir}&quot;)
+  private String versionsDir;
+
+  @Value(&quot;${keys.startQuotaDay}&quot;)
+  private int startQuotaDay;
+
+  @Bean(name = &quot;startQuotaDay&quot;)
+  public int getStartQuotaDay() {
+<span class="nc" id="L79">    return startQuotaDay;</span>
+  }
+
+  @Value(&quot;${keys.startQuotaHour}&quot;)
+  private int startQuotaHour;
+
+  @Bean(name = &quot;startQuotaHour&quot;)
+  public int getStartQuotaHour() {
+<span class="nc" id="L87">    return startQuotaHour;</span>
+  }
+
+  @Value(&quot;${keys.startQuotaMinute}&quot;)
+  private int startQuotaMinute;
+
+  @Value(&quot;${uri.path}&quot;)
+  private String uriPath;
+
+  @Value(&quot;${dbpedia.sparqlEndpoint}&quot;)
+  private String sparqlEndpoint;
+
+  @Bean(name = &quot;startQuotaMinute&quot;)
+  public int getStartQuotaMinute() {
+<span class="nc" id="L101">    return startQuotaMinute;</span>
+  }
+
+  public String getUriPath() {
+<span class="nc" id="L105">    return uriPath;</span>
+  }
+
+  public void setUriPath(String uriPath) {
+<span class="nc" id="L109">    this.uriPath = uriPath;</span>
+<span class="nc" id="L110">  }</span>
+
+  @Bean
+  public Map&lt;Class&lt;? extends RequestModel&gt;, DBpediaQueryFactory&gt; createFactoryMap(
+      List&lt;DBpediaQueryFactory&lt;?&gt;&gt; factories) {
+<span class="nc" id="L115">    Map&lt;Class&lt;? extends RequestModel&gt;, DBpediaQueryFactory&gt; ret = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">    for (DBpediaQueryFactory&lt;?&gt; f : factories) {</span>
+<span class="nc" id="L117">      ret.put(f.getGenericType(), f);</span>
+<span class="nc" id="L118">    }</span>
+<span class="nc" id="L119">    return ret;</span>
+  }
+
+  @Bean
+  public OntModel createOntModel() {
+<span class="nc" id="L124">    return createOntModel(ontologyFile);</span>
+  }
+
+  public static OntModel createOntModel(String filename) {
+<span class="fc" id="L128">    OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, null);</span>
+<span class="fc" id="L129">    InputStream in = null;</span>
+    try {
+<span class="fc" id="L131">      in = FileUtils.openInputStream(new File(filename));</span>
+<span class="nc" id="L132">    } catch (IOException e) {</span>
+<span class="nc" id="L133">      LOG.error(&quot;Cannot open the ontology file &quot; + filename, e.getMessage());</span>
+<span class="fc" id="L134">    }</span>
+    try {
+<span class="fc" id="L136">      model.read(in, null);</span>
+<span class="fc" id="L137">      LOG.info(&quot;Ontology &quot; + filename + &quot; loaded.&quot;);</span>
+<span class="nc" id="L138">    } catch (Exception e) {</span>
+<span class="nc" id="L139">      LOG.error(&quot;Error when loading Ontology file &quot; + filename);</span>
+<span class="nc" id="L140">      throw e;</span>
+<span class="fc" id="L141">    }</span>
+
+<span class="fc" id="L143">    return model;</span>
+  }
+
+  @Bean
+  public SemanticVersionSet&lt;ApiVersion&gt; loadVersions() throws IOException {
+<span class="nc" id="L148">    VersionLoader loader = new VersionLoader();</span>
+<span class="nc" id="L149">    return loader.loadFromDirectory(new File(versionsDir));</span>
+  }
+
+  @Bean
+  public Set loadApiKeys() {
+<span class="nc" id="L154">    return loadApiKeys(apiKeyFile);</span>
+  }
+
+  @Bean
+  public PrefixMappingImpl createPrefixMapping() throws IOException {
+<span class="nc" id="L159">    return loadPrefixMapping(prefixesFile);</span>
+  }
+
+  /**
+   * Reads the prefix mapping file, creates a PrefixMappingImpl from it and locks it
+   */
+  public static PrefixMappingImpl loadPrefixMapping(String path) throws IOException {
+    try {
+<span class="fc" id="L167">      HashMap&lt;?, ?&gt; map = new ObjectMapper().readValue(new File(path), HashMap.class);</span>
+      //prefMap = map;
+<span class="fc" id="L169">      PrefixMappingImpl prefixMapping = new PrefixMappingImpl();</span>
+<span class="fc" id="L170">      prefixMapping.setNsPrefixes((Map&lt;String, String&gt;) map);</span>
+<span class="fc" id="L171">      prefixMapping.lock();</span>
+<span class="fc" id="L172">      LOG.info(&quot;Prefix mapping loaded from file &quot; + path + &quot;.&quot;);</span>
+<span class="fc" id="L173">      return prefixMapping;</span>
+<span class="nc" id="L174">    } catch (IOException e) {</span>
+<span class="nc" id="L175">      LOG.error(&quot;Error while loading the prefixes from &quot; + path);</span>
+<span class="nc" id="L176">      throw e;</span>
+    }
+  }
+
+  public static Set loadApiKeys(String filename) {
+<span class="fc" id="L181">    Set&lt;String&gt; apiKeyList = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L182">    try (FileReader filereader = new FileReader(filename);</span>
+<span class="fc" id="L183">        BufferedReader bufferedReader = new BufferedReader(filereader)) {</span>
+      String line;
+<span class="fc bfc" id="L185" title="All 2 branches covered.">      while ((line = bufferedReader.readLine()) != null) {</span>
+<span class="fc" id="L186">        apiKeyList.add(line);</span>
+      }
+<span class="fc" id="L188">      LOG.info(&quot;ApikeyList &quot; + filename + &quot; loaded.&quot;);</span>
+
+<span class="nc" id="L190">    } catch (FileNotFoundException fnfEx) {</span>
+<span class="nc" id="L191">      LOG.error(&quot;File &quot; + filename + &quot; not found.\n&quot; + fnfEx);</span>
+<span class="nc" id="L192">    } catch (IOException ioEx) {</span>
+<span class="nc" id="L193">      LOG.error(&quot;Error when loading Apikeys File &quot; + filename + &quot;\n&quot; + ioEx);</span>
+<span class="pc" id="L194">    }</span>
+<span class="fc" id="L195">    return apiKeyList;</span>
+  }
+
+
+  public String getSparqlEndpoint() {
+<span class="nc" id="L200">    return sparqlEndpoint;</span>
+  }
+
+
+  @Value(&quot;${mappedProperties}&quot;)
+  public String mappedProperties;
+
+  @Bean(name = &quot;rml&quot;)
+  public Map&lt;String, List&lt;String&gt;&gt; getMappedProperties()
+      throws IOException {
+<span class="nc" id="L210">    return loadMappedProperties(mappedProperties);</span>
+  }
+
+  public static Map&lt;String, List&lt;String&gt;&gt; loadMappedProperties(String fileName)
+      throws IOException {
+<span class="nc" id="L215">    JsonNode root = null;</span>
+    List&lt;JsonNode&gt; nodeList;
+<span class="nc" id="L217">    Map&lt;String, List&lt;String&gt;&gt; map = new HashMap&lt;&gt;();</span>
+    String instance;
+    List&lt;String&gt; set;
+<span class="nc" id="L220">    root = new ObjectMapper().readTree(new File(fileName));</span>
+<span class="nc" id="L221">    Iterator&lt;JsonNode&gt; it = root.elements();</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">    while (it.hasNext()) {</span>
+      String[] s;
+      String shortInstance;
+<span class="nc" id="L225">      set = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L226">      JsonNode node = it.next();</span>
+<span class="nc" id="L227">      instance = node.get(&quot;@id&quot;).asText();</span>
+<span class="nc" id="L228">      s = instance.split(&quot;:&quot;);</span>
+<span class="nc" id="L229">      shortInstance = s[1];</span>
+<span class="nc" id="L230">      nodeList = node.findValues(&quot;@id&quot;);</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">      for (JsonNode o : nodeList) {</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        if (!(o.asText().equals(instance))) {</span>
+<span class="nc" id="L233">          set.add(o.asText());</span>
+        }
+<span class="nc" id="L235">      }</span>
+<span class="nc" id="L236">      map.put(shortInstance, set);</span>
+<span class="nc" id="L237">    }</span>
+<span class="nc" id="L238">    return map;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

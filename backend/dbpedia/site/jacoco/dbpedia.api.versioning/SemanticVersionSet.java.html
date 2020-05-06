@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SemanticVersionSet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">dbpedia-api</a> &gt; <a href="index.source.html" class="el_package">dbpedia.api.versioning</a> &gt; <span class="el_source">SemanticVersionSet.java</span></div><h1>SemanticVersionSet.java</h1><pre class="source lang-java linenums">package dbpedia.api.versioning;
+
+import dbpedia.api.model.AbstractSemanticVersion;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * A set of versions. Use the SemanticVersionSet.Builder to build it.
+ */
+public class SemanticVersionSet&lt;V extends AbstractSemanticVersion&gt; {
+
+  /**
+   * Ascending-ordered List of all versions
+   */
+<span class="fc" id="L19">  private List&lt;V&gt; versions = new ArrayList&lt;&gt;();</span>
+
+  /**
+   * maps the versions to its semantic version names this map is used for a quick lookup of the
+   * versions
+   */
+<span class="fc" id="L25">  private Map&lt;String, V&gt; lookupMap = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L27">  private SemanticVersionSet() {</span>
+<span class="fc" id="L28">  } //used by the Builder</span>
+
+  /**
+   * returns the most recent version (highest major, major and patch)
+   */
+  public V getLatest() {
+<span class="fc" id="L34">    return lastItemOfList(versions);</span>
+  }
+
+  /**
+   * Creates an iterable which iterates all versions from an old version to the latest The iterator
+   * increases first the patch version and then the minor version The iterator will also increase
+   * the major versions, so the version returned by next() must not necessarily be compatible to the
+   * old version
+   */
+  public Iterable&lt;V&gt; iterateToLatest(AbstractSemanticVersion oldVersion) {
+<span class="fc" id="L44">    Iterator&lt;V&gt; listIterator = versions.iterator();</span>
+
+    //forward to oldVerison
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">    while (listIterator.hasNext()) {</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">      if (listIterator.next().compareTo(oldVersion) == 0) {</span>
+<span class="fc" id="L49">        break;</span>
+      }
+    }
+<span class="fc" id="L52">    return () -&gt; listIterator;</span>
+  }
+
+  /**
+   * gets a version by its version number
+   *
+   * @throws VersionNotFoundException If the version is not found
+   */
+  public V get(int major, int minor, int patch) throws VersionNotFoundException {
+<span class="fc" id="L61">    V result = lookupMap</span>
+<span class="fc" id="L62">        .get(AbstractSemanticVersion.createSemanticVersioningString(major, minor, patch));</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">    if (result == null) {</span>
+<span class="fc" id="L64">      throw new VersionNotFoundException();</span>
+    }
+<span class="fc" id="L66">    return result;</span>
+  }
+
+  /**
+   * Checks if a version number exists in this set
+   */
+  public boolean contains(int major, int minor, int patch) {
+<span class="fc" id="L73">    String versionName = AbstractSemanticVersion</span>
+<span class="fc" id="L74">        .createSemanticVersioningString(major, minor, patch);</span>
+<span class="fc" id="L75">    return lookupMap.containsKey(versionName);</span>
+  }
+
+  /**
+   * @return the number of all versions in this set
+   */
+  public int size() {
+<span class="nc" id="L82">    return versions.size();</span>
+  }
+
+
+<span class="fc" id="L86">  public static class Builder&lt;V extends AbstractSemanticVersion&gt; {</span>
+
+<span class="fc" id="L88">    SemanticVersionSet&lt;V&gt; instance = new SemanticVersionSet&lt;&gt;();</span>
+
+    public Builder&lt;V&gt; add(V version) {
+<span class="fc" id="L91">      instance.versions.add(version);</span>
+<span class="fc" id="L92">      instance.lookupMap.put(version.getSemanticVersioningString(), version);</span>
+<span class="fc" id="L93">      return this;</span>
+    }
+
+    /**
+     * Sorts the version lists by their version number and returns the instance
+     */
+    public SemanticVersionSet&lt;V&gt; build() {
+<span class="fc" id="L100">      Collections.sort(instance.versions);</span>
+<span class="fc" id="L101">      return instance;</span>
+    }
+
+  }
+
+  /**
+   * Utility method that returns the last item of a list (or null if the list is null or has size
+   * 0)
+   */
+  private static &lt;T&gt; T lastItemOfList(List&lt;T&gt; list) {
+<span class="pc bpc" id="L111" title="2 of 4 branches missed.">    if (list == null || list.size() == 0) {</span>
+<span class="nc" id="L112">      return null;</span>
+    }
+<span class="fc" id="L114">    return list.get(list.size() - 1);</span>
+  }
+
+  public List&lt;V&gt; getAsList() {
+<span class="nc" id="L118">    return Collections.unmodifiableList(this.versions);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

@@ -1,0 +1,9 @@
+ValueRequestQueryFactoryTest.class
+StupidHttpServletRequestMock.class
+RequestHandlerImplementationTest.class
+EntityRequestQueryFactoryTest.class
+ModelTests.class
+VersioningTest.class
+APIKeyHandlerTest.class
+TestUtils.class
+LogDataModelTest.class
