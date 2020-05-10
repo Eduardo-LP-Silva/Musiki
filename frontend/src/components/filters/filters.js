@@ -18,7 +18,7 @@ class Filters extends Component {
                 <span>Search Filters</span>
                 <label className="filter-container">
                     Albuns
-                    <input id="albuns" name="filter" type="checkbox" value="albuns"/>
+                    <input id="albuns" name="filter" type="checkbox" value="albuns" onClick={(event) => this.props.callback(event.target)}/>
                     <span className="filter-btn"></span>
                 </label>
                 <div className="filter-vertical-div"></div>

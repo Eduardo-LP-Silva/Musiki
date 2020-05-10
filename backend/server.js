@@ -12,7 +12,7 @@ const server = app.listen(process.env.PORT || 8080, () => {
 
 dbpedia.start();
 
-setTimeout(() => { dbpedia.values("Metallica", []); }, 5000);
+// setTimeout(() => { dbpedia.values("Metallica", []); }, 5000);
 
-setTimeout(() => { dbpedia.entities("Metallica,dbo:artist ", [], []); }, 5000);
+setTimeout(() => { dbpedia.entities("Metallica,dbo:artist ", [], []); }, 7000);
 

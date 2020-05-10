@@ -10,7 +10,7 @@ class Settings extends Component {
         super(props);
 
         this.state = {
-          maxBranches: 10  
+          maxBranches: 10
         };
 
         this.setMaxBranches = this.setMaxBranches.bind(this);
@@ -19,7 +19,7 @@ class Settings extends Component {
     render() {
         return (
             <Form id="settings" style={{opacity: this.props.opacity}}>
-                <Filters/>
+                <Filters callback={this.props.callback}/>
                 <Form.Group style={{marginTop: "1.5em"}}>
                     <Form.Label style={{fontWeight: "bold"}}>
                         Maximum Branch Number
