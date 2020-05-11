@@ -24,7 +24,8 @@ class App extends Component {
       <div id="content">
         <Navbar/>
         <FontAwesomeIcon id="settings-icon" icon={faCog} onClick={this.toggleSettings}/>
-        <Settings opacity={this.state.settings}/>
+        <Settings opacity={this.state.settings} callback={this.addGraphNode}/>
+        <Graph graphData={this.state.graphData}/>
       </div>
     );
   }
