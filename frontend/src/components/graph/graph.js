@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {ForceGraph2D} from 'react-force-graph'
+import { ForceGraph2D } from 'react-force-graph'
 import './graph.css'
 
 class Graph extends Component {
@@ -7,8 +7,6 @@ class Graph extends Component {
         super(props);
     }
 
-  
-    
     render() {
         return (
                   <ForceGraph2D

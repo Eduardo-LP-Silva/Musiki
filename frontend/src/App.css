@@ -2,7 +2,7 @@
 
 html, body, #root {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   background: rgb(66,167,245);
   background: linear-gradient(180deg, #42a7f5, #8442f5);
   background-size: 400% 400%;
