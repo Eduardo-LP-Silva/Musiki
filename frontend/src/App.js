@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Container, Row, Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import Navbar from './components/navbar/navbar';
@@ -24,8 +25,14 @@ class App extends Component {
       <div id="content">
         <Navbar/>
         <FontAwesomeIcon id="settings-icon" icon={faCog} onClick={this.toggleSettings}/>
-        <Settings opacity={this.state.settings} callback={this.addGraphNode}/>
-        <Graph graphData={this.state.graphData}/>
+        <Row>
+          <Col md={2} >
+          <Settings opacity={this.state.settings} callback={this.addGraphNode}/>
+          </Col>
+          <Col md={10} className="justify-content-center">
+          <Graph graphData={this.state.graphData}/>
+          </Col>
+        </Row>
       </div>
     );
   }

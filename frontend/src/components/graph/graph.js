@@ -21,7 +21,7 @@ class Graph extends Component {
           
                       ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
                       ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
-          
+
                       ctx.textAlign = 'center';
                       ctx.textBaseline = 'middle';
                       ctx.fillStyle = node.color;
