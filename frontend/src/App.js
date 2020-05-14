@@ -14,20 +14,28 @@ class App extends Component {
 
     this.state = {
       settings: 0,
-      graphData: {nodes: nodes, links: links}
+      graphData: {nodes: nodes, links: links},
+      selectedNode: {}
     };
 
     this.toggleSettings = this.toggleSettings.bind(this);
+    this.setSelectedNode = this.setSelectedNode.bind(this);
   }
 
   render() {
     return (
       <div id="content">
-        <Navbar/>
-        <FontAwesomeIcon id="settings-icon" icon={faCog} onClick={this.toggleSettings}/>
+        <Navbar setSelectedNode={this.setSelectedNode} search={this.search}/>
+        {this.state.selectedNode.hasOwnProperty('type') ? 
+          <FontAwesomeIcon id="settings-icon" icon={faCog} onClick={this.toggleSettings}/>
+          : ''}
         <Row>
           <Col md={2} >
-          <Settings opacity={this.state.settings} callback={this.addGraphNode}/>
+          <Settings 
+            selectedNodeType={this.state.selectedNode.type} 
+            opacity={this.state.settings} 
+            callback={this.addGraphNode}
+          />
           </Col>
           <Col md={10} className="justify-content-center">
           <Graph graphData={this.state.graphData}/>
@@ -41,6 +49,14 @@ class App extends Component {
     // TODO:
     console.log(foobar);
 
+  }
+
+  setSelectedNode(node) {
+    this.setState({selectedNode: node});
+  }
+
+  search(searchString) {
+    console.log(searchString);
   }
 
   toggleSettings() {

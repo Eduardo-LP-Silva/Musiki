@@ -1,11 +1,10 @@
 const express = require('express');
 const path = require('path');
 const app = express();
+const dbpedia = require('./dbpedia/dbpedia');
 
 if (require('dotenv').config().error != undefined)
 	console.log("Failed to read .env!");
-
-const dbpedia = require('./dbpedia/dbpedia');
 
 app.use(express.static(path.join(__dirname, 'build')));
 
@@ -14,6 +13,14 @@ const server = app.listen(process.env.PORT || 8080, () => {
 });
 
 dbpedia.start();
+
+app.get('/search/:selectedNodeType/:searchString', function (req, res) {
+    switch(req.params.selectedNodeType) {
+        case "artist":
+            
+            break;
+    }
+});
 
 // setTimeout(() => { dbpedia.values("Metallica", []); }, 5000);
 

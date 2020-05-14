@@ -38,6 +38,10 @@
     width: 6%;
 }
 
+#search-bar > .search-icon:hover {
+    cursor: pointer;
+}
+
 #search-bar > input {
     border: none;
     font-family: inherit;
