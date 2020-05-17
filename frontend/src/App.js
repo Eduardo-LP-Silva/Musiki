@@ -9,6 +9,8 @@ import {nodes, links} from './components/graph/miserables.json';
 import { env } from './environments/env';
 import './App.css';
 
+const axios = require('axios');
+
 class App extends Component {
   constructor(props) {
 	 super(props);
@@ -61,30 +63,20 @@ class App extends Component {
   addGraphNode(foobar) {
 	 // TODO:
 	 console.log(foobar);
-
   }
 
 	search(searchString) {
-		console.log(searchString);
-
-		if(this.state.selectedNode.hasOwnProperty('type')) {
-			fetch(`${env.API_URL}/search/`, {
-				method: 'POST', // *GET, POST, PUT, DELETE, etc.
-				headers: {
-				  'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-				},
-				body: this.searchParams({
-					search_string: searchString,
-					node_type: this.state.selectedNode.type
-				}) // body data type must match "Content-Type" header
-			})
-			.then(response => response.json())
-			.then(data => {
-				console.log(data); // JSON data parsed by `response.json()` call
-			 }); 
-		}
-		else
-		console.log('No node / search bar selected');
+    axios.post(`${env.API_URL}/search`, {
+      searchStr: searchString,
+      nodeType: this.state.selectedNode.type,
+      nodeName: this.state.selectedNode.name,
+      filters: this.state.nodeFilters.get(this.state.selectedNode.name)
+    })
+    .then((response) => {
+      console.log(response);
+    }, (error) => {
+      console.log(error);
+    })
 	}
 
 	searchParams(params) {

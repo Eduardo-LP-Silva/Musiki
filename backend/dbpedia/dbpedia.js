@@ -92,6 +92,21 @@ exports.entities = function entities(value, filter, ofilter) {
 
 }
 
+exports.formatFilters = function(filters) {
+	const newFilters = [];
+
+    for (filter in filters)
+        switch (filter) {
+            case 'artist':
+                newFilters.push('dbo:artist');
+                break;
+
+            default:
+                break;
+        }
+
+    return newFilters;
+}
 
 function addGenericParameters(originalLink) {
 
