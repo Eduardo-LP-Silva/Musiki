@@ -45,6 +45,8 @@ class App extends Component {
             selectedNodeType={this.state.selectedNode.type} 
             opacity={this.state.settings} 
             callback={this.addGraphNode}
+            addFilter={this.addNodeFilter}
+            removeFilter={this.removeNodeFilter}
           />
           </Col>
           <Col md={10} className="justify-content-center">
@@ -97,6 +99,7 @@ class App extends Component {
       filters.set(this.state.selectedNode.name, [filter]);
 
     this.setState({nodeFilters: filters});
+    console.log(this.state.nodeFilters);
   }
 
   removeNodeFilter(filter) {
@@ -115,6 +118,7 @@ class App extends Component {
     } 
     else
       console.log(`The selected node ${this.state.selectedNode.name} doesn't have any filters active!`);
+      console.log(this.state.nodeFilters);
   }
 
   setSelectedNodeFilters(filters) {

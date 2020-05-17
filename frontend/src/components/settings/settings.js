@@ -16,6 +16,7 @@ class Settings extends Component {
         this.setMaxBranches = this.setMaxBranches.bind(this);
         this.setFilters = this.setFilters.bind(this);
         this.renderFilters = this.renderFilters.bind(this);
+        this.changeFilter = this.changeFilter.bind(this);
     }
 
     render() {
@@ -76,7 +77,7 @@ class Settings extends Component {
             filters.push(
                 <label className="filter-container" key={this.state.filters[i]}>
                     {filter}
-                    <input id={filter} name={filter} type="checkbox" value={filter} />
+                    <input id={filter} name={filter} type="checkbox" value={filter} onChange={this.changeFilter} />
                     <span className="filter-btn"></span>
                 </label>
             );
@@ -86,6 +87,13 @@ class Settings extends Component {
         }
 
         return filters;
+    }
+
+    changeFilter(event) {
+        if(event.target.checked === true)
+            this.props.addFilter(event.target.name);
+        else
+            this.props.removeFilter(event.target.name);
     }
 
     setMaxBranches(event) {
