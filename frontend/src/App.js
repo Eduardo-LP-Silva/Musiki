@@ -11,122 +11,138 @@ import './App.css';
 
 class App extends Component {
   constructor(props) {
-    super(props);
+	 super(props);
 
-    this.state = {
-      settings: 0,
-      graphData: {nodes: nodes, links: links},
-      selectedNode: {type: "", name: ""}, //type, name
-      nodeFilters: new Map()
-    };
+	 this.state = {
+		settings: 0,
+		graphData: {nodes: nodes, links: links},
+		selectedNode: {type: "", name: ""}, //type, name
+		nodeFilters: new Map()
+	 };
 
-    this.toggleSettings = this.toggleSettings.bind(this);
-    this.setSelectedNode = this.setSelectedNode.bind(this);
-    this.addNodeFilter = this.addNodeFilter.bind(this);
-    this.removeNodeFilter = this.removeNodeFilter.bind(this);
-    this.search = this.search.bind(this);
+	 this.toggleSettings = this.toggleSettings.bind(this);
+	 this.setSelectedNode = this.setSelectedNode.bind(this);
+	 this.addNodeFilter = this.addNodeFilter.bind(this);
+	 this.removeNodeFilter = this.removeNodeFilter.bind(this);
+	 this.search = this.search.bind(this);
   }
 
   render() {
-    return (
-      <div id="content">
-        <Navbar 
-          setSelectedNode={this.setSelectedNode} 
-          search={this.search} 
-          selectedNode={this.state.selectedNode}
-          nodeFilters={this.state.nodeFilters}
-          setNodeFilters={this.removeNodeFilter}/>
-        {this.state.selectedNode.hasOwnProperty('type') ? 
-          <FontAwesomeIcon id="settings-icon" icon={faCog} onClick={this.toggleSettings}/>
-          : ''}
-        <Row>
-          <Col md={2} >
-          <Settings 
-            selectedNodeType={this.state.selectedNode.type} 
-            opacity={this.state.settings} 
-            callback={this.addGraphNode}
-          />
-          </Col>
-          <Col md={10} className="justify-content-center">
-          <Graph graphData={this.state.graphData}/>
-          </Col>
-        </Row>
-      </div>
-    );
+	 return (
+		<div id="content">
+		  <Navbar 
+			 setSelectedNode={this.setSelectedNode} 
+			 search={this.search} 
+			 selectedNode={this.state.selectedNode}
+			 nodeFilters={this.state.nodeFilters}
+			 setNodeFilters={this.removeNodeFilter}/>
+		  {this.state.selectedNode.hasOwnProperty('type') ? 
+			 <FontAwesomeIcon id="settings-icon" icon={faCog} onClick={this.toggleSettings}/>
+			 : ''}
+		  <Row>
+			 <Col md={2} >
+			 <Settings 
+				selectedNodeType={this.state.selectedNode.type} 
+				opacity={this.state.settings} 
+				callback={this.addGraphNode}
+			 />
+			 </Col>
+			 <Col md={10} className="justify-content-center">
+			 <Graph graphData={this.state.graphData}/>
+			 </Col>
+		  </Row>
+		</div>
+	 );
   }
 
   addGraphNode(foobar) {
-    // TODO:
-    console.log(foobar);
+	 // TODO:
+	 console.log(foobar);
 
   }
 
-  search(searchString) {
-    console.log(searchString);
+	search(searchString) {
+		console.log(searchString);
 
-    if(this.state.selectedNode.hasOwnProperty('type'))
-      fetch(`${env.API_URL}/search/${this.state.selectedNode.type}/${searchString}`)
-        .then(res => res.json())
-        .then((result) => {
-          console.log(result);
-        });
-    else
-      console.log('No node / search bar selected');
-  }
+		if(this.state.selectedNode.hasOwnProperty('type')) {
+			fetch(`${env.API_URL}/search/`, {
+				method: 'POST', // *GET, POST, PUT, DELETE, etc.
+				headers: {
+				  'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+				},
+				body: this.searchParams({
+					search_string: searchString,
+					node_type: this.state.selectedNode.type
+				}) // body data type must match "Content-Type" header
+			})
+			.then(response => response.json())
+			.then(data => {
+				console.log(data); // JSON data parsed by `response.json()` call
+			 }); 
+		}
+		else
+		console.log('No node / search bar selected');
+	}
+
+	searchParams(params) {
+		return Object.keys(params).map((key) => {
+			return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+		 }).join('&');
+	}
 
   setSelectedNode(node) {
-    this.setState({selectedNode: node});
+	 this.setState({selectedNode: node});
   }
 
   addNodeFilter(filter) {
-    const filters = this.state.nodeFilters;
+	 const filters = this.state.nodeFilters;
 
-    if(filters.has(this.state.selectedNode.name)) {
-      const selectedFilters = filters.get(this.state.selectedNode.name);
+	 if(filters.has(this.state.selectedNode.name)) {
+		const selectedFilters = filters.get(this.state.selectedNode.name);
 
-      if(!selectedFilters.includes(filter)) {
-        selectedFilters.push(filter);
-        filters.set(this.state.selectedNode.name, selectedFilters);
-      }
-      else {
-        console.log(`The selected node ${this.state.selectedNode.name} already has ${filter} filter active!`);
-        return;
-      }
-    } 
-    else
-      filters.set(this.state.selectedNode.name, [filter]);
+		if(!selectedFilters.includes(filter)) {
+		  selectedFilters.push(filter);
+		  filters.set(this.state.selectedNode.name, selectedFilters);
+		}
+		else {
+		  console.log(`The selected node ${this.state.selectedNode.name} already has ${filter} filter active!`);
+		  return;
+		}
+	 } 
+	 else
+		filters.set(this.state.selectedNode.name, [filter]);
 
-    this.setState({nodeFilters: filters});
+	 this.setState({nodeFilters: filters});
   }
 
   removeNodeFilter(filter) {
-    const filters = this.state.nodeFilters;
+	 const filters = this.state.nodeFilters;
 
-    if(filters.has(this.state.selectedNode.name)) {
-      let selectedFilters = filters.get(this.state.selectedNode.name);
+	 if(filters.has(this.state.selectedNode.name)) {
+		let selectedFilters = filters.get(this.state.selectedNode.name);
 
-      if(selectedFilters.includes(filter)) {
-        selectedFilters = selectedFilters.filter(f => f !== filter);
-        filters.set(this.state.selectedNode.name, selectedFilters);
-        this.setState({nodeFilters: filters});
-      }
-      else
-        console.log(`The selected node ${this.state.selectedNode.name} doesn't have ${filter} filter active!`);
-    } 
-    else
-      console.log(`The selected node ${this.state.selectedNode.name} doesn't have any filters active!`);
+		if(selectedFilters.includes(filter)) {
+		  selectedFilters = selectedFilters.filter(f => f !== filter);
+		  filters.set(this.state.selectedNode.name, selectedFilters);
+		  this.setState({nodeFilters: filters});
+		}
+		else
+		  console.log(`The selected node ${this.state.selectedNode.name} doesn't have ${filter} filter active!`);
+	 } 
+	 else
+		console.log(`The selected node ${this.state.selectedNode.name} doesn't have any filters active!`);
   }
 
   setSelectedNodeFilters(filters) {
-    const sn = this.state.selectedNode;
-    
-    sn.filters = filters;
+	 const sn = this.state.selectedNode;
+	 
+	 sn.filters = filters;
 
-    this.setState({selectedNode: sn});
+	 this.setState({selectedNode: sn});
   }
 
   toggleSettings() {
-    this.setState({settings: 1 - this.state.settings});
+	 this.setState({settings: 1 - this.state.settings});
   }
 }
 

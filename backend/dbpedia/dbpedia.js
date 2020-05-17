@@ -22,7 +22,7 @@ exports.start = function start() {
 	});
 
 	dbpediaAPI.stdout.on('data', function (data) {
-		console.log('dbpedia: ' + data.toString());
+		// console.log('dbpedia: ' + data.toString());
 	});
 
 	dbpediaAPI.stderr.on('data', function (data) {
