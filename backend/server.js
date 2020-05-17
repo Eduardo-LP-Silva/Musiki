@@ -14,10 +14,15 @@ const server = app.listen(process.env.PORT || 8080, () => {
 
 dbpedia.start();
 
+//Req = {search_string, node_type, node_name, filters}
+app.post('/search', function(req, res) {
+
+});
+
 app.get('/search/:selectedNodeType/:searchString', function (req, res) {
     switch(req.params.selectedNodeType) {
         case "artist":
-            
+            res.send(dbpedia.values(req.params.searchString, 'dbo:artist'));
             break;
     }
 });

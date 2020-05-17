@@ -5,7 +5,8 @@ import { faCog } from '@fortawesome/free-solid-svg-icons';
 import Navbar from './components/navbar/navbar';
 import Settings from './components/settings/settings';
 import Graph from './components/graph/graph';
-import {nodes, links} from './components/graph/miserables.json'
+import {nodes, links} from './components/graph/miserables.json';
+import { env } from './environments/env';
 import './App.css';
 
 class App extends Component {
@@ -15,17 +16,26 @@ class App extends Component {
     this.state = {
       settings: 0,
       graphData: {nodes: nodes, links: links},
-      selectedNode: {}
+      selectedNode: {type: "", name: ""}, //type, name
+      nodeFilters: new Map()
     };
 
     this.toggleSettings = this.toggleSettings.bind(this);
     this.setSelectedNode = this.setSelectedNode.bind(this);
+    this.addNodeFilter = this.addNodeFilter.bind(this);
+    this.removeNodeFilter = this.removeNodeFilter.bind(this);
+    this.search = this.search.bind(this);
   }
 
   render() {
     return (
       <div id="content">
-        <Navbar setSelectedNode={this.setSelectedNode} search={this.search}/>
+        <Navbar 
+          setSelectedNode={this.setSelectedNode} 
+          search={this.search} 
+          selectedNode={this.state.selectedNode}
+          nodeFilters={this.state.nodeFilters}
+          setNodeFilters={this.removeNodeFilter}/>
         {this.state.selectedNode.hasOwnProperty('type') ? 
           <FontAwesomeIcon id="settings-icon" icon={faCog} onClick={this.toggleSettings}/>
           : ''}
@@ -51,12 +61,68 @@ class App extends Component {
 
   }
 
+  search(searchString) {
+    console.log(searchString);
+
+    if(this.state.selectedNode.hasOwnProperty('type'))
+      fetch(`${env.API_URL}/search/${this.state.selectedNode.type}/${searchString}`)
+        .then(res => res.json())
+        .then((result) => {
+          console.log(result);
+        });
+    else
+      console.log('No node / search bar selected');
+  }
+
   setSelectedNode(node) {
     this.setState({selectedNode: node});
   }
 
-  search(searchString) {
-    console.log(searchString);
+  addNodeFilter(filter) {
+    const filters = this.state.nodeFilters;
+
+    if(filters.has(this.state.selectedNode.name)) {
+      const selectedFilters = filters.get(this.state.selectedNode.name);
+
+      if(!selectedFilters.includes(filter)) {
+        selectedFilters.push(filter);
+        filters.set(this.state.selectedNode.name, selectedFilters);
+      }
+      else {
+        console.log(`The selected node ${this.state.selectedNode.name} already has ${filter} filter active!`);
+        return;
+      }
+    } 
+    else
+      filters.set(this.state.selectedNode.name, [filter]);
+
+    this.setState({nodeFilters: filters});
+  }
+
+  removeNodeFilter(filter) {
+    const filters = this.state.nodeFilters;
+
+    if(filters.has(this.state.selectedNode.name)) {
+      let selectedFilters = filters.get(this.state.selectedNode.name);
+
+      if(selectedFilters.includes(filter)) {
+        selectedFilters = selectedFilters.filter(f => f !== filter);
+        filters.set(this.state.selectedNode.name, selectedFilters);
+        this.setState({nodeFilters: filters});
+      }
+      else
+        console.log(`The selected node ${this.state.selectedNode.name} doesn't have ${filter} filter active!`);
+    } 
+    else
+      console.log(`The selected node ${this.state.selectedNode.name} doesn't have any filters active!`);
+  }
+
+  setSelectedNodeFilters(filters) {
+    const sn = this.state.selectedNode;
+    
+    sn.filters = filters;
+
+    this.setState({selectedNode: sn});
   }
 
   toggleSettings() {
