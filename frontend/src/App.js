@@ -42,9 +42,10 @@ class App extends Component {
         <Row>
           <Col md={2} >
           <Settings 
-            selectedNodeType={this.state.selectedNode.type} 
+            selectedNode={this.state.selectedNode} 
             opacity={this.state.settings} 
             callback={this.addGraphNode}
+            filters={this.state.nodeFilters}
             addFilter={this.addNodeFilter}
             removeFilter={this.removeNodeFilter}
           />
