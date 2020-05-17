@@ -6,8 +6,9 @@ import Navbar from './components/navbar/navbar';
 import Settings from './components/settings/settings';
 import Graph from './components/graph/graph';
 import {nodes, links} from './components/graph/miserables.json';
-import { env } from './environments/env';
 import './App.css';
+
+const requests = require('./components/requests/requests');
 
 class App extends Component {
   constructor(props) {
@@ -15,30 +16,28 @@ class App extends Component {
 
 	 this.state = {
 		settings: 0,
-		graphData: {nodes: nodes, links: links},
-		selectedNode: {type: "", name: ""}, //type, name
-		nodeFilters: new Map()
+		graphData: {nodes: [], links: []},
+		selectedNode: {type: "none", id: ""}, // id
+		nodeFilters: new Map(),
+		groupIndex: 1,
 	 };
 
 	 this.toggleSettings = this.toggleSettings.bind(this);
-	 this.setSelectedNode = this.setSelectedNode.bind(this);
 	 this.addNodeFilter = this.addNodeFilter.bind(this);
 	 this.removeNodeFilter = this.removeNodeFilter.bind(this);
-	 this.search = this.search.bind(this);
+   this.search = this.search.bind(this);
+   this.onNodeClick = this.onNodeClick.bind(this);
   }
 
   render() {
     return (
       <div id="content">
         <Navbar 
-          setSelectedNode={this.setSelectedNode} 
           search={this.search} 
           selectedNode={this.state.selectedNode}
           nodeFilters={this.state.nodeFilters}
           setNodeFilters={this.removeNodeFilter}/>
-        {this.state.selectedNode.hasOwnProperty('type') ? 
           <FontAwesomeIcon id="settings-icon" icon={faCog} onClick={this.toggleSettings}/>
-          : ''}
         <Row>
           <Col md={2} >
           <Settings 
@@ -51,7 +50,10 @@ class App extends Component {
           />
           </Col>
           <Col md={10} className="justify-content-center">
-          <Graph graphData={this.state.graphData}/>
+			 <Graph 
+			   graphData={this.state.graphData}
+				 onNodeClick={this.onNodeClick}
+			 />
           </Col>
         </Row>
       </div>
@@ -67,53 +69,39 @@ class App extends Component {
 	search(searchString) {
 		console.log(searchString);
 
-		if(this.state.selectedNode.hasOwnProperty('type')) {
-			fetch(`${env.API_URL}/search/`, {
-				method: 'POST', // *GET, POST, PUT, DELETE, etc.
-				headers: {
-				  'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-				},
-				body: this.searchParams({
-					search_string: searchString,
-					node_type: this.state.selectedNode.type
-				}) // body data type must match "Content-Type" header
-			})
-			.then(response => response.json())
-			.then(data => {
-				console.log(data); // JSON data parsed by `response.json()` call
-			 }); 
-		}
-		else
-		console.log('No node / search bar selected');
-	}
+    requests.post("search", { search_string: searchString, node_type: this.state.selectedNode.type}, (result) => {
+      console.log(result);
 
-	searchParams(params) {
-		return Object.keys(params).map((key) => {
-			return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
-		 }).join('&');
-	}
+      if (result.node_type.toUpperCase() !== "NULL") {
+        result.group = this.state.groupIndex;
+      // this.setState({groupIndex: this.state.groupIndex+1});
+        this.addNode(result);
+      }
 
-  setSelectedNode(node) {
-	 this.setState({selectedNode: node});
+    });
+	}
+	
+  addNode(node) {
+		this.setState({graphData: {nodes: this.state.graphData.nodes.concat([node]), links: this.state.graphData.links}});
   }
 
   addNodeFilter(filter) {
     const filters = this.state.nodeFilters;
 
-    if(filters.has(this.state.selectedNode.name)) {
-      const selectedFilters = filters.get(this.state.selectedNode.name);
+    if(filters.has(this.state.selectedNode.id)) {
+      const selectedFilters = filters.get(this.state.selectedNode.id);
 
       if(!selectedFilters.includes(filter)) {
         selectedFilters.push(filter);
-        filters.set(this.state.selectedNode.name, selectedFilters);
+        filters.set(this.state.selectedNode.id, selectedFilters);
       }
       else {
-        console.log(`The selected node ${this.state.selectedNode.name} already has ${filter} filter active!`);
+        console.log(`The selected node ${this.state.selectedNode.id} already has ${filter} filter active!`);
         return;
       }
     } 
     else
-      filters.set(this.state.selectedNode.name, [filter]);
+      filters.set(this.state.selectedNode.id, [filter]);
 
     this.setState({nodeFilters: filters});
     console.log(this.state.nodeFilters);
@@ -122,19 +110,19 @@ class App extends Component {
   removeNodeFilter(filter) {
     const filters = this.state.nodeFilters;
 
-    if(filters.has(this.state.selectedNode.name)) {
-      let selectedFilters = filters.get(this.state.selectedNode.name);
+    if(filters.has(this.state.selectedNode.id)) {
+      let selectedFilters = filters.get(this.state.selectedNode.id);
 
       if(selectedFilters.includes(filter)) {
         selectedFilters = selectedFilters.filter(f => f !== filter);
-        filters.set(this.state.selectedNode.name, selectedFilters);
+        filters.set(this.state.selectedNode.id, selectedFilters);
         this.setState({nodeFilters: filters});
       }
       else
-        console.log(`The selected node ${this.state.selectedNode.name} doesn't have ${filter} filter active!`);
+        console.log(`The selected node ${this.state.selectedNode.id} doesn't have ${filter} filter active!`);
     } 
     else
-      console.log(`The selected node ${this.state.selectedNode.name} doesn't have any filters active!`);
+      console.log(`The selected node ${this.state.selectedNode.id} doesn't have any filters active!`);
       console.log(this.state.nodeFilters);
   }
 
@@ -148,6 +136,13 @@ class App extends Component {
 
   toggleSettings() {
 	 this.setState({settings: 1 - this.state.settings});
+  }
+
+
+  onNodeClick(node) {
+    console.log(node);
+    
+    this.setState({selectedNode: node});
   }
 }
 

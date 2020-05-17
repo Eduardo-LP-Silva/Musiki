@@ -3,11 +3,13 @@ import { ForceGraph2D } from "react-force-graph";
 import "./graph.css";
 
 class Graph extends Component {
+
   render() {
     return (
       <ForceGraph2D
         class="col-md-10"
         graphData={this.props.graphData}
+        onNodeClick={this.props.onNodeClick}
         nodeLabel="id"
         linkLabel="link"
         width={1246}

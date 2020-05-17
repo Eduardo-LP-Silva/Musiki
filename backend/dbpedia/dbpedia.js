@@ -34,7 +34,11 @@ exports.start = function start() {
 	});
 }
 
-exports.values = function values(entities, properties) {
+exports.values = function values(entities, properties, callback) {
+
+	if (properties == undefined)
+		properties = [];
+
 	let link = endpoint + 'values?';
 	link += 'entities=' + encodeURIComponent(entities);
 
@@ -43,26 +47,33 @@ exports.values = function values(entities, properties) {
 	}
 
 	link = addGenericParameters(link);
+	let success = false;
 
 	axios.get(link, {
 		'Accept': 'application/json'
 	})
-	.then((response) => {
-
-		let data = response.data;
-		console.log(JSON.stringify(data, null, 2));
-		return data;
+	.then((result) => {
+		success = true;
+		callback(result.data);
 	})
-	.catch((error) => {
-
-		let errorMsg = 'Failed to make GET request on ' + link;
-		console.log(errorMsg);
-		return "";
+	.catch(async function(error) {
+		if (!success) {
+			console.log('Failed to make GET request on ' + link + ", retrying in 1 sec");
+			await new Promise(resolve => setTimeout(resolve, 1000));
+			values(entities, properties, callback);
+		}
 	});
-
 }
 
 exports.entities = function entities(value, filter, ofilter) {
+	
+	if (filter == undefined)
+		filter = [];
+
+
+	if (ofilter == undefined)
+		ofilter = [];
+
 	let link = endpoint + 'entities?';
 	link += 'value=' + encodeURIComponent(value);
 
@@ -83,13 +94,15 @@ exports.entities = function entities(value, filter, ofilter) {
 
 		let data = response.data;
 		console.log(JSON.stringify(data, null, 2));
+		return data;
 	})
 	.catch((error) => {
 
 		let errorMsg = 'Failed to make GET request on ' + link;
 		console.log(errorMsg);
 	});
-
+	
+	return {};
 }
 
 

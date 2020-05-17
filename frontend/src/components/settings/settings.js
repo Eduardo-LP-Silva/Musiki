@@ -82,8 +82,8 @@ class Settings extends Component {
                         name={filter} 
                         type="checkbox" 
                         value={filter}
-                        checked={this.props.filters.has(this.props.selectedNode.name) 
-                            && this.props.filters.get(this.props.selectedNode.name).includes(filter)} 
+                        checked={this.props.filters.has(this.props.selectedNode.id) 
+                            && this.props.filters.get(this.props.selectedNode.id).includes(filter)} 
                         onChange={this.changeFilter} />
                     <span className="filter-btn"></span>
                 </label>

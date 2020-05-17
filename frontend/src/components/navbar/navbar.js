@@ -10,13 +10,12 @@ class Navbar extends Component {
         super(props);
 
         this.search = this.search.bind(this);
-        this.setNode = this.setNode.bind(this);
     }
 
     render() {
         return (
             <nav id="navbar">
-                <div id="search" onClick={this.setNode}>
+                <div id="search" >
                     <Logo className="Logo" height="50" width="50" />
                     <span id="musiki">Musiki</span>
                     <div id="search-bar">
@@ -38,10 +37,6 @@ class Navbar extends Component {
         this.props.search(searchString);
     }
 
-    setNode() {
-        if(!this.props.selectedNode.hasOwnProperty('name') || this.props.selectedNode.name !== 'searchbar')
-            this.props.setSelectedNode({type: 'none', name: 'searchbar'});
-    }
 }
 
 export default Navbar;
