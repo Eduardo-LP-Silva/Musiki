@@ -1,28 +1,23 @@
-import React, { Component } from 'react';
-import { ForceGraph2D } from 'react-force-graph'
-import './graph.css'
+import React, { Component } from "react";
+import { ForceGraph2D } from "react-force-graph";
+import "./graph.css";
 
 class Graph extends Component {
   render() {
     return (
       <ForceGraph2D
+        class="col-md-10"
         graphData={this.props.graphData}
-        nodeAutoColorBy="group"
-        nodeCanvasObject={(node, ctx, globalScale) => {
-          const label = node.id;
-          const fontSize = 12 / globalScale;
-          ctx.font = `${fontSize}px Sans-Serif`;
-          const textWidth = ctx.measureText(label).width;
-          const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
-
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-          ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
-
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillStyle = node.color;
-          ctx.fillText(label, node.x, node.y);
-        }} id="graph" />
+        nodeLabel="id"
+        linkLabel="link"
+        width={1246}
+        nodeCanvasObject={({ id, x, y }, ctx, globalScale) => {
+          ctx.fillStyle = "rgba(255,255,255, 0.8)";
+          ctx.beginPath();
+          ctx.arc(x, y, 5, 0, 2 * Math.PI, false);
+          ctx.fill();
+        }}
+      />
     );
   }
 }
