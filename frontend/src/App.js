@@ -28,31 +28,34 @@ class App extends Component {
   }
 
   render() {
-	 return (
-		<div id="content">
-		  <Navbar 
-			 setSelectedNode={this.setSelectedNode} 
-			 search={this.search} 
-			 selectedNode={this.state.selectedNode}
-			 nodeFilters={this.state.nodeFilters}
-			 setNodeFilters={this.removeNodeFilter}/>
-		  {this.state.selectedNode.hasOwnProperty('type') ? 
-			 <FontAwesomeIcon id="settings-icon" icon={faCog} onClick={this.toggleSettings}/>
-			 : ''}
-		  <Row>
-			 <Col md={2} >
-			 <Settings 
-				selectedNodeType={this.state.selectedNode.type} 
-				opacity={this.state.settings} 
-				callback={this.addGraphNode}
-			 />
-			 </Col>
-			 <Col md={10} className="justify-content-center">
-			 <Graph graphData={this.state.graphData}/>
-			 </Col>
-		  </Row>
-		</div>
-	 );
+    return (
+      <div id="content">
+        <Navbar 
+          setSelectedNode={this.setSelectedNode} 
+          search={this.search} 
+          selectedNode={this.state.selectedNode}
+          nodeFilters={this.state.nodeFilters}
+          setNodeFilters={this.removeNodeFilter}/>
+        {this.state.selectedNode.hasOwnProperty('type') ? 
+          <FontAwesomeIcon id="settings-icon" icon={faCog} onClick={this.toggleSettings}/>
+          : ''}
+        <Row>
+          <Col md={2} >
+          <Settings 
+            selectedNode={this.state.selectedNode} 
+            opacity={this.state.settings} 
+            callback={this.addGraphNode}
+            filters={this.state.nodeFilters}
+            addFilter={this.addNodeFilter}
+            removeFilter={this.removeNodeFilter}
+          />
+          </Col>
+          <Col md={10} className="justify-content-center">
+          <Graph graphData={this.state.graphData}/>
+          </Col>
+        </Row>
+      </div>
+    );
   }
 
   addGraphNode(foobar) {
@@ -95,42 +98,44 @@ class App extends Component {
   }
 
   addNodeFilter(filter) {
-	 const filters = this.state.nodeFilters;
+    const filters = this.state.nodeFilters;
 
-	 if(filters.has(this.state.selectedNode.name)) {
-		const selectedFilters = filters.get(this.state.selectedNode.name);
+    if(filters.has(this.state.selectedNode.name)) {
+      const selectedFilters = filters.get(this.state.selectedNode.name);
 
-		if(!selectedFilters.includes(filter)) {
-		  selectedFilters.push(filter);
-		  filters.set(this.state.selectedNode.name, selectedFilters);
-		}
-		else {
-		  console.log(`The selected node ${this.state.selectedNode.name} already has ${filter} filter active!`);
-		  return;
-		}
-	 } 
-	 else
-		filters.set(this.state.selectedNode.name, [filter]);
+      if(!selectedFilters.includes(filter)) {
+        selectedFilters.push(filter);
+        filters.set(this.state.selectedNode.name, selectedFilters);
+      }
+      else {
+        console.log(`The selected node ${this.state.selectedNode.name} already has ${filter} filter active!`);
+        return;
+      }
+    } 
+    else
+      filters.set(this.state.selectedNode.name, [filter]);
 
-	 this.setState({nodeFilters: filters});
+    this.setState({nodeFilters: filters});
+    console.log(this.state.nodeFilters);
   }
 
   removeNodeFilter(filter) {
-	 const filters = this.state.nodeFilters;
+    const filters = this.state.nodeFilters;
 
-	 if(filters.has(this.state.selectedNode.name)) {
-		let selectedFilters = filters.get(this.state.selectedNode.name);
+    if(filters.has(this.state.selectedNode.name)) {
+      let selectedFilters = filters.get(this.state.selectedNode.name);
 
-		if(selectedFilters.includes(filter)) {
-		  selectedFilters = selectedFilters.filter(f => f !== filter);
-		  filters.set(this.state.selectedNode.name, selectedFilters);
-		  this.setState({nodeFilters: filters});
-		}
-		else
-		  console.log(`The selected node ${this.state.selectedNode.name} doesn't have ${filter} filter active!`);
-	 } 
-	 else
-		console.log(`The selected node ${this.state.selectedNode.name} doesn't have any filters active!`);
+      if(selectedFilters.includes(filter)) {
+        selectedFilters = selectedFilters.filter(f => f !== filter);
+        filters.set(this.state.selectedNode.name, selectedFilters);
+        this.setState({nodeFilters: filters});
+      }
+      else
+        console.log(`The selected node ${this.state.selectedNode.name} doesn't have ${filter} filter active!`);
+    } 
+    else
+      console.log(`The selected node ${this.state.selectedNode.name} doesn't have any filters active!`);
+      console.log(this.state.nodeFilters);
   }
 
   setSelectedNodeFilters(filters) {

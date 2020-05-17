@@ -16,6 +16,7 @@ class Settings extends Component {
         this.setMaxBranches = this.setMaxBranches.bind(this);
         this.setFilters = this.setFilters.bind(this);
         this.renderFilters = this.renderFilters.bind(this);
+        this.changeFilter = this.changeFilter.bind(this);
     }
 
     render() {
@@ -25,7 +26,7 @@ class Settings extends Component {
                     {this.renderFilters()}
                 </div>
                 <Form.Group style={{ marginTop: "1.5em" }}>
-                    {this.props.selectedNodeType !== "none" && this.props.selectedNodeType != null ?
+                    {this.props.selectedNode.type !== "none" && this.props.selectedNode.type != null ?
                         <div>
                             <Form.Label style={{ fontWeight: "bold" }}>
                                 Maximum Branch Number
@@ -49,18 +50,18 @@ class Settings extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.selectedNodeType !== prevProps.selectedNodeType)
+        if (this.props.selectedNode.type !== prevProps.selectedNode.type)
             this.setFilters();
     }
 
     setFilters() {
-        switch (this.props.selectedNodeType) {
+        switch (this.props.selectedNode.type) {
             case "none":
                 this.setState({ filters: ['artist'] });
                 break;
 
             default:
-                console.log(`Unknow node type selected: ${this.props.selectedNodeType}`);
+                console.log(`Unknow node type selected: ${this.props.selectedNode.type}`);
         }
     }
 
@@ -76,7 +77,14 @@ class Settings extends Component {
             filters.push(
                 <label className="filter-container" key={this.state.filters[i]}>
                     {filter}
-                    <input id={filter} name={filter} type="checkbox" value={filter} />
+                    <input 
+                        id={filter} 
+                        name={filter} 
+                        type="checkbox" 
+                        value={filter}
+                        checked={this.props.filters.has(this.props.selectedNode.name) 
+                            && this.props.filters.get(this.props.selectedNode.name).includes(filter)} 
+                        onChange={this.changeFilter} />
                     <span className="filter-btn"></span>
                 </label>
             );
@@ -86,6 +94,13 @@ class Settings extends Component {
         }
 
         return filters;
+    }
+
+    changeFilter(event) {
+        if(event.target.checked === true)
+            this.props.addFilter(event.target.name);
+        else
+            this.props.removeFilter(event.target.name);
     }
 
     setMaxBranches(event) {

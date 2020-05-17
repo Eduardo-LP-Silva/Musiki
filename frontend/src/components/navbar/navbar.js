@@ -9,10 +9,6 @@ class Navbar extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-            filters: []
-        };
-
         this.search = this.search.bind(this);
         this.setNode = this.setNode.bind(this);
     }
