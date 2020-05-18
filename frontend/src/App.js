@@ -12,21 +12,22 @@ const requests = require('./components/requests/requests');
 
 class App extends Component {
   constructor(props) {
-	 super(props);
+    super(props);
 
-	 this.state = {
-		settings: 0,
-		graphData: {nodes: [], links: []},
-		selectedNode: {type: "none", id: ""}, // id
-		nodeFilters: new Map(),
-		groupIndex: 1,
-	 };
+    this.state = {
+    settings: 0,
+    graphData: {nodes: [], links: []},
+    selectedNode: {type: "none", id: ""}, // id
+    nodeFilters: new Map(),
+    groupIndex: 1,
+    nodeInfo: undefined,
+    };
 
-	 this.toggleSettings = this.toggleSettings.bind(this);
-	 this.addNodeFilter = this.addNodeFilter.bind(this);
-	 this.removeNodeFilter = this.removeNodeFilter.bind(this);
-   this.search = this.search.bind(this);
-   this.onNodeClick = this.onNodeClick.bind(this);
+    this.toggleSettings = this.toggleSettings.bind(this);
+    this.addNodeFilter = this.addNodeFilter.bind(this);
+    this.removeNodeFilter = this.removeNodeFilter.bind(this);
+    this.search = this.search.bind(this);
+    this.onNodeClick = this.onNodeClick.bind(this);
   }
 
   render() {
@@ -47,7 +48,9 @@ class App extends Component {
             filters={this.state.nodeFilters}
             addFilter={this.addNodeFilter}
             removeFilter={this.removeNodeFilter}
+            nodeInfo={this.state.nodeInfo}
             ref="settings"
+
           />
           </Col>
           <Col md={10} className="justify-content-center">
@@ -61,9 +64,10 @@ class App extends Component {
     );
   }
 
-  addGraphNode(foobar) {
-	 // TODO:
-	 console.log(foobar);
+  componentDidMount() {
+    requests.get("nodeInfo", undefined, (result) => {
+      this.setState({nodeInfo: result});
+    })
 
   }
 
@@ -86,6 +90,16 @@ class App extends Component {
 		this.setState({graphData: {nodes: this.state.graphData.nodes.concat([node]), links: this.state.graphData.links}});
   }
 
+  addNodeChildren(parentNode, newNode) {
+
+    this.addNode(newNode);
+
+    let link = {source: parentNode, target: newNode.id, value: 1};
+
+    this.setState({graphData: {nodes: this.state.graphData.nodes, links: this.state.graphData.links.concat([link])}});
+
+  }
+
   addNodeFilter(filter) {
     const filters = this.state.nodeFilters;
 
@@ -106,6 +120,36 @@ class App extends Component {
 
     this.setState({nodeFilters: filters});
     console.log(this.state.nodeFilters);
+
+    this.addNodeFilterGraph(filter);
+  }
+
+  addNodeFilterGraph(filter) {
+
+    let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
+    for (let i = 0; i < filters.length; i++) {
+      if (filters[i].name.toUpperCase() === filter.toUpperCase()) {
+
+        filter = filters[i];
+
+        if (!filter.reverse) {
+          requests.get("values", {
+            entities: this.state.selectedNode.id,
+            properties: filter.property,
+          }, (result) => {
+              let bindings = result.results.bindings;
+
+              for (let i = 0; i < bindings.length; i++) {
+                let link = bindings[i][filter.property.replace(':', '')].value;
+
+                this.addNodeChildren(this.state.selectedNode.id, {id: link.substr(link.lastIndexOf('/')+1), type:"none"});
+              }
+          })
+        }
+
+        return;
+      }
+    }
   }
 
   removeNodeFilter(filter) {
@@ -147,6 +191,8 @@ class App extends Component {
 
     this.refs.settings.setFilters();
   }
+
+  ApplyFilter
 }
 
 export default App;

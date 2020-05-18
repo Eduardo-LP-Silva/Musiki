@@ -57,6 +57,50 @@ app.post('/search', async function(req, res) {
     });
 });
 
+app.get('/values', function(req, res) {
+
+    let {entities, properties} = req.query;
+
+    res.status(200);
+
+    if (entities != undefined) {
+        dbpedia.values(entities, properties, (result) => {
+
+            if (result.results.bindings.length > 0) {
+                res.send(result);
+                return;
+            }
+
+            res.send({});
+        });
+    }
+    else {
+        res.send({});
+    }
+});
+
+app.get('/entities', function(req, res) {
+
+    let {value, filter, ofilter} = req.query;
+
+    res.status(200);
+
+    if (value != undefined) {
+        dbpedia.entities(value, filter, ofilter, (result) => {
+
+            if (result.results.bindings.length > 0) {
+                res.send(result);
+                return;
+            }
+
+            res.send({});
+        });
+    }
+    else {
+        res.send({});
+    }
+});
+
 app.get('/nodeInfo', function(req, res) {
    
     res.status(200);

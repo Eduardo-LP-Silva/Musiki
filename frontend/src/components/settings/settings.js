@@ -13,12 +13,8 @@ class Settings extends Component {
         this.state = {
             filters: [],
             maxBranches: 10,
-            nodeInfo: undefined,
         };
 
-        requests.get("nodeInfo", (result) => {
-            this.setState({nodeInfo: result}, this.setFilters);
-        })
 
         this.setMaxBranches = this.setMaxBranches.bind(this);
         this.setFilters = this.setFilters.bind(this);
@@ -65,9 +61,9 @@ class Settings extends Component {
        
         console.log("Setting filters");
 
-        if (this.state.nodeInfo !== undefined) {
-            if (this.state.nodeInfo.hasOwnProperty(this.props.selectedNode.type)) {
-                this.setState({ filters: this.state.nodeInfo[this.props.selectedNode.type] ? this.state.nodeInfo[this.props.selectedNode.type].filters.map(x => x.name) : [] });
+        if (this.props.nodeInfo !== undefined) {
+            if (this.props.nodeInfo.hasOwnProperty(this.props.selectedNode.type)) {
+                this.setState({ filters: this.props.nodeInfo[this.props.selectedNode.type] ? this.props.nodeInfo[this.props.selectedNode.type].filters.map(x => x.name) : [] });
             }
             else {
                 console.log(`Unknow node type selected: ${this.props.selectedNode.type}`);

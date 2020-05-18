@@ -1,8 +1,17 @@
 
 const { env } = require('../../environments/env');
 
-exports.get = function get(endpoint, callback) {
-    fetch(`${env.API_URL}/${endpoint}`, {
+exports.get = function get(endpoint, queryParams, callback) {
+
+    let link = `${env.API_URL}/${endpoint}`;
+
+    if (queryParams != undefined) {
+        link += "?" + Object.keys(queryParams)
+        .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(queryParams[k]))
+        .join('&');
+    }
+
+    fetch(link, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         // headers: {
         //   'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
