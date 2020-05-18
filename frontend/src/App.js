@@ -47,6 +47,7 @@ class App extends Component {
             filters={this.state.nodeFilters}
             addFilter={this.addNodeFilter}
             removeFilter={this.removeNodeFilter}
+            ref="settings"
           />
           </Col>
           <Col md={10} className="justify-content-center">
@@ -72,7 +73,7 @@ class App extends Component {
     requests.post("search", { search_string: searchString, node_type: this.state.selectedNode.type}, (result) => {
       console.log(result);
 
-      if (result.node_type.toUpperCase() !== "NULL") {
+      if (result.type.toUpperCase() !== "NULL") {
         result.group = this.state.groupIndex;
       // this.setState({groupIndex: this.state.groupIndex+1});
         this.addNode(result);
@@ -143,6 +144,8 @@ class App extends Component {
     console.log(node);
     
     this.setState({selectedNode: node});
+
+    this.refs.settings.setFilters();
   }
 }
 

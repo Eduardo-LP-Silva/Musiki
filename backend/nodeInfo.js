@@ -1,19 +1,19 @@
 exports.nodeInfo = {
-    "Artist" : {
-        validation: "Organization",
+    "artist" : {
+        validation: "organization",
         filters: [
                     {
-                        name: "Members",
+                        name: "members",
                         property: "dbo:bandMember",
                         reverse: false,
                     },
                     {
-                        name: "Genres",
+                        name: "genres",
                         property: "dbo:genre",
                         reverse: false,
                     },
                     {
-                        name: "Albums",
+                        name: "albums",
                         property: "dbo:artist",
                         reverse: true,
                         validationKey: "dbp:type",

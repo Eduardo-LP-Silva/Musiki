@@ -1,7 +1,7 @@
 
 const { env } = require('../../environments/env');
 
-exports.get = function get(endpoint) {
+exports.get = function get(endpoint, callback) {
     fetch(`${env.API_URL}/${endpoint}`, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         // headers: {
@@ -14,7 +14,7 @@ exports.get = function get(endpoint) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log(data); // JSON data parsed by `response.json()` call
+        callback(data); // JSON data parsed by `response.json()` call
      });
 }
 

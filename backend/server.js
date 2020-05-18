@@ -57,6 +57,13 @@ app.post('/search', async function(req, res) {
     });
 });
 
+app.get('/nodeInfo', function(req, res) {
+   
+    res.status(200);
+   
+    res.send(nodeInfo);
+});
+
 function detectNodeType(bindings) {
 
     for (let binding of bindings) {
@@ -76,7 +83,7 @@ function detectNodeType(bindings) {
 function createNode(nodeType, name) {
     return {
         id: name,
-        node_type: nodeType,
+        type: nodeType,
     };
 }
 

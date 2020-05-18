@@ -4,14 +4,21 @@ import RangeSlider from 'react-bootstrap-range-slider';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import './settings.css';
 
+const requests = require('../requests/requests');
+
 class Settings extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
             filters: [],
-            maxBranches: 10
+            maxBranches: 10,
+            nodeInfo: undefined,
         };
+
+        requests.get("nodeInfo", (result) => {
+            this.setState({nodeInfo: result}, this.setFilters);
+        })
 
         this.setMaxBranches = this.setMaxBranches.bind(this);
         this.setFilters = this.setFilters.bind(this);
@@ -55,13 +62,16 @@ class Settings extends Component {
     }
 
     setFilters() {
-        switch (this.props.selectedNode.type) {
-            case "none":
-                this.setState({ filters: ['artist'] });
-                break;
+       
+        console.log("Setting filters");
 
-            default:
+        if (this.state.nodeInfo !== undefined) {
+            if (this.state.nodeInfo.hasOwnProperty(this.props.selectedNode.type)) {
+                this.setState({ filters: this.state.nodeInfo[this.props.selectedNode.type] ? this.state.nodeInfo[this.props.selectedNode.type].filters.map(x => x.name) : [] });
+            }
+            else {
                 console.log(`Unknow node type selected: ${this.props.selectedNode.type}`);
+            }
         }
     }
 
