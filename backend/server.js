@@ -39,6 +39,13 @@ app.post('/search', async function(req, res) {
         return;
     }
 
+    //DBpedia resources start with capital letters
+    search_string = search_string[0].toUpperCase() + search_string.slice(1);
+    //DBpedia resources have _ instead of spaces
+    search_string = search_string.replace(/\s/g, '_');
+
+    console.log(search_string);
+
     dbpedia.values(search_string, undefined, (result) => {
 
         if (result.results.bindings.length > 0) {
