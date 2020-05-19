@@ -1,11 +1,8 @@
 exports.nodeInfo = {
-    "artist": {
+    "band": {
         //Maybe add validation key?
-        /* Maybe add more than one? Organization only applies to bands / groups, and I couldn't find a common attribute 
-        ** between bands and solo artists specific enough
-        */
         //key: rdf:type
-        validation: "organization", //Maybe change to MusicGroup
+        validation: "MusicGroup",
         filters: [
             {
                 name: "members",
@@ -21,7 +18,7 @@ exports.nodeInfo = {
                 name: "albums",
                 property: "dbo:artist",
                 reverse: true,
-                validationKey: "dbp:type", //maybe change to rdf:type (some albumns don't have dpb:type), but duplicate values must be dealt with
+                validationKey: "dbp:type",
                 validationValue: "album"
             },
             {
@@ -36,9 +33,41 @@ exports.nodeInfo = {
                 property: "dbo:musicalArtist",
                 reverse: true,
                 validationKey: "rdfs:label",
-                validationValue: "Song"
+                validationValue: "song"
             }
 
+        ]
+    },
+    "artist": {
+        //key: rdf:type
+        validation: "Artist",
+        filters: [
+            {
+                name: "genres",
+                property: "dbo:genre",
+                reverse: false,
+            },
+            {
+                name: "albums",
+                property: "dbo:artist",
+                reverse: true,
+                validationKey: "dbp:type",
+                validationValue: "album"
+            },
+            {
+                name: "songs",
+                property: "dbo:musicalArtist",
+                reverse: true,
+                validationKey: "rdfs:label",
+                validationValue: "song"
+            },
+            {
+                name: "bands",
+                property: "dbo:bandMember",
+                reverse: true,
+                validationKey: "rdf:type",
+                validationValue: "MusicGroup"
+            }
         ]
     },
     "genre": {
@@ -70,9 +99,64 @@ exports.nodeInfo = {
                 name: "songs",
                 property: "dbo:genre",
                 reverse: true,
-                validationKey: "rdf:type",
-                validationValue: "Song"
+                validationKey: "rdfs:label",
+                validationValue: "song"
             }
+        ]
+    },
+    "album": {
+        //key: dbp:type
+        validation: "album",
+        filters: [
+            {
+                name: "artist",
+                property: "dbo:artist",
+                reverse: false
+            },
+            {
+                name: "genre",
+                property: "dbo:genre",
+                reverse: false
+            },
+            {
+                name: "songs",
+                property: "dbp:title",
+                reverse: false
+            }
+        ]
+    },
+    "single": {
+        //key: rdf:type
+        validation: "Single",
+        filters: [
+            {
+                name: "artist",
+                property: "dbo:artist",
+                reverse: false
+            },
+            {
+                name: "genre",
+                property: "dbo:genre",
+                reverse: false
+            },
+        ]
+    },
+    "song": {
+        //key: rdfs:label
+        validation: "song",
+        filters: [
+            {
+                name: "genre",
+                property: "dbo:genre",
+                reverse: false,
+            },
+            {
+                name: "albums",
+                property: "dbp:title",
+                reverse: true,
+                validationKey: "dbp:type",
+                validationValue: "album"
+            },
         ]
     }
 }
