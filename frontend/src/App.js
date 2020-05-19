@@ -26,25 +26,6 @@ class App extends Component {
     this.addNodeFilter = this.addNodeFilter.bind(this);
     this.removeNodeFilter = this.removeNodeFilter.bind(this);
     this.search = this.search.bind(this);
-    this.onNodeClick = this.onNodeClick.bind(this);
-    this.onNodeHover = this.onNodeHover.bind(this);
-    this.paintRing = this.paintRing.bind(this);
-  }
-
-  paintRing(node, ctx) {
-    console.log("HELO");
-    // paint highlighted nodes
-    ctx.beginPath();
-    ctx.arc(
-      node.x,
-      node.y,
-      ctx.measureText(node.id).width * 0.8,
-      0,
-      2 * Math.PI,
-      false
-    );
-    ctx.fillStyle = "orange";
-    ctx.fill();
   }
 
   render() {
@@ -78,12 +59,6 @@ class App extends Component {
             <Graph
               id="graph"
               graphData={this.state.graphData}
-              nodeCanvasObjectMode={(node) =>
-                (node === this.state.selectedNode) ? "before" : undefined
-              }
-              nodeCanvasObject={this.paintRing}
-              onNodeClick={this.onNodeClick}
-              onNodeHover={this.onNodeHover}
             />
           </Col>
         </Row>
@@ -224,18 +199,6 @@ class App extends Component {
 
   toggleSettings() {
     this.setState({ settings: 1 - this.state.settings });
-  }
-
-  onNodeClick(node) {
-    console.log(node);
-
-    this.setState({ selectedNode: node });
-  }
-
-  onNodeHover(node) {
-   
-    if (node)   
-      this.state.selectedNode = node;
   }
 }
 
