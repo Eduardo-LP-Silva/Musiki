@@ -36,20 +36,21 @@ exports.start = function start() {
 
 exports.values = function values(entities, properties, callback) {
 
-
-
 	let link = endpoint + 'values?';
 	link += 'entities=' + encodeURIComponent(entities);
 
-	try {
-		if (properties == undefined)
-			properties = [];
-		else if (Array.isArray(JSON.parse(properties))) { 
-			properties = JSON.parse(properties);	
-		}
+	if (properties == undefined) {
+		properties = [];
 	}
-	catch (e) { // Treat properties as string
-		properties = [properties];
+	else if (!Array.isArray(properties)) {
+		try {
+			if (Array.isArray(JSON.parse(properties))) {
+				properties = JSON.parse(properties);	
+			}
+		}
+		catch (e) {  // Treat properties as string
+			properties = [properties];
+		}
 	}
 
 	for (let i = 0; i < properties.length; i++) {
@@ -77,35 +78,39 @@ exports.values = function values(entities, properties, callback) {
 
 exports.entities = function entities(value, filter, ofilter, callback) {
 	
-	if (filter == undefined)
+	if (filter == undefined) {
 		filter = [];
+	}
+	else if (!Array.isArray(filter)) {
+		try {
+			if (Array.isArray(JSON.parse(filter))) {
+				filter = JSON.parse(filter);	
+			}
+		}
+		catch (e) {  // Treat filter as string
+			filter = [filter];
+		}
+	}
 
-	if (ofilter == undefined)
+	if (ofilter == undefined) {
 		ofilter = [];
+	}
+	else if (!Array.isArray(ofilter)) {
+		try {
+			if (Array.isArray(JSON.parse(ofilter))) {
+				ofilter = JSON.parse(ofilter);	
+			}
+		}
+		catch (e) {  // Treat ofilter as string
+			ofilter = [ofilter];
+		}
+	}
 
 	let link = endpoint + 'entities?';
 	link += 'value=' + encodeURIComponent(value);
 
-	try {
-		if (Array.isArray(JSON.parse(filter))) {
-			filter = JSON.parse(filter);	
-		}
-	}
-	catch (e) {  // Treat filter as string
-		filter = [filter];
-	}
-
 	for (let i = 0; i < filter.length; i++) {
 		link += '&filter=' + encodeURIComponent(filter[i]);
-	}
-
-	try {
-		if (Array.isArray(JSON.parse(ofilter))) {
-			ofilter = JSON.parse(ofilter);	
-		}
-	}
-	catch (e) {  // Treat ofilter as string
-		ofilter = [ofilter];
 	}
 
 	for (let i = 0; i < ofilter.length; i++) {

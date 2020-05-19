@@ -88,12 +88,7 @@ app.get('/entities', function(req, res) {
     if (value != undefined) {
         dbpedia.entities(value, filter, ofilter, (result) => {
 
-            if (result.results.bindings.length > 0) {
-                res.send(result);
-                return;
-            }
-
-            res.send({});
+            res.send(result);
         });
     }
     else {
