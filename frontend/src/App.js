@@ -146,6 +146,28 @@ class App extends Component {
               }
           })
         }
+        else {
+          requests.get("entities", {
+            value: `${this.state.selectedNode.id},${filter.property}`,
+            ofilter: filter.validationKey,
+          }, (result) => {
+              let bindings = result.results.bindings;
+				  let added = [];
+
+              for (let i = 0; i < bindings.length; i++) {
+					let entityName =  bindings[i]["entities"].value
+					entityName = entityName.substr(entityName.lastIndexOf('/')+1);
+					let link = bindings[i][filter.validationKey.replace(':', '')]?.value;
+
+					 if (!added.includes(entityName) && link != undefined && link.toUpperCase().includes(filter.validationValue.toUpperCase())) {
+						added.push(entityName);
+						
+						// TODO: get type of child node
+						this.addNodeChildren(this.state.selectedNode.id, {id: entityName, type:"none"});
+					 }
+              }
+          })
+        }
 
         return;
       }
