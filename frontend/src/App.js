@@ -16,16 +16,16 @@ class App extends Component {
     this.state = {
       settings: 0,
       graphData: { nodes: [], links: [] },
-      selectedNode: { type: "none", id: "" }, // id
-      nodeFilters: new Map(),
+      selectedNode: { type: "none", id: "" , activeFilters: []}, //when type = none, navbar is selected
+      initialSearchFilter: "",
       groupIndex: 1,
       nodeInfo: undefined
     };
 
     this.toggleSettings = this.toggleSettings.bind(this);
-    this.addNodeFilter = this.addNodeFilter.bind(this);
-    this.removeNodeFilter = this.removeNodeFilter.bind(this);
+    this.setSelectedNode = this.setSelectedNode.bind(this);
     this.search = this.search.bind(this);
+    this.setInitialSearchFilter = this.setInitialSearchFilter.bind(this);
   }
 
   render() {
@@ -33,9 +33,7 @@ class App extends Component {
       <div id="content">
         <Navbar
           search={this.search}
-          selectedNode={this.state.selectedNode}
-          nodeFilters={this.state.nodeFilters}
-          setNodeFilters={this.removeNodeFilter}
+          setSelectedNode={this.setSelectedNode}
         />
         <FontAwesomeIcon
           id="settings-icon"
@@ -47,11 +45,10 @@ class App extends Component {
             <Settings
               selectedNode={this.state.selectedNode}
               opacity={this.state.settings}
-              callback={this.addGraphNode}
-              filters={this.state.nodeFilters}
-              addFilter={this.addNodeFilter}
-              removeFilter={this.removeNodeFilter}
               nodeInfo={this.state.nodeInfo}
+              initialSearchFilter={this.state.initialSearchFilter}
+              setInitialSearchFilter={this.setInitialSearchFilter}
+              setSelectedNode={this.setSelectedNode}
               ref="settings"
             />
           </Col>
@@ -59,6 +56,8 @@ class App extends Component {
             <Graph
               id="graph"
               graphData={this.state.graphData}
+              selectedNode={this.state.selectedNode}
+              setSelectedNode={this.setSelectedNode}
             />
           </Col>
         </Row>
@@ -73,8 +72,6 @@ class App extends Component {
   }
 
   search(searchString) {
-    console.log(searchString);
-
     requests.post(
       "search",
       { search_string: searchString, node_type: this.state.selectedNode.type },
@@ -112,6 +109,7 @@ class App extends Component {
     });
   }
 
+  /*
   addNodeFilter(filter) {
     const filters = this.state.nodeFilters;
 
@@ -133,7 +131,7 @@ class App extends Component {
     console.log(this.state.nodeFilters);
 
     this.addNodeFilterGraph(filter);
-  }
+  } */
 
   addNodeFilterGraph(filter) {
     let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
@@ -168,6 +166,7 @@ class App extends Component {
     }
   }
 
+  /*
   removeNodeFilter(filter) {
     const filters = this.state.nodeFilters;
 
@@ -187,6 +186,14 @@ class App extends Component {
         `The selected node ${this.state.selectedNode.id} doesn't have any filters active!`
       );
     console.log(this.state.nodeFilters);
+  } */
+
+  setInitialSearchFilter(filter) {
+    this.setState({initialSearchFilter: filter});
+  }
+
+  setSelectedNode(node) {
+    this.setState({selectedNode: node});
   }
 
   setSelectedNodeFilters(filters) {

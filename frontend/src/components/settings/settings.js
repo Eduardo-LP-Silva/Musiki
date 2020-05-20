@@ -4,17 +4,14 @@ import RangeSlider from 'react-bootstrap-range-slider';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import './settings.css';
 
-const requests = require('../requests/requests');
-
 class Settings extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
             filters: [],
-            maxBranches: 10,
+            maxBranches: 10, //Maybe pass this to selectedNode as well
         };
-
 
         this.setMaxBranches = this.setMaxBranches.bind(this);
         this.setFilters = this.setFilters.bind(this);
@@ -29,7 +26,7 @@ class Settings extends Component {
                     {this.renderFilters()}
                 </div>
                 <Form.Group style={{ marginTop: "1.5em" }}>
-                    {this.props.selectedNode.type !== "none" && this.props.selectedNode.type != null ?
+                    {this.props.selectedNode.type != null && this.props.selectedNode.type !== "none" ?
                         <div>
                             <Form.Label style={{ fontWeight: "bold" }}>
                                 Maximum Branch Number
@@ -58,16 +55,29 @@ class Settings extends Component {
     }
 
     setFilters() {
-       
-        console.log("Setting filters");
+        if(this.props.selectedNode.type === 'none') {
+            this.setState({filters: ['artist', 'band', 'genre', 'album', 'single', 'song']}); //Initial search filters
 
+            this.state.filters.forEach(filter => {
+                if(filter === this.props.initialSearchFilter) {
+                    document.getElementById(filter).checked = true;
+                    return;
+                }
+            });
+                     
+            return;
+        }
+        
         if (this.props.nodeInfo !== undefined) {
             if (this.props.nodeInfo.hasOwnProperty(this.props.selectedNode.type)) {
-                this.setState({ filters: this.props.nodeInfo[this.props.selectedNode.type] ? this.props.nodeInfo[this.props.selectedNode.type].filters.map(x => x.name) : [] });
-            }
-            else {
-                console.log(`Unknow node type selected: ${this.props.selectedNode.type}`);
-            }
+                this.setState({ filters: this.props.nodeInfo[this.props.selectedNode.type] 
+                    ? this.props.nodeInfo[this.props.selectedNode.type].filters.map(x => x.name) : [] });
+                
+                this.state.filters.forEach(filter => {
+                    if(this.props.selectedNode.activeFilters.includes(filter))
+                        document.getElementById(filter).checked = true;
+                });                    
+            }               
         }
     }
 
@@ -83,14 +93,12 @@ class Settings extends Component {
             filters.push(
                 <label className="filter-container" key={this.state.filters[i]}>
                     {filter}
-                    <input 
+                    <input
                         id={filter} 
-                        name={filter} 
-                        type="checkbox" 
+                        name="filter" //name must be the same for radio buttons to work
+                        type={this.props.selectedNode.type === 'none' ? 'radio' : 'checkbox'} //Initial search can only have one filter
                         value={filter}
-                        checked={this.props.filters.has(this.props.selectedNode.id) 
-                            && this.props.filters.get(this.props.selectedNode.id).includes(filter)} 
-                        onChange={this.changeFilter} />
+                        onChange={this.changeFilter}/>
                     <span className="filter-btn"></span>
                 </label>
             );
@@ -103,10 +111,33 @@ class Settings extends Component {
     }
 
     changeFilter(event) {
-        if(event.target.checked === true)
-            this.props.addFilter(event.target.name);
+        if(event.target.checked === true) {
+            if(this.props.selectedNode.type === 'none')
+                this.props.setInitialSearchFilter(event.target.id);
+            else
+                this.addNodeFilter(event.target.id);
+        }
         else
-            this.props.removeFilter(event.target.name);
+            if(this.props.selectedNode.type !== 'none') //Can't unselect radio button, can only select new one, so the condition above has already changed the initialSearch filter
+                this.removeNodeFilter(event.target.id);
+    }
+
+    addNodeFilter(filter) {
+        const sn = this.props.selectedNode;
+
+        if(!sn.activeFilters.includes(filter)) {
+            sn.activeFilters.push(filter);
+            this.props.setSelectedNode(sn);
+        }
+    }
+
+    removeNodeFilter(filter) {
+        const sn = this.props.selectedNode;
+
+        if(sn.activeFilters.includes(filter)) {
+            sn.activeFilters.splice(sn.activeFilters.indexOf(filter), 1);
+            this.props.setSelectedNode(sn);
+        }
     }
 
     setMaxBranches(event) {

@@ -9,6 +9,7 @@ class Navbar extends Component {
     constructor(props) {
         super(props);
 
+        this.selectNavbar = this.selectNavbar.bind(this);
         this.search = this.search.bind(this);
     }
 
@@ -18,7 +19,7 @@ class Navbar extends Component {
                 <div id="search" >
                     <Logo className="Logo" height="50" width="50" />
                     <span id="musiki">Musiki</span>
-                    <div id="search-bar">
+                    <div id="search-bar" onClick={this.selectNavbar}>
                         <FontAwesomeIcon onClick={this.search} className="search-icon" icon={faSearch}/>
                         <input type="text" placeholder="Search ..." required/>
                     </div>
@@ -29,6 +30,10 @@ class Navbar extends Component {
                 </div>
             </nav>
         );
+    }
+
+    selectNavbar() {
+        this.props.setSelectedNode({type: "none", id: "navbar", activeFilters: []});
     }
 
     search() {

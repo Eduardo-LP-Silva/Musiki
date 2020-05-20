@@ -8,7 +8,6 @@ class Graph extends Component {
 
     this.state = {
       hoveredNode: null,
-      clickedNode: null,
       radius: null
     };
 
@@ -37,10 +36,10 @@ class Graph extends Component {
     
     const label = node.id;
     const fontSize = 15 / globalScale;
-    const size = node === (this.state.hoveredNode || this.state.clickedNode) ? 0.65 : 0.6;
+    const size = node == (this.state.hoveredNode || this.props.selectedNode) ? 0.65 : 0.6;
    
     ctx.font = `${fontSize}px arial`;
-    ctx.fillStyle = node === (this.state.hoveredNode || this.state.clickedNode) ? 'white' : 'rgba(255,255,255,0.8)';
+    ctx.fillStyle = node == (this.state.hoveredNode || this.props.selectedNode) ? 'white' : 'rgba(255,255,255,0.8)';
     ctx.shadowBlur = "1";
     ctx.shadowColor = "rgba(0, 0 ,0 , 0.25)";
     ctx.shadowOffsetX = "4";
@@ -57,23 +56,21 @@ class Graph extends Component {
       false
     );
     ctx.fill();
-    ctx.fillStyle = node === this.state.clickedNode ? '#595959' : "#808080";
+    ctx.fillStyle = node === this.props.selectedNode ? '#595959' : "#808080";
     ctx.shadowColor = "rgba(0, 0, 0, 0)";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(label, node.x, node.y);
-
   }
 
   onNodeClick(node) {
-    
-    if(node) {
-      this.setState({ clickedNode: node})
+    console.log(node);
+    if(node && this.props.selectedNode !== node) {
+      if(!node.hasOwnProperty('activeFilters'))
+        node.activeFilters = [];
     }
-
-    else {
-      this.setState({ clickedNode: null });
-    }
+      this.props.setSelectedNode(node);
+    //else maybe ?
   }
 
   onNodeHover(node) {
