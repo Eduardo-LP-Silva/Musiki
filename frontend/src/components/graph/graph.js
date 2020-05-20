@@ -7,7 +7,9 @@ class Graph extends Component {
     super(props);
 
     this.state = {
-      hoveredNode: null
+      hoveredNode: null,
+      clickedNode: null,
+      radius: null
     };
 
     this.onNodeClick = this.onNodeClick.bind(this);
@@ -22,8 +24,8 @@ class Graph extends Component {
         nodeLabel="id"
         linkColor={() => "rgba(255,255,255,0.7)"}
         linkLabel="link"
+        nodeRelSize = {this.radius}
         width={window.innerWidth * 0.8}
-
         onNodeClick={this.onNodeClick}
         onNodeHover={this.onNodeHover}
         nodeCanvasObject={this.styleNodes}
@@ -32,38 +34,50 @@ class Graph extends Component {
   }
 
   styleNodes(node, ctx, globalScale) {
+    
     const label = node.id;
     const fontSize = 15 / globalScale;
+    const size = node === (this.state.hoveredNode || this.state.clickedNode) ? 0.65 : 0.6;
+   
     ctx.font = `${fontSize}px arial`;
-    ctx.fillStyle = node == this.state.hoveredNode ? 'red' : 'white';
+    ctx.fillStyle = node === (this.state.hoveredNode || this.state.clickedNode) ? 'white' : 'rgba(255,255,255,0.8)';
     ctx.shadowBlur = "1";
     ctx.shadowColor = "rgba(0, 0 ,0 , 0.25)";
     ctx.shadowOffsetX = "4";
     ctx.shadowOffsetY = "4";
+
+    this.radius = ctx.measureText(label).width * size;
     ctx.beginPath();
     ctx.arc(
       node.x,
       node.y,
-      ctx.measureText(label).width * 0.6,
+      ctx.measureText(label).width * size,
       0,
       2 * Math.PI,
       false
     );
     ctx.fill();
-    ctx.fillStyle = "#808080";
+    ctx.fillStyle = node === this.state.clickedNode ? '#595959' : "#808080";
     ctx.shadowColor = "rgba(0, 0, 0, 0)";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(label, node.x, node.y);
+
   }
 
   onNodeClick(node) {
-    console.log(node);
+    
+    if(node) {
+      this.setState({ clickedNode: node})
+    }
 
-    this.setState({ selectedNode: node });
+    else {
+      this.setState({ clickedNode: null });
+    }
   }
 
   onNodeHover(node) {
+
     if(node) {
       this.setState({hoveredNode: node});
     }

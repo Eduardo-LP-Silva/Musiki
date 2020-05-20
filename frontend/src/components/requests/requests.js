@@ -5,7 +5,7 @@ exports.get = function get(endpoint, queryParams, callback) {
 
     let link = `${env.API_URL}/${endpoint}`;
 
-    if (queryParams != undefined) {
+    if (queryParams !== undefined) {
         link += "?" + Object.keys(queryParams)
         .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(queryParams[k]))
         .join('&');
