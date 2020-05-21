@@ -128,6 +128,8 @@ class Settings extends Component {
         if(!sn.activeFilters.includes(filter)) {
             sn.activeFilters.push(filter);
             this.props.setSelectedNode(sn);
+
+            this.props.addFilterNodes(filter);
         }
     }
 

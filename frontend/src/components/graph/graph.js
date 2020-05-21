@@ -36,10 +36,10 @@ class Graph extends Component {
     
     const label = node.id;
     const fontSize = 15 / globalScale;
-    const size = node == (this.state.hoveredNode || this.props.selectedNode) ? 0.65 : 0.6;
+    const size = node === (this.state.hoveredNode || this.props.selectedNode) ? 0.65 : 0.6;
    
     ctx.font = `${fontSize}px arial`;
-    ctx.fillStyle = node == (this.state.hoveredNode || this.props.selectedNode) ? 'white' : 'rgba(255,255,255,0.8)';
+    ctx.fillStyle = node === (this.state.hoveredNode || this.props.selectedNode) ? 'white' : 'rgba(255,255,255,0.8)';
     ctx.shadowBlur = "1";
     ctx.shadowColor = "rgba(0, 0 ,0 , 0.25)";
     ctx.shadowOffsetX = "4";
