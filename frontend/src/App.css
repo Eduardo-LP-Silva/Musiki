@@ -7,7 +7,7 @@ html, body, #root {
   background: linear-gradient(180deg, #42a7f5, #8442f5);
   background-size: 400% 400%;
   overflow-x: hidden;
-
+  
   -webkit-animation: AnimationName 60s ease infinite alternate;
   -moz-animation: AnimationName 60s ease infinite alternate;
   animation: AnimationName 60s ease infinite alternate;
