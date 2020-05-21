@@ -128,6 +128,8 @@ class Settings extends Component {
         if(!sn.activeFilters.includes(filter)) {
             sn.activeFilters.push(filter);
             this.props.setSelectedNode(sn);
+
+            this.props.addFilterNodes(filter);
         }
     }
 
@@ -137,6 +139,8 @@ class Settings extends Component {
         if(sn.activeFilters.includes(filter)) {
             sn.activeFilters.splice(sn.activeFilters.indexOf(filter), 1);
             this.props.setSelectedNode(sn);
+
+            this.props.removeFilterNodes(filter);
         }
     }
 

@@ -26,6 +26,9 @@ class App extends Component {
     this.setSelectedNode = this.setSelectedNode.bind(this);
     this.search = this.search.bind(this);
     this.setInitialSearchFilter = this.setInitialSearchFilter.bind(this);
+    this.addFilterNodes = this.addFilterNodes.bind(this);
+    this.removeFilterNodes = this.removeFilterNodes.bind(this);
+
   }
 
   render() {
@@ -49,7 +52,8 @@ class App extends Component {
               initialSearchFilter={this.state.initialSearchFilter}
               setInitialSearchFilter={this.setInitialSearchFilter}
               setSelectedNode={this.setSelectedNode}
-              ref="settings"
+              addFilterNodes={this.addFilterNodes}
+              removeFilterNodes={this.removeFilterNodes}
             />
           </Col>
           <Col md={10} className="justify-content-center">
@@ -76,30 +80,36 @@ class App extends Component {
       "search",
       { search_string: searchString, node_type: this.state.selectedNode.type },
       (result) => {
-        console.log(result);
 
         if (result.type.toUpperCase() !== "NULL") {
           result.group = this.state.groupIndex;
           // this.setState({groupIndex: this.state.groupIndex+1});
-          this.addNode(result);
+          this.addNode(result.id, result.type);
         }
       }
     );
   }
 
-  addNode(node) {
+  addNode(id, type, filterName) {
+
+    let newNode = {id: id, type: type};
+
+    if (filterName !== undefined) {
+      newNode.filterName = filterName;
+    }
+
+    console.log(newNode);
+
     this.setState({
       graphData: {
-        nodes: this.state.graphData.nodes.concat([node]),
+        nodes: this.state.graphData.nodes.concat([newNode]),
         links: this.state.graphData.links,
       },
     });
   }
 
-  addNodeChildren(parentNode, newNode) {
-    this.addNode(newNode);
-
-    let link = { source: parentNode, target: newNode.id, value: 1 };
+  addLink(parentId, targetId) {
+    let link = { source: parentId, target: targetId, value: 1 };
 
     this.setState({
       graphData: {
@@ -109,7 +119,115 @@ class App extends Component {
     });
   }
 
-  /*
+  addNodeChildren(parentId, childId, childType, filterName) {
+    this.addNode(childId, childType, filterName);
+
+    this.addLink(parentId, childId);
+  }
+
+  addFilterNodes(filter) {
+
+    let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
+    for (let i = 0; i < filters.length; i++) {
+      if (filters[i].name.toUpperCase() === filter.toUpperCase()) {
+
+        filter = filters[i];
+
+        console.log(filter);
+
+        if (!filter.reverse) {
+          requests.get("values", {
+            entities: this.state.selectedNode.id,
+            properties: filter.property,
+          }, (result, passedFilter) => {
+
+            let bindings = result.results.bindings;
+
+              for (const binding of bindings) {
+                let link = binding[passedFilter.property.replace(':', '')]?.value;
+
+                if (link !== undefined)
+                  this.addNodeChildren(this.state.selectedNode.id, link.substr(link.lastIndexOf('/')+1), "none", passedFilter.name);
+              }
+          }, filter)
+        }
+        else {
+          requests.get("entities", {
+            value: `${this.state.selectedNode.id},${filter.property}`,
+            ofilter: filter.validationKey,
+
+            }, (result, passedFilter) => {
+              let bindings = result.results.bindings;
+              let added = [];
+
+              for (const binding of bindings) {
+                let entityName =  binding["entities"].value
+                entityName = entityName.substr(entityName.lastIndexOf('/')+1);
+                let link = binding[passedFilter.validationKey.replace(':', '')]?.value;
+
+                if (!added.includes(entityName) && link !== undefined && link.toUpperCase().includes(passedFilter.validationValue.toUpperCase())) {
+                  added.push(entityName);
+                  
+                  // TODO: get type of child node
+                  this.addNodeChildren(this.state.selectedNode.id, entityName, "none", passedFilter.name);
+                }
+              }
+            }, filter)
+        }
+
+        return;
+      }
+    }
+  }
+
+  removeFilterNodes(filter) {
+
+    let filterName = filter;
+    let links = this.state.graphData.links;
+    let selectedNode = this.state.selectedNode;
+
+    for (let i = 0; i < links.length; i++) {
+      let link = links[i];
+
+      if (link.source.id === selectedNode.id && link.target.filterName.toUpperCase() === filterName.toUpperCase()) {
+
+        this.removeNode(link.target.id);
+
+        links.splice(i, 1);
+        i--;
+      }
+    }
+
+    this.setState({
+      graphData: {
+        nodes: this.state.graphData.nodes,
+        links: links,
+      },
+    });
+
+  }
+
+  removeNode(id) {
+    let nodes = this.state.graphData.nodes;
+    
+    for (let i = 0; i < nodes.length; i++) {
+      if (nodes[i].id === id) {
+        nodes.splice(i, 1);
+
+        this.setState({
+          graphData: {
+            nodes: nodes,
+            links: this.state.graphData.links,
+          },
+        });
+
+        return;
+      }
+    }
+  }
+
+
+    /*
   addNodeFilter(filter) {
     const filters = this.state.nodeFilters;
 
@@ -132,59 +250,6 @@ class App extends Component {
 
     this.addNodeFilterGraph(filter);
   } */
-
-  addNodeFilterGraph(filter) {
-
-    let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
-    for (let i = 0; i < filters.length; i++) {
-      if (filters[i].name.toUpperCase() === filter.toUpperCase()) {
-
-        filter = filters[i];
-
-        if (!filter.reverse) {
-          requests.get("values", {
-            entities: this.state.selectedNode.id,
-            properties: filter.property,
-          }, (result) => {
-
-            let bindings = result.results.bindings;
-
-            for (let i = 0; i < bindings.length; i++) {
-              let link = bindings[i][filter.property.replace(':', '')].value;
-
-              if (link != undefined)
-                this.addNodeChildren(this.state.selectedNode.id, { id: link.substr(link.lastIndexOf('/') + 1), type: "none" });
-            }
-          })
-        }
-        else {
-          requests.get("entities", {
-            value: `${this.state.selectedNode.id},${filter.property}`,
-            ofilter: filter.validationKey,
-
-          }, (result) => {
-            let bindings = result.results.bindings;
-            let added = [];
-
-            for (let i = 0; i < bindings.length; i++) {
-              let entityName = bindings[i]["entities"].value
-              entityName = entityName.substr(entityName.lastIndexOf('/') + 1);
-              let link = bindings[i][filter.validationKey.replace(':', '')]?.value;
-
-              if (!added.includes(entityName) && link != undefined && link.toUpperCase().includes(filter.validationValue.toUpperCase())) {
-                added.push(entityName);
-
-                // TODO: get type of child node
-                this.addNodeChildren(this.state.selectedNode.id, { id: entityName, type: "none" });
-              }
-            }
-          })
-        }
-
-        return;
-      }
-    }
-  }
 
   /*
   removeNodeFilter(filter) {

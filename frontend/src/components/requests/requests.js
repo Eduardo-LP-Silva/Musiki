@@ -1,7 +1,7 @@
 
 const { env } = require('../../environments/env');
 
-exports.get = function get(endpoint, queryParams, callback) {
+exports.get = function get(endpoint, queryParams, callback, state) {
 
     let link = `${env.API_URL}/${endpoint}`;
 
@@ -23,7 +23,7 @@ exports.get = function get(endpoint, queryParams, callback) {
     })
     .then(response => response.json())
     .then(data => {
-        callback(data); // JSON data parsed by `response.json()` call
+        callback(data, state); // JSON data parsed by `response.json()` call
      });
 }
 

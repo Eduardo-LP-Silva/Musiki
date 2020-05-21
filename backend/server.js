@@ -140,8 +140,3 @@ function parseInput(queryStr) {
 
     return queryStr;
 }
-
-// setTimeout(() => { dbpedia.values("Metallica", []); }, 5000);
-
-// setTimeout(() => { dbpedia.entities("Metallica,dbo:artist ", [], []); }, 7000);
-
