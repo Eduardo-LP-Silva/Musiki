@@ -25,6 +25,16 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     next();
   });
+
+app.get('/search', async function(req, res) {
+    const queryStr = req.query.queryStr;
+    const filter = req.query.filter;
+
+    queryStr = parseInput(queryStr);
+
+    
+
+});
   
 
 //Req = {search_string, node_type, node_name, filters}
@@ -39,11 +49,7 @@ app.post('/search', async function(req, res) {
         return;
     }
 
-    //DBpedia resources start with capital letters
-    search_string = search_string[0].toUpperCase() + search_string.slice(1);
-    //DBpedia resources have _ instead of spaces
-    search_string = search_string.replace(/\s/g, '_');
-
+    search_string = parseInput(search_string);
     console.log(search_string);
 
     dbpedia.values(search_string, undefined, (result) => {
@@ -124,6 +130,15 @@ function createNode(nodeType, name) {
         id: name,
         type: nodeType,
     };
+}
+
+function parseInput(queryStr) {
+    //DBpedia resources start with capital letters
+    queryStr = queryStr[0].toUpperCase() + queryStr.slice(1);
+    //DBpedia resources have _ instead of spaces
+    queryStr = queryStr.replace(/\s/g, '_');
+
+    return queryStr;
 }
 
 // setTimeout(() => { dbpedia.values("Metallica", []); }, 5000);

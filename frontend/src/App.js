@@ -16,7 +16,7 @@ class App extends Component {
     this.state = {
       settings: 0,
       graphData: { nodes: [], links: [] },
-      selectedNode: { type: "none", id: "" , activeFilters: []}, //when type = none, navbar is selected
+      selectedNode: { type: "none", id: "", activeFilters: [] }, //when type = none, navbar is selected
       initialSearchFilter: "",
       groupIndex: 1,
       nodeInfo: undefined
@@ -147,14 +147,14 @@ class App extends Component {
             properties: filter.property,
           }, (result) => {
 
-              let bindings = result.results.bindings;
+            let bindings = result.results.bindings;
 
-              for (let i = 0; i < bindings.length; i++) {
-                let link = bindings[i][filter.property.replace(':', '')].value;
+            for (let i = 0; i < bindings.length; i++) {
+              let link = bindings[i][filter.property.replace(':', '')].value;
 
-                if (link != undefined)
-                  this.addNodeChildren(this.state.selectedNode.id, {id: link.substr(link.lastIndexOf('/')+1), type:"none"});
-              }
+              if (link != undefined)
+                this.addNodeChildren(this.state.selectedNode.id, { id: link.substr(link.lastIndexOf('/') + 1), type: "none" });
+            }
           })
         }
         else {
@@ -162,27 +162,29 @@ class App extends Component {
             value: `${this.state.selectedNode.id},${filter.property}`,
             ofilter: filter.validationKey,
 
-            }, (result) => {
-                let bindings = result.results.bindings;
+          }, (result) => {
+            let bindings = result.results.bindings;
             let added = [];
 
             for (let i = 0; i < bindings.length; i++) {
-              let entityName =  bindings[i]["entities"].value
-              entityName = entityName.substr(entityName.lastIndexOf('/')+1);
+              let entityName = bindings[i]["entities"].value
+              entityName = entityName.substr(entityName.lastIndexOf('/') + 1);
               let link = bindings[i][filter.validationKey.replace(':', '')]?.value;
 
               if (!added.includes(entityName) && link != undefined && link.toUpperCase().includes(filter.validationValue.toUpperCase())) {
                 added.push(entityName);
-                
+
                 // TODO: get type of child node
-                this.addNodeChildren(this.state.selectedNode.id, {id: entityName, type:"none"});
+                this.addNodeChildren(this.state.selectedNode.id, { id: entityName, type: "none" });
               }
             }
-            })
+          })
         }
 
         return;
       }
+    }
+  }
 
   /*
   removeNodeFilter(filter) {
@@ -207,11 +209,11 @@ class App extends Component {
   } */
 
   setInitialSearchFilter(filter) {
-    this.setState({initialSearchFilter: filter});
+    this.setState({ initialSearchFilter: filter });
   }
 
   setSelectedNode(node) {
-    this.setState({selectedNode: node});
+    this.setState({ selectedNode: node });
   }
 
   setSelectedNodeFilters(filters) {
