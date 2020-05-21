@@ -89,17 +89,19 @@ class App extends Component {
     );
   }
 
-  addNode(node) {
+  addNode(id, type) {
+
+    let newNode = {id: id, type: type};
+
     this.setState({
       graphData: {
-        nodes: this.state.graphData.nodes.concat([node]),
+        nodes: this.state.graphData.nodes.concat([newNode]),
         links: this.state.graphData.links,
       },
     });
   }
 
   addLink(parentId, targetId) {
-
     let link = { source: parentId, target: targetId, value: 1 };
 
     this.setState({
@@ -131,7 +133,7 @@ class App extends Component {
                 let link = bindings[i][passedFilter.property.replace(':', '')].value;
 
                 if (link !== undefined)
-                  this.addNodeChildren(this.state.selectedNode.id, {id: link.substr(link.lastIndexOf('/')+1), type:"none"});
+                  this.addNodeChildren(this.state.selectedNode.id, link.substr(link.lastIndexOf('/')+1), "none");
               }
           }, filter)
         }
@@ -153,7 +155,7 @@ class App extends Component {
                   added.push(entityName);
                   
                   // TODO: get type of child node
-                  this.addNodeChildren(this.state.selectedNode.id, {id: entityName, type:"none"});
+                  this.addNodeChildren(this.state.selectedNode.id, entityName, "none");
                 }
               }
             }, filter)
@@ -164,11 +166,10 @@ class App extends Component {
     }
   }
 
-  addNodeChildren(parentNode, newNode) {
-    this.addNode(newNode);
+  addNodeChildren(parentId, childId, childType) {
+    this.addNode(childId, childType);
 
-    this.addLink(parentNode, newNode.id);
-    
+    this.addLink(parentId, childId);
   }
 
     /*
