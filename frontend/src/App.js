@@ -144,7 +144,7 @@ class App extends Component {
               let bindings = result.results.bindings;
 
               for (const binding of bindings) {
-                let link = binding[passedFilter.property.replace(':', '')].value;
+                let link = binding[passedFilter.property.replace(':', '')]?.value;
 
                 if (link !== undefined)
                   this.addNodeChildren(this.state.selectedNode.id, link.substr(link.lastIndexOf('/')+1), "none", passedFilter.name);
