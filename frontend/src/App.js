@@ -27,6 +27,7 @@ class App extends Component {
     this.search = this.search.bind(this);
     this.setInitialSearchFilter = this.setInitialSearchFilter.bind(this);
     this.addFilterNodes = this.addFilterNodes.bind(this);
+    this.removeFilterNodes = this.removeFilterNodes.bind(this);
 
   }
 
@@ -52,7 +53,7 @@ class App extends Component {
               setInitialSearchFilter={this.setInitialSearchFilter}
               setSelectedNode={this.setSelectedNode}
               addFilterNodes={this.addFilterNodes}
-              // removeFilterNodes={removeFilterNodes}
+              removeFilterNodes={this.removeFilterNodes}
             />
           </Col>
           <Col md={10} className="justify-content-center">
@@ -142,11 +143,11 @@ class App extends Component {
 
               let bindings = result.results.bindings;
 
-              for (let i = 0; i < bindings.length; i++) {
-                let link = bindings[i][passedFilter.property.replace(':', '')].value;
+              for (const binding of bindings) {
+                let link = binding[passedFilter.property.replace(':', '')].value;
 
                 if (link !== undefined)
-                  this.addNodeChildren(this.state.selectedNode.id, link.substr(link.lastIndexOf('/')+1), "none", filter.name);
+                  this.addNodeChildren(this.state.selectedNode.id, link.substr(link.lastIndexOf('/')+1), "none", passedFilter.name);
               }
           }, filter)
         }
@@ -159,16 +160,16 @@ class App extends Component {
               let bindings = result.results.bindings;
               let added = [];
 
-              for (let i = 0; i < bindings.length; i++) {
-                let entityName =  bindings[i]["entities"].value
+              for (const binding of bindings) {
+                let entityName =  binding["entities"].value
                 entityName = entityName.substr(entityName.lastIndexOf('/')+1);
-                let link = bindings[i][passedFilter.validationKey.replace(':', '')]?.value;
+                let link = binding[passedFilter.validationKey.replace(':', '')]?.value;
 
                 if (!added.includes(entityName) && link !== undefined && link.toUpperCase().includes(passedFilter.validationValue.toUpperCase())) {
                   added.push(entityName);
                   
                   // TODO: get type of child node
-                  this.addNodeChildren(this.state.selectedNode.id, entityName, "none", filter.name);
+                  this.addNodeChildren(this.state.selectedNode.id, entityName, "none", passedFilter.name);
                 }
               }
             }, filter)
@@ -181,9 +182,48 @@ class App extends Component {
 
   removeFilterNodes(filter) {
 
-    console.log(filter);
+    let filterName = filter;
+    let links = this.state.graphData.links;
+    let selectedNode = this.state.selectedNode;
 
+    for (let i = 0; i < links.length; i++) {
+      let link = links[i];
 
+      if (link.source.id === selectedNode.id && link.target.filterName.toUpperCase() === filterName.toUpperCase()) {
+
+        this.removeNode(link.target.id);
+
+        links.splice(i, 1);
+        i--;
+      }
+    }
+
+    this.setState({
+      graphData: {
+        nodes: this.state.graphData.nodes,
+        links: links,
+      },
+    });
+
+  }
+
+  removeNode(id) {
+    let nodes = this.state.graphData.nodes;
+    
+    for (let i = 0; i < nodes.length; i++) {
+      if (nodes[i].id === id) {
+        nodes.splice(i, 1);
+
+        this.setState({
+          graphData: {
+            nodes: nodes,
+            links: this.state.graphData.links,
+          },
+        });
+
+        return;
+      }
+    }
   }
 
 
