@@ -27,6 +27,7 @@ class App extends Component {
     this.search = this.search.bind(this);
     this.setInitialSearchFilter = this.setInitialSearchFilter.bind(this);
     this.addFilterNodes = this.addFilterNodes.bind(this);
+    this.removeFilterNodes = this.removeFilterNodes.bind(this);
   }
 
   render() {
