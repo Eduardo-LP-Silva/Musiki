@@ -79,20 +79,25 @@ class App extends Component {
       "search",
       { search_string: searchString, node_type: this.state.selectedNode.type },
       (result) => {
-        console.log(result);
 
         if (result.type.toUpperCase() !== "NULL") {
           result.group = this.state.groupIndex;
           // this.setState({groupIndex: this.state.groupIndex+1});
-          this.addNode(result);
+          this.addNode(result.id, result.type);
         }
       }
     );
   }
 
-  addNode(id, type) {
+  addNode(id, type, filterName) {
 
     let newNode = {id: id, type: type};
+
+    if (filterName !== undefined) {
+      newNode.filterName = filterName;
+    }
+
+    console.log(newNode);
 
     this.setState({
       graphData: {
@@ -113,6 +118,11 @@ class App extends Component {
     });
   }
 
+  addNodeChildren(parentId, childId, childType, filterName) {
+    this.addNode(childId, childType, filterName);
+
+    this.addLink(parentId, childId);
+  }
 
   addFilterNodes(filter) {
 
@@ -121,6 +131,8 @@ class App extends Component {
       if (filters[i].name.toUpperCase() === filter.toUpperCase()) {
 
         filter = filters[i];
+
+        console.log(filter);
 
         if (!filter.reverse) {
           requests.get("values", {
@@ -134,7 +146,7 @@ class App extends Component {
                 let link = bindings[i][passedFilter.property.replace(':', '')].value;
 
                 if (link !== undefined)
-                  this.addNodeChildren(this.state.selectedNode.id, link.substr(link.lastIndexOf('/')+1), "none");
+                  this.addNodeChildren(this.state.selectedNode.id, link.substr(link.lastIndexOf('/')+1), "none", filter.name);
               }
           }, filter)
         }
@@ -156,7 +168,7 @@ class App extends Component {
                   added.push(entityName);
                   
                   // TODO: get type of child node
-                  this.addNodeChildren(this.state.selectedNode.id, entityName, "none");
+                  this.addNodeChildren(this.state.selectedNode.id, entityName, "none", filter.name);
                 }
               }
             }, filter)
@@ -167,11 +179,13 @@ class App extends Component {
     }
   }
 
-  addNodeChildren(parentId, childId, childType) {
-    this.addNode(childId, childType);
+  removeFilterNodes(filter) {
 
-    this.addLink(parentId, childId);
+    console.log(filter);
+
+
   }
+
 
     /*
   addNodeFilter(filter) {
