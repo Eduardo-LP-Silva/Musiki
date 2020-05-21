@@ -134,37 +134,55 @@ class App extends Component {
   } */
 
   addNodeFilterGraph(filter) {
+
     let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
     for (let i = 0; i < filters.length; i++) {
       if (filters[i].name.toUpperCase() === filter.toUpperCase()) {
+
         filter = filters[i];
 
         if (!filter.reverse) {
-          requests.get(
-            "values",
-            {
-              entities: this.state.selectedNode.id,
-              properties: filter.property,
-            },
-            (result) => {
+          requests.get("values", {
+            entities: this.state.selectedNode.id,
+            properties: filter.property,
+          }, (result) => {
+
               let bindings = result.results.bindings;
 
               for (let i = 0; i < bindings.length; i++) {
-                let link = bindings[i][filter.property.replace(":", "")].value;
+                let link = bindings[i][filter.property.replace(':', '')].value;
 
-                this.addNodeChildren(this.state.selectedNode.id, {
-                  id: link.substr(link.lastIndexOf("/") + 1),
-                  type: "none",
-                });
+                if (link != undefined)
+                  this.addNodeChildren(this.state.selectedNode.id, {id: link.substr(link.lastIndexOf('/')+1), type:"none"});
+              }
+          })
+        }
+        else {
+          requests.get("entities", {
+            value: `${this.state.selectedNode.id},${filter.property}`,
+            ofilter: filter.validationKey,
+
+            }, (result) => {
+                let bindings = result.results.bindings;
+            let added = [];
+
+            for (let i = 0; i < bindings.length; i++) {
+              let entityName =  bindings[i]["entities"].value
+              entityName = entityName.substr(entityName.lastIndexOf('/')+1);
+              let link = bindings[i][filter.validationKey.replace(':', '')]?.value;
+
+              if (!added.includes(entityName) && link != undefined && link.toUpperCase().includes(filter.validationValue.toUpperCase())) {
+                added.push(entityName);
+                
+                // TODO: get type of child node
+                this.addNodeChildren(this.state.selectedNode.id, {id: entityName, type:"none"});
               }
             }
-          );
+            })
         }
 
         return;
       }
-    }
-  }
 
   /*
   removeNodeFilter(filter) {
