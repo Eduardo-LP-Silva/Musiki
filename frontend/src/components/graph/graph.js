@@ -13,6 +13,7 @@ class Graph extends Component {
 
     this.onNodeClick = this.onNodeClick.bind(this);
     this.onNodeHover = this.onNodeHover.bind(this);
+    this.onBackgroundClick = this.onBackgroundClick.bind(this);
     this.clickAnimation = this.clickAnimation.bind(this);
     this.styleNodes = this.styleNodes.bind(this);
 
@@ -25,9 +26,13 @@ class Graph extends Component {
         nodeLabel="id"
         linkColor={() => "rgba(255,255,255,0.7)"}
         linkLabel="link"
+        dagMode={'td'}
+        dagLevelDistance={this.radius*2}
         nodeRelSize={this.radius}
         width={window.innerWidth * 0.8}
+        height= {window.innerHeight * 0.75}
         onNodeClick={this.onNodeClick}
+        onBackgroundClick={this.onBackgroundClick}
         onNodeHover={this.onNodeHover}
         nodeCanvasObject={this.styleNodes}
       />
@@ -41,12 +46,12 @@ class Graph extends Component {
     const label = node.id;
     const fontSize = 15 / globalScale;
     const size =
-      node == (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
+      node === (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
 
     //Node design properties
     ctx.font = `${fontSize}px arial`;
     ctx.fillStyle =
-      node == (this.state.hoveredNode || this.props.selectedNode)
+      node === (this.state.hoveredNode || this.props.selectedNode)
         ? "white"
         : "rgba(255,255,255,0.8)";
     ctx.shadowBlur = "1";
@@ -55,11 +60,12 @@ class Graph extends Component {
     ctx.shadowOffsetY = "4";
 
     this.radius = ctx.measureText(label).width * size;
+      
     ctx.beginPath();
     ctx.arc(
       node.x,
       node.y,
-      ctx.measureText(label).width * size,
+      this.radius,
       0,
       2 * Math.PI,
       false
@@ -102,7 +108,7 @@ class Graph extends Component {
       ctx.arc(
         node.x,
         node.y,
-        ctx.measureText(label).width * (size + 0.15),
+        this.radius + 2,
         0,
         2 * Math.PI,
         false
@@ -120,6 +126,13 @@ class Graph extends Component {
     }
     this.props.setSelectedNode(node);
     //else maybe ?
+  }
+
+  onBackgroundClick(){
+
+    let nullNode = { type: "none", id: "" };
+
+    this.props.setSelectedNode(nullNode);
   }
 
   onNodeHover(node) {

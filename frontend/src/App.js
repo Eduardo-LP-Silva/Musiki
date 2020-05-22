@@ -62,8 +62,8 @@ class App extends Component {
               graphData={this.state.graphData}
               selectedNode={this.state.selectedNode}
               setSelectedNode={this.setSelectedNode}
-            />
-          </Col>
+            /> 
+          </Col> 
         </Row>
       </div>
     );

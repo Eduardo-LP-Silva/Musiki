@@ -1,6 +1,8 @@
 #settings {
    /*width: fit-content;*/
     background-color: white;
+    background-image: url('line.svg');
+    background-repeat: no-repeat;
     border-radius: 0.5em;
     padding-top: 1em;
     margin-top: 1em;
@@ -24,6 +26,7 @@
 .filter-container {
     position: relative;
     padding-left: 40px;
+    margin: 0 0 25px 10px;
     cursor: pointer;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -41,24 +44,29 @@
 .filter-btn {
     position: absolute;
     left: 0;
-    height: 15px;
-    width: 15px;
+    height: 14px;
+    width: 14px;
+    margin-top: 5px;
     background-color: rgba(66,167,245,1);
+    border: 3px solid white;
     border-radius: 50%;
     transition: all 0.3s ease;
     left: 6px;
 }
 
 .filter-container:hover > .filter-btn {
-    width: 22px;
-    height: 22px;
-    left: 3px;
+    width: 17px;
+    height: 17px;
+    margin-top: 2px;
+    left: 5px;
+    
 }
 
 .filter-container > input:checked ~ .filter-btn {
-    width: 22px;
-    height: 22px;
-    left: 3px;
+    width: 17px;
+    height: 17px;
+    margin-top: 2px;
+    left: 5px;
 }
 
 .filter-btn:after {
@@ -71,11 +79,6 @@
     display: block;
 }
 
-.filter-vertical-div {
-    margin-top: 5px;
-    margin-bottom: 5px;
-    margin-left: 13px;
-    height: 20px;
-    width: 2px;
-    background-color: rgba(132,66,245,1);
+.filterBanner {
+    margin-bottom: 35px !important;
 }
