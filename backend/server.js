@@ -27,13 +27,31 @@ app.use((req, res, next) => {
   });
 
 app.get('/search', async function(req, res) {
-    const queryStr = req.query.queryStr;
     const filter = req.query.filter;
+    let queryStr = req.query.queryStr;
 
     queryStr = parseInput(queryStr);
 
-    
+    console.log(queryStr);
 
+    if(nodeInfo.hasOwnProperty(filter)) {
+        const originalStr = parseOutput(queryStr);
+
+        dbpedia.values(queryStr, undefined, (result) => {
+            if(checkInitialNodeType(result.results.bindings, nodeInfo[filter].validation.toUpperCase())) {
+                res.status(200);
+                res.send(createNode(filter, originalStr));
+            }
+            else {
+                res.status(404);
+                res.send(`No results for ${originalStr} of type ${filter} were found.`);
+            }
+        });
+    }
+    else {
+        res.status(400);
+        res.send(`Unknown filter ${filter}`);
+    }
 });
   
 
@@ -109,6 +127,17 @@ app.get('/nodeInfo', function(req, res) {
     res.send(nodeInfo);
 });
 
+function checkInitialNodeType(bindings, validation) {
+    for (let binding of bindings) {
+        const value = binding['values'].value.toUpperCase();
+
+        if(value.includes(validation))
+            return true;
+    }
+
+    return false;
+}
+
 function detectNodeType(bindings) {
 
     for (let binding of bindings) {
@@ -139,4 +168,8 @@ function parseInput(queryStr) {
     queryStr = queryStr.replace(/\s/g, '_');
 
     return queryStr;
+}
+
+function parseOutput(queryStr) {
+    return queryStr.replace(/_/g, ' ')
 }

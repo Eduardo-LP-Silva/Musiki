@@ -17,7 +17,7 @@ class App extends Component {
       settings: 0,
       graphData: { nodes: [], links: [] },
       selectedNode: { type: "none", id: "", activeFilters: [] }, //when type = none, navbar is selected
-      initialSearchFilter: "",
+      initialSearchFilter: "Artist",
       groupIndex: 1,
       nodeInfo: undefined
     };
@@ -76,23 +76,18 @@ class App extends Component {
   }
 
   search(searchString) {
-    requests.post(
-      "search",
-      { search_string: searchString, node_type: this.state.selectedNode.type },
-      (result) => {
 
-        if (result.type.toUpperCase() !== "NULL") {
-          result.group = this.state.groupIndex;
-          // this.setState({groupIndex: this.state.groupIndex+1});
-          this.addNode(result.id, result.type);
-        }
-      }
-    );
+    requests.get('search', {filter: this.state.initialSearchFilter, queryStr: searchString}, (res) => {
+      console.log(res);
+      this.addNode(res.id, res.type);
+    });
   }
 
   addNode(id, type, filterName) {
 
     let newNode = {id: id, type: type};
+
+    console.log(newNode);
 
     if (filterName !== undefined) {
       newNode.filterName = filterName;

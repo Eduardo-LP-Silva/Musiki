@@ -1,7 +1,5 @@
 exports.nodeInfo = {
     "band": {
-        //Maybe add validation key?
-        //key: rdf:type
         validation: "MusicGroup",
         filters: [
             {
@@ -39,7 +37,6 @@ exports.nodeInfo = {
         ]
     },
     "artist": {
-        //key: rdf:type
         validation: "Artist",
         filters: [
             {
@@ -71,7 +68,6 @@ exports.nodeInfo = {
         ]
     },
     "genre": {
-        //key: rdf:type
         validation: "Genre",
         filters: [
             {
@@ -105,7 +101,6 @@ exports.nodeInfo = {
         ]
     },
     "album": {
-        //key: dbp:type
         validation: "album",
         filters: [
             {
@@ -126,7 +121,6 @@ exports.nodeInfo = {
         ]
     },
     "single": {
-        //key: rdf:type
         validation: "Single",
         filters: [
             {
@@ -142,7 +136,6 @@ exports.nodeInfo = {
         ]
     },
     "song": {
-        //key: rdfs:label
         validation: "song",
         filters: [
             {

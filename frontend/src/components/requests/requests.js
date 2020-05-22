@@ -12,14 +12,7 @@ exports.get = function get(endpoint, queryParams, callback, state) {
     }
 
     fetch(link, {
-        method: 'GET', // *GET, POST, PUT, DELETE, etc.
-        // headers: {
-        //   'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-        // },
-        // body: this.searchParams({
-        //     search_string: searchString,
-        //     node_type: this.state.selectedNode.type
-        // }) // body data type must match "Content-Type" header
+        method: 'GET'
     })
     .then(response => response.json())
     .then(data => {

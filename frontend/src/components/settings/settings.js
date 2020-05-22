@@ -94,10 +94,10 @@ class Settings extends Component {
                 <label className="filter-container" key={this.state.filters[i]}>
                     {filter}
                     <input
-                        id={filter} 
+                        id={this.state.filters[i]} 
                         name="filter" //name must be the same for radio buttons to work
                         type={this.props.selectedNode.type === 'none' ? 'radio' : 'checkbox'} //Initial search can only have one filter
-                        value={filter}
+                        value={this.state.filters[i]}
                         onChange={this.changeFilter}/>
                     <span className="filter-btn"></span>
                 </label>
