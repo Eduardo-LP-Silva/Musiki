@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Row, Col } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { ReactComponent as Logo } from '../../resources/icons/music.svg';
@@ -19,10 +20,10 @@ class Navbar extends Component {
                 <div id="search" >
                     <Logo className="Logo" height="50" width="50" />
                     <span id="musiki">Musiki</span>
-                    <div id="search-bar" onClick={this.selectNavbar}>
+                    <Row id="search-bar" onClick={this.selectNavbar}>
                         <FontAwesomeIcon onClick={this.search} className="search-icon" icon={faSearch}/>
                         <input type="text" placeholder="Search ..." required/>
-                    </div>
+                    </Row>
                 </div>
                 <div id="wikipedia">
                     <span id="poweredWikipedia">Powered By <p><b>Wikipedia</b></p></span>

@@ -26,8 +26,6 @@ class Graph extends Component {
         nodeLabel="id"
         linkColor={() => "rgba(255,255,255,0.7)"}
         linkLabel="link"
-        dagMode={'td'}
-        dagLevelDistance={this.radius + 3}
         nodeRelSize={this.radius}
         width={window.innerWidth * 0.8}
         height= {window.innerHeight * 0.75}
@@ -81,7 +79,7 @@ class Graph extends Component {
       ctx.shadowColor = "rgba(0, 0, 0, 0)";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(label, node.x, node.y + 17);
+      ctx.fillText(label, node.x, node.y + 16);
       ctx.save();
     }
 

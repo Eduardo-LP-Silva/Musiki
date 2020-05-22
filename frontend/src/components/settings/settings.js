@@ -85,7 +85,7 @@ class Settings extends Component {
 
         const filters = [];
 
-        if(this.state.filters.length === 6){
+   /*     if(this.state.filters.length === 6){
             document.getElementById('settings').style = "background-size: auto 65%";
             document.getElementById('settings').style.backgroundPosition = "21% 65%";
             
@@ -100,10 +100,15 @@ class Settings extends Component {
             document.getElementById('settings').style.backgroundPosition = "18% 40%";
         }
 
+        else if(this.state.filters.length ===  3) {
+            document.getElementById('settings').style.backgroundSize = "10% 30%";
+            document.getElementById('settings').style.backgroundPosition = "18% 40%";
+        }
+
         else if(this.state.filters.length ===  2) {
             document.getElementById('settings').style.backgroundSize = "10% 20%";
             document.getElementById('settings').style.backgroundPosition = "18% 40%";
-        }
+        }*/
 
 
         if (this.state.filters.length > 0)
@@ -124,6 +129,9 @@ class Settings extends Component {
                     <span className="filter-btn"></span>
                 </label>
             );
+
+            if (i !== this.state.filters.length - 1)
+            filters.push(<div className="filter-vertical-div" key={`div#${i}`}></div>);
         }
 
         return filters;
