@@ -1,89 +1,103 @@
 #navbar {
-    width: 100%;
-    display: flex;
-    color: white;
-    font-family: 'Roboto Condensed', sans-serif;
-    margin-top: 1em;
+  width: 100%;
+  display: flex;
+  color: white;
+  font-family: "Roboto Condensed", sans-serif;
+  margin-top: 1em;
 }
 
 #search {
-    width: 70%;
-    display: flex;
-    align-items: center;
+  width: 70%;
+  display: flex;
+  align-items: center;
 }
 
 .Logo {
-   filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
 }
 
 #musiki {
-    font-size: 18pt;
-    margin-right: 3em;
-    margin-left: 1em;
-    line-height: 29px;
-    text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  font-size: 18pt;
+  margin-right: 16em;
+  margin-left: 1em;
+  line-height: 29px;
+  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 #search-bar {
-    width: 50%;
-    min-width: 150px;
-    padding: 0.5em 1em;
-    border-radius: 2em;
-    background: rgba(255, 255, 255, 0.5);
+  width: 50%;
+  min-width: 150px;
+  padding: 0.5em 1em;
+  border-radius: 2em;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 #search-bar > .search-icon {
-    color: gray;
-    margin-right: 1%;
-    width: 6%;
+  color: white;
+  margin-right: 1%;
+  width: 6%;
 }
 
 #search-bar > .search-icon:hover {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 #search-bar > input {
-    border: none;
-    font-family: inherit;
-    font-size: 12pt;
-    font-style: italic;
-    width: 90%;
-    margin-left: 0.5em;
-    background-color: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 12pt;
+  font-style: italic;
+  width: 90%;
+  margin-left: 0.5em;
+  background-color: transparent;
+  color: white;
+}
+
+#search-bar > ::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 1;
+}
+
+#search-bar:focus-within > ::placeholder {
+  color: grey;
+  opacity: 1;
 }
 
 #search-bar:focus-within {
-    background: rgba(255, 255, 255, 0.9);
-    transition: ease-in-out 0.3s;
-    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.9);
+  transition: ease-in-out 0.3s;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+#search-bar:focus-within > .search-icon, #search-bar:focus-within > input {
+  color: gray;
 }
 
 #search-bar > input:required {
-    box-shadow: none;
+  box-shadow: none;
 }
 
 #search-bar > input:focus {
-    box-shadow: none;
-    outline: none;
-
+  box-shadow: none;
+  outline: none;
 }
 
 #wikipedia {
-    display:flex;
-    width:30%;
-    flex-flow: row-reverse;
-    align-items: center;
-    font-size: 10pt;
+  display: flex;
+  width: 30%;
+  flex-flow: row-reverse;
+  align-items: center;
+  font-size: 10pt;
 }
 
 .wikiLogo {
-    margin-right: 1em;
+  margin-right: 1em;
 }
 
 #poweredWikipedia {
-    margin-top: 0.5em;
+  margin-top: 0.5em;
 }
 
 #poweredWikipedia b {
-    font-size: 12pt;
+  font-size: 12pt;
 }

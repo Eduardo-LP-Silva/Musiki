@@ -82,7 +82,7 @@ class Settings extends Component {
     }
 
     renderFilters() {
-        
+
         const filters = [];
 
         if(this.state.filters.length === 6){
@@ -90,9 +90,18 @@ class Settings extends Component {
             document.getElementById('settings').style.backgroundPosition = "21% 65%";
             
         }
+        else if(this.state.filters.length ===  5) {
+            document.getElementById('settings').style.backgroundSize = "10% 45%";
+            document.getElementById('settings').style.backgroundPosition = "18% 40%";
+        }
+
         else if(this.state.filters.length ===  4) {
-            console.log("4");
             document.getElementById('settings').style.backgroundSize = "10% 40%";
+            document.getElementById('settings').style.backgroundPosition = "18% 40%";
+        }
+
+        else if(this.state.filters.length ===  2) {
+            document.getElementById('settings').style.backgroundSize = "10% 20%";
             document.getElementById('settings').style.backgroundPosition = "18% 40%";
         }
 

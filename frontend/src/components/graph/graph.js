@@ -27,7 +27,7 @@ class Graph extends Component {
         linkColor={() => "rgba(255,255,255,0.7)"}
         linkLabel="link"
         dagMode={'td'}
-        dagLevelDistance={this.radius*2}
+        dagLevelDistance={this.radius + 3}
         nodeRelSize={this.radius}
         width={window.innerWidth * 0.8}
         height= {window.innerHeight * 0.75}
@@ -47,6 +47,8 @@ class Graph extends Component {
     const fontSize = 15 / globalScale;
     const size =
       node === (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
+    
+    const  rad = ctx.measureText(label).width;
 
     //Node design properties
     ctx.font = `${fontSize}px arial`;
@@ -60,24 +62,48 @@ class Graph extends Component {
     ctx.shadowOffsetY = "4";
 
     this.radius = ctx.measureText(label).width * size;
-      
+    let commonRad = 10 * size;
+  
     ctx.beginPath();
-    ctx.arc(
-      node.x,
-      node.y,
-      this.radius,
-      0,
-      2 * Math.PI,
-      false
-    );
-    ctx.fill();
+        
+    if(rad > 30){
+      ctx.arc(
+        node.x,
+        node.y,
+        commonRad,
+        0,
+        2 * Math.PI,
+        false
+      );
+      ctx.fill();
+  
+      ctx.fillStyle = node === this.props.selectedNode ? "white" : "rgba(255,255,255,0.8)";
+      ctx.shadowColor = "rgba(0, 0, 0, 0)";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, node.x, node.y + 17);
+      ctx.save();
+    }
 
-    ctx.fillStyle = node === this.props.selectedNode ? "#595959" : "#808080";
-    ctx.shadowColor = "rgba(0, 0, 0, 0)";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(label, node.x, node.y);
-    ctx.save();
+    else {
+      ctx.arc(
+        node.x,
+        node.y,
+        this.radius,
+        0,
+        2 * Math.PI,
+        false
+      );
+      ctx.fill();
+  
+      ctx.fillStyle = node === this.props.selectedNode ? "#595959" : "#808080";
+      ctx.shadowColor = "rgba(0, 0, 0, 0)";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, node.x, node.y);
+      ctx.save();
+     
+    }
    
     //Click Animation
     this.clickAnimation(node, ctx, label, size);
@@ -88,7 +114,7 @@ class Graph extends Component {
   clickAnimation(node, ctx, label, size) {
 
     var time = new Date();
-  
+   
     if (node === this.props.selectedNode) {
       ctx.strokeStyle = "white";
       ctx.shadowColor = "rgba(0, 0, 0, 0)";
@@ -97,7 +123,9 @@ class Graph extends Component {
       ctx.shadowOffsetX = "4";
       ctx.shadowOffsetY = "4";
       ctx.lineWidth = 1;
-      ctx.setLineDash([((2* Math.PI *ctx.measureText(label).width * size)/5), ((2* Math.PI *ctx.measureText(label).width * size)/5)]);
+      const  rad = ctx.measureText(label).width > 25 ? 10 : ctx.measureText(label).width * size;
+
+      ctx.setLineDash([((2* Math.PI * rad)/5), ((2* Math.PI * rad)/5)]);
       ctx.translate(node.x, node.y);
       ctx.rotate(
         ((2 * Math.PI) / 6) * time.getSeconds() +
@@ -105,14 +133,14 @@ class Graph extends Component {
       );
       ctx.translate(-node.x, -node.y);
       ctx.beginPath();
-      ctx.arc(
-        node.x,
-        node.y,
-        this.radius + 2,
-        0,
-        2 * Math.PI,
-        false
-      );
+        ctx.arc(
+          node.x,
+          node.y,
+          rad + 2,
+          0,
+          2 * Math.PI,
+          false
+        );     
       ctx.stroke();
       window.requestAnimationFrame(this.clickAnimation);
       ctx.restore();

@@ -19,7 +19,7 @@ class App extends Component {
       selectedNode: { type: "none", id: "", activeFilters: [] }, //when type = none, navbar is selected
       initialSearchFilter: "Artist",
       groupIndex: 1,
-      nodeInfo: undefined
+      nodeInfo: undefined,
     };
 
     this.toggleSettings = this.toggleSettings.bind(this);
@@ -28,23 +28,26 @@ class App extends Component {
     this.setInitialSearchFilter = this.setInitialSearchFilter.bind(this);
     this.addFilterNodes = this.addFilterNodes.bind(this);
     this.removeFilterNodes = this.removeFilterNodes.bind(this);
-
   }
 
   render() {
     return (
       <div id="content">
-        <Navbar
-          search={this.search}
-          setSelectedNode={this.setSelectedNode}
-        />
-        <FontAwesomeIcon
-          id="settings-icon"
-          icon={faCog}
-          onClick={this.toggleSettings}
-        />
+        <Navbar search={this.search} setSelectedNode={this.setSelectedNode} />
         <Row>
-          <Col md={2}>
+          <Col id="filterSection" md={2}>
+            <Row className="settingsSection align-items-center">
+              <Col md={2}>
+                <FontAwesomeIcon
+                  id="settings-icon"
+                  icon={faCog}
+                  onClick={this.toggleSettings}
+                />
+              </Col>
+              <Col md={10}>
+                <span id="settings-span">Settings</span>
+              </Col>
+            </Row>
             <Settings
               selectedNode={this.state.selectedNode}
               opacity={this.state.settings}
@@ -62,8 +65,8 @@ class App extends Component {
               graphData={this.state.graphData}
               selectedNode={this.state.selectedNode}
               setSelectedNode={this.setSelectedNode}
-            /> 
-          </Col> 
+            />
+          </Col>
         </Row>
       </div>
     );
@@ -84,8 +87,7 @@ class App extends Component {
   }
 
   addNode(id, type, filterName) {
-
-    let newNode = {id: id, type: type};
+    let newNode = { id: id, type: type };
 
     console.log(newNode);
 
@@ -121,11 +123,9 @@ class App extends Component {
   }
 
   addFilterNodes(filter) {
-
     let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
     for (let i = 0; i < filters.length; i++) {
       if (filters[i].name.toUpperCase() === filter.toUpperCase()) {
-
         filter = filters[i];
 
         console.log(filter);
@@ -139,35 +139,58 @@ class App extends Component {
             let bindings = result.results.bindings;
 
               for (const binding of bindings) {
-                let link = binding[passedFilter.property.replace(':', '')]?.value;
+                let link =
+                  binding[passedFilter.property.replace(":", "")]?.value;
 
                 if (link !== undefined)
-                  this.addNodeChildren(this.state.selectedNode.id, link.substr(link.lastIndexOf('/')+1), "none", passedFilter.name);
+                  this.addNodeChildren(
+                    this.state.selectedNode.id,
+                    link.substr(link.lastIndexOf("/") + 1),
+                    "none",
+                    passedFilter.name
+                  );
               }
-          }, filter)
-        }
-        else {
-          requests.get("entities", {
-            value: `${this.state.selectedNode.id},${filter.property}`,
-            ofilter: filter.validationKey,
-
-            }, (result, passedFilter) => {
+            },
+            filter
+          );
+        } else {
+          requests.get(
+            "entities",
+            {
+              value: `${this.state.selectedNode.id},${filter.property}`,
+              ofilter: filter.validationKey,
+            },
+            (result, passedFilter) => {
               let bindings = result.results.bindings;
               let added = [];
 
               for (const binding of bindings) {
-                let entityName =  binding["entities"].value
-                entityName = entityName.substr(entityName.lastIndexOf('/')+1);
-                let link = binding[passedFilter.validationKey.replace(':', '')]?.value;
+                let entityName = binding["entities"].value;
+                entityName = entityName.substr(entityName.lastIndexOf("/") + 1);
+                let link =
+                  binding[passedFilter.validationKey.replace(":", "")]?.value;
 
-                if (!added.includes(entityName) && link !== undefined && link.toUpperCase().includes(passedFilter.validationValue.toUpperCase())) {
+                if (
+                  !added.includes(entityName) &&
+                  link !== undefined &&
+                  link
+                    .toUpperCase()
+                    .includes(passedFilter.validationValue.toUpperCase())
+                ) {
                   added.push(entityName);
-                  
+
                   // TODO: get type of child node
-                  this.addNodeChildren(this.state.selectedNode.id, entityName, "none", passedFilter.name);
+                  this.addNodeChildren(
+                    this.state.selectedNode.id,
+                    entityName,
+                    "none",
+                    passedFilter.name
+                  );
                 }
               }
-            }, filter)
+            },
+            filter
+          );
         }
 
         return;
@@ -176,7 +199,6 @@ class App extends Component {
   }
 
   removeFilterNodes(filter) {
-
     let filterName = filter;
     let links = this.state.graphData.links;
     let selectedNode = this.state.selectedNode;
@@ -184,8 +206,10 @@ class App extends Component {
     for (let i = 0; i < links.length; i++) {
       let link = links[i];
 
-      if (link.source.id === selectedNode.id && link.target.filterName.toUpperCase() === filterName.toUpperCase()) {
-
+      if (
+        link.source.id === selectedNode.id &&
+        link.target.filterName.toUpperCase() === filterName.toUpperCase()
+      ) {
         this.removeNode(link.target.id);
 
         links.splice(i, 1);
@@ -199,12 +223,11 @@ class App extends Component {
         links: links,
       },
     });
-
   }
 
   removeNode(id) {
     let nodes = this.state.graphData.nodes;
-    
+
     for (let i = 0; i < nodes.length; i++) {
       if (nodes[i].id === id) {
         nodes.splice(i, 1);
@@ -221,8 +244,7 @@ class App extends Component {
     }
   }
 
-
-    /*
+  /*
   addNodeFilter(filter) {
     const filters = this.state.nodeFilters;
 

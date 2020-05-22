@@ -66,12 +66,25 @@ html, body, #root {
 }
 
 #settings-icon {
-  margin-top: 1em;
   color: white;
+  transition: all 0.2s ease;
+}
+
+.settingsSection:hover > #settings-span {
+  color: white !important;
+}
+
+#settings-span {
+  color:transparent;
+  cursor: none;
   transition: all 0.2s ease;
 }
 
 #settings-icon:hover {
   cursor: pointer;
   transform: rotate(30deg);
+}
+
+#filterSection {
+  margin-top: 5em;
 }
