@@ -89,8 +89,9 @@ class App extends Component {
   }
 
   search(searchString) {
-    requests.get('search', {filter: this.state.initialSearchFilter, queryStr: searchString}, (res) => {
+    requests.get('search', {filter: this.state.initialSearchFilter, queryStr: searchString}, (res, status) => {
       console.log(res);
+      console.log(status);
       this.addNode(res.id, res.type);
     });
 
