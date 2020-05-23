@@ -85,6 +85,8 @@ app.get('/values', function(req, res) {
 
     let {entities, properties} = req.query;
 
+    entities = parseInput(entities);
+
     res.status(200);
 
     if (entities != undefined) {
@@ -106,6 +108,8 @@ app.get('/values', function(req, res) {
 app.get('/entities', function(req, res) {
 
     let {value, filter, ofilter} = req.query;
+
+    value = parseInput(value);
 
     res.status(200);
 
