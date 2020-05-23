@@ -108,6 +108,14 @@ class App extends Component {
   }
 
   search(searchString) {
+    const nodes = this.state.graphData.nodes;
+    const links = this.state.graphData.links;
+    
+    nodes.splice(0, nodes.length);
+    links.splice(0, links.length);
+
+    this.setState({graphData: {nodes: nodes, links: links}});
+    
     requests.get(
       "search",
       { filter: this.state.initialSearchFilter, queryStr: searchString },

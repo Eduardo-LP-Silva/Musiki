@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
-import RangeSlider from 'react-bootstrap-range-slider';
-import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import './settings.css';
 
 class Settings extends Component {
