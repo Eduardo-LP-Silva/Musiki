@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { ForceGraph2D } from "react-force-graph";
 import "./graph.css";
 
+const requests = require("../requests/requests");
+
 class Graph extends Component {
   constructor(props) {
     super(props);
@@ -109,9 +111,27 @@ class Graph extends Component {
     if (node && this.props.selectedNode !== node) {
       if (!node.hasOwnProperty("activeFilters")) 
         node.activeFilters = [];
+        
+        requests.get("values", {
+          entities: node.id,
+          properties: "dbo:abstract",
+        }, (result, status, state) => {
+          if (status === 200) {
+            let bindings = result.results.bindings;
 
-      this.props.setSelectedNode(node);
-      console.log(node);
+            for (const binding of bindings) {
+              let value = binding["dboabstract"]?.value;
+                let lang = binding["dboabstract"]["xml:lang"];
+
+              if (value !== undefined && lang !== undefined && lang === "en") {
+                node.abstract = value;
+                console.log(value);
+                this.props.setSelectedNode(node);
+                break;
+              }
+            }
+          }
+        });
     }
     
     //else maybe ?

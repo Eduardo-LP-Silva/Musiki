@@ -91,7 +91,9 @@ class App extends Component {
     requests.get('search', {filter: this.state.initialSearchFilter, queryStr: searchString}, (res, status) => {
       console.log(res);
       console.log(status);
-      this.addNode(res.id, res.type);
+
+      if (status === 200)
+        this.addNode(res.id, res.type);
     });
 
     //IF RESPONSE STATUS 400 -> Warning

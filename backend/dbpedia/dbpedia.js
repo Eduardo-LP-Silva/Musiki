@@ -70,8 +70,8 @@ exports.values = function values(entities, properties, callback) {
 	.catch(async function(error) {
 		if (!success) {
 			console.log('Failed to make GET request on ' + link + ", retrying in 1 sec");
-			await new Promise(resolve => setTimeout(resolve, 1000));
-			values(entities, properties, callback);
+			
+			callback({error: error.code});
 		}
 	});
 }
@@ -130,8 +130,7 @@ exports.entities = function entities(value, filter, ofilter, callback) {
 	.catch(async function(error) {
 		if (!success) {
 			console.log('Failed to make GET request on ' + link + ", retrying in 1 sec");
-			await new Promise(resolve => setTimeout(resolve, 1000));
-			entities(value, filter, ofilter);
+			callback({error: error.code});
 		}
 	});
 }

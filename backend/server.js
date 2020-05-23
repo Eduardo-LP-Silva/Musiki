@@ -27,7 +27,7 @@ app.use((req, res, next) => {
   });
 
 app.get('/search', async function(req, res) {
-    const filter = req.query.filter;
+    const filter = req.query.filter.toLowerCase();
     let queryStr = req.query.queryStr;
 
     queryStr = parseInput(queryStr);
@@ -38,7 +38,16 @@ app.get('/search', async function(req, res) {
         const originalStr = parseOutput(queryStr);
 
         dbpedia.values(queryStr, undefined, (result) => {
-            if(checkInitialNodeType(result.results.bindings, nodeInfo[filter].validation.toUpperCase())) {
+            
+
+            if (result.error !== undefined) {
+
+                console.log(JSON.stringify(result.error));
+                res.status(400);
+                res.send(result);
+            }
+
+            else if(checkInitialNodeType(result.results.bindings, nodeInfo[filter].validation.toUpperCase())) {
                 res.status(200);
                 res.send(createNode(filter, originalStr));
             }
@@ -55,32 +64,6 @@ app.get('/search', async function(req, res) {
 });
   
 
-//Req = {search_string, node_type, node_name, filters}
-app.post('/search', async function(req, res) {
-
-    let {search_string} = req.body;
-   
-    res.status(200);
-   
-    if (search_string === "") {
-        res.send(createNode("null", search_string));
-        return;
-    }
-
-    search_string = parseInput(search_string);
-    console.log(search_string);
-
-    dbpedia.values(search_string, undefined, (result) => {
-
-        if (result.results.bindings.length > 0) {
-            res.send(createNode(detectNodeType(result.results.bindings), search_string));
-            return;
-        }
-
-        res.send(createNode("null", search_string));
-    });
-});
-
 app.get('/values', function(req, res) {
 
     let {entities, properties} = req.query;
@@ -92,12 +75,15 @@ app.get('/values', function(req, res) {
     if (entities != undefined) {
         dbpedia.values(entities, properties, (result) => {
 
-            if (result.results.bindings.length > 0) {
+            if (result.error != undefined) {
+                res.status(400);
+                res.send(result);
+            }
+
+            else if (result.results.bindings.length > 0) {
                 res.send(result);
                 return;
             }
-
-            res.send({});
         });
     }
     else {
@@ -116,7 +102,14 @@ app.get('/entities', function(req, res) {
     if (value != undefined) {
         dbpedia.entities(value, filter, ofilter, (result) => {
 
-            res.send(result);
+            if (result.error != undefined) {
+                res.status(400);
+                res.send(result);
+            }
+            else {
+                res.send(result);
+
+            }
         });
     }
     else {
