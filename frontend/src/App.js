@@ -79,7 +79,6 @@ class App extends Component {
   }
 
   search(searchString) {
-
     requests.get('search', {filter: this.state.initialSearchFilter, queryStr: searchString}, (res) => {
       console.log(res);
       this.addNode(res.id, res.type);
@@ -89,13 +88,12 @@ class App extends Component {
   addNode(id, type, filterName) {
     let newNode = { id: id, type: type };
 
-    console.log(newNode);
+    if(this.state.selectedNode.type !== "none")
+      newNode.parent = this.state.selectedNode;
 
     if (filterName !== undefined) {
       newNode.filterName = filterName;
     }
-
-    console.log(newNode);
 
     this.setState({
       graphData: {
@@ -124,6 +122,7 @@ class App extends Component {
 
   addFilterNodes(filter) {
     let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
+
     for (let i = 0; i < filters.length; i++) {
       if (filters[i].name.toUpperCase() === filter.toUpperCase()) {
         filter = filters[i];
@@ -137,19 +136,22 @@ class App extends Component {
           }, (result, passedFilter) => {
 
             let bindings = result.results.bindings;
+            const sn = this.state.selectedNode;
+            let nodeChildren = sn.childrenNo === undefined ? 0 : sn.childrenNo;
 
               for (const binding of bindings) {
                 let link =
                   binding[passedFilter.property.replace(":", "")]?.value;
 
-                if (link !== undefined)
-                  this.addNodeChildren(
-                    this.state.selectedNode.id,
-                    link.substr(link.lastIndexOf("/") + 1),
-                    "none",
-                    passedFilter.name
-                  );
+                if (link !== undefined) {
+                  this.addNodeChildren(this.state.selectedNode.id, link.substr(link.lastIndexOf("/") + 1), "none", 
+                    passedFilter.name);
+                  nodeChildren++;
+                }
               }
+
+              sn.childrenNo = nodeChildren;
+              this.setState({selectedNode: sn});
             },
             filter
           );
@@ -163,6 +165,8 @@ class App extends Component {
             (result, passedFilter) => {
               let bindings = result.results.bindings;
               let added = [];
+              const sn = this.state.selectedNode;
+              let nodeChildren = sn.childrenNo === undefined ? 0 : sn.childrenNo;
 
               for (const binding of bindings) {
                 let entityName = binding["entities"].value;
@@ -170,24 +174,18 @@ class App extends Component {
                 let link =
                   binding[passedFilter.validationKey.replace(":", "")]?.value;
 
-                if (
-                  !added.includes(entityName) &&
-                  link !== undefined &&
-                  link
-                    .toUpperCase()
-                    .includes(passedFilter.validationValue.toUpperCase())
-                ) {
+                if (!added.includes(entityName) && link !== undefined 
+                  && link.toUpperCase().includes(passedFilter.validationValue.toUpperCase())) {
                   added.push(entityName);
 
                   // TODO: get type of child node
-                  this.addNodeChildren(
-                    this.state.selectedNode.id,
-                    entityName,
-                    "none",
-                    passedFilter.name
-                  );
+                  this.addNodeChildren(this.state.selectedNode.id, entityName, "none", passedFilter.name);
+                  nodeChildren++;
                 }
               }
+
+              sn.childrenNo = nodeChildren;
+              this.setState({selectedNode: sn});
             },
             filter
           );
@@ -203,19 +201,23 @@ class App extends Component {
     let links = this.state.graphData.links;
     let selectedNode = this.state.selectedNode;
 
+    const sn = this.state.selectedNode;
+    let nodeChildren = sn.childrenNo;
+
     for (let i = 0; i < links.length; i++) {
       let link = links[i];
 
-      if (
-        link.source.id === selectedNode.id &&
-        link.target.filterName.toUpperCase() === filterName.toUpperCase()
-      ) {
+      if (link.source.id === selectedNode.id && link.target.filterName.toUpperCase() === filterName.toUpperCase()) {
         this.removeNode(link.target.id);
 
         links.splice(i, 1);
         i--;
+        nodeChildren--;
       }
     }
+
+    sn.childrenNo = nodeChildren;
+    this.setState({selectedNode: sn});
 
     this.setState({
       graphData: {
@@ -296,6 +298,7 @@ class App extends Component {
 
   setSelectedNode(node) {
     this.setState({ selectedNode: node });
+    console.log(this.state.graphData.nodes);
   }
 
   setSelectedNodeFilters(filters) {
