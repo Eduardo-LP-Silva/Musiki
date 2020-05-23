@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Row, Col } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCog } from "@fortawesome/free-solid-svg-icons";
+import { faCog, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "./components/navbar/navbar";
 import Settings from "./components/settings/settings";
 import Graph from "./components/graph/graph";
@@ -22,6 +22,8 @@ class App extends Component {
       groupIndex: 1,
       nodeInfo: undefined,
       loading: false,
+      results: false,
+      warning: false
     };
 
     this.toggleSettings = this.toggleSettings.bind(this);
@@ -43,7 +45,12 @@ class App extends Component {
           >
             <StageSpinner id="spinner" size={30} color="white" loading={this.state.loading} />
             { this.state.loading ? 
-            <span id="searching">Searching, please wait</span> : ''}
+            <span className="logs">Searching, please wait</span> : ''}
+            { this.state.warning ?
+            <React.Fragment>
+            <FontAwesomeIcon id="warningIcon" icon={faExclamationCircle} />
+            <span className="warning"> Select a filter first</span>
+            </React.Fragment> : '' }
           </Col>
         </Row>
         <Row>
