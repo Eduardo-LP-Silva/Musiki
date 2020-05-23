@@ -26,7 +26,7 @@ class Navbar extends Component {
                     </Row>
                 </div>
                 <div id="wikipedia">
-                    <span id="poweredWikipedia">Powered By <p><b>Wikipedia</b></p></span>
+                    <span id="poweredWikipedia">Powered By <p><b>DBpedia</b></p></span>
                     <Wikipedia className="wikiLogo" height="45" width="45" />
                 </div>
             </nav>
