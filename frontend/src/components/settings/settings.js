@@ -82,7 +82,10 @@ class Settings extends Component {
                         name="filter" //name must be the same for radio buttons to work
                         type={this.props.selectedNode.type === 'none' ? 'radio' : 'checkbox'} //Initial search can only have one filter
                         value={this.state.filters[i]}
-                        onChange={this.changeFilter}/>
+                        onChange={this.changeFilter}
+                        checked={this.props.selectedNode.type === 'none' ? 
+                            this.props.initialSearchFilter === this.state.filters[i] : 
+                            this.props.selectedNode.activeFilters.includes(this.state.filters[i])}/>
                     <span className="filter-btn" style={{ backgroundColor : `hsl(${hue}, 90%, 61%)`}}></span>
                 </label>
             );
@@ -95,7 +98,7 @@ class Settings extends Component {
 
         return filters;
     }
-
+    
     changeFilter(event) {
         if(event.target.checked === true) {
             if(this.props.selectedNode.type === 'none')

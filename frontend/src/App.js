@@ -18,7 +18,7 @@ class App extends Component {
       settings: 0,
       graphData: { nodes: [], links: [] },
       selectedNode: { type: "none", id: "", activeFilters: [] }, //when type = none, navbar is selected
-      initialSearchFilter: "Artist",
+      initialSearchFilter: "artist",
       groupIndex: 1,
       nodeInfo: undefined,
       loading: false,
@@ -115,7 +115,7 @@ class App extends Component {
     links.splice(0, links.length);
 
     this.setState({graphData: {nodes: nodes, links: links}});
-    
+
     requests.get(
       "search",
       { filter: this.state.initialSearchFilter, queryStr: searchString },
