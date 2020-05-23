@@ -9,6 +9,7 @@ class Graph extends Component {
     this.state = {
       hoveredNode: null,
       radius: null,
+      maxRadius: 30
     };
 
     this.onNodeClick = this.onNodeClick.bind(this);
@@ -37,108 +38,83 @@ class Graph extends Component {
     );
   }
 
-  
-
   styleNodes(node, ctx, globalScale) {
 
     const label = node.id;
     const fontSize = 15 / globalScale;
-    const size =
-      node === (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
-    
-    const  rad = ctx.measureText(label).width;
+    const commonRadius = 30/ globalScale;
+    const size = node === (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
+    let rad = ctx.measureText(label).width;
+    console.log("MAX RADIUS " + this.state.maxRadius);
+    console.log("RAD " + rad);
+    let height; 
 
     //Node design properties
     ctx.font = `${fontSize}px arial`;
-    ctx.fillStyle =
-      node === (this.state.hoveredNode || this.props.selectedNode)
-        ? "white"
-        : "rgba(255,255,255,0.8)";
+    ctx.fillStyle = node === (this.state.hoveredNode || this.props.selectedNode) ? "white" : "rgba(255,255,255,0.8)";
     ctx.shadowBlur = "1";
     ctx.shadowColor = "rgba(0, 0 ,0 , 0.25)";
     ctx.shadowOffsetX = "4";
     ctx.shadowOffsetY = "4";
 
-    this.radius = ctx.measureText(label).width * size;
-    let commonRad = 10 * size;
-  
-    ctx.beginPath();
-        
-    if(rad > 30){
-      ctx.arc(
-        node.x,
-        node.y,
-        commonRad,
-        0,
-        2 * Math.PI,
-        false
-      );
-      ctx.fill();
-  
-      ctx.fillStyle = node === this.props.selectedNode ? "white" : "rgba(255,255,255,0.8)";
-      ctx.shadowColor = "rgba(0, 0, 0, 0)";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(label, node.x, node.y + 16);
-      ctx.save();
+    if(rad > this.state.maxRadius){
+      this.radius = commonRadius;
+      height = node === this.props.selectedNode ? node.y + this.radius + (16 / globalScale) : node.y + this.radius + (10 / globalScale);
     }
 
     else {
-      ctx.arc(
-        node.x,
-        node.y,
-        this.radius,
-        0,
-        2 * Math.PI,
-        false
-      );
-      ctx.fill();
-  
-      ctx.fillStyle = node === this.props.selectedNode ? "#595959" : "#808080";
-      ctx.shadowColor = "rgba(0, 0, 0, 0)";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(label, node.x, node.y);
-      ctx.save();
-     
+      this.radius = ctx.measureText(label).width;
+      height = node.y;
     }
-   
+
+  
+    ctx.beginPath();
+    ctx.arc( node.x, node.y, this.radius * size, 0, 2 * Math.PI, false);
+    ctx.fill();
+
+    if(rad > this.state.maxRadius)
+     ctx.fillStyle = node === this.props.selectedNode ? "white" : "rgba(255,255,255,0.8)";
+
+    else 
+     ctx.fillStyle = node === this.props.selectedNode ? "#595959" : "#808080";
+
+    ctx.shadowColor = "rgba(0, 0, 0, 0)";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, node.x, height);
+    ctx.save();
+    
+    
     //Click Animation
-    this.clickAnimation(node, ctx, label, size);
+    this.clickAnimation(node, ctx, globalScale);
     window.requestAnimationFrame(this.clickAnimation);
 
   }
 
-  clickAnimation(node, ctx, label, size) {
+  clickAnimation(node, ctx, globalScale) {
 
     var time = new Date();
+    const circle = 2 * Math.PI;
+    let lineLength = (circle * this.radius)/5;
+    let linesDistance = ((circle * this.radius) - lineLength)/5;
+
    
     if (node === this.props.selectedNode) {
+
       ctx.strokeStyle = "white";
       ctx.shadowColor = "rgba(0, 0, 0, 0)";
       ctx.shadowBlur = "1";
       ctx.shadowColor = "rgba(0, 0 ,0 , 0.25)";
       ctx.shadowOffsetX = "4";
       ctx.shadowOffsetY = "4";
-      ctx.lineWidth = 1;
-      const  rad = ctx.measureText(label).width > 25 ? 10 : ctx.measureText(label).width * size;
-
-      ctx.setLineDash([((2* Math.PI * rad)/5), ((2* Math.PI * rad)/5)]);
+      ctx.lineWidth = (3 / globalScale);
+     
+      ctx.setLineDash([lineLength, linesDistance]);
       ctx.translate(node.x, node.y);
-      ctx.rotate(
-        ((2 * Math.PI) / 6) * time.getSeconds() +
-          ((2 * Math.PI) / 6000) * time.getMilliseconds()
-      );
+      ctx.rotate((circle / 6) * time.getSeconds() + (circle / 6000) * time.getMilliseconds());
       ctx.translate(-node.x, -node.y);
       ctx.beginPath();
-        ctx.arc(
-          node.x,
-          node.y,
-          rad + 2,
-          0,
-          2 * Math.PI,
-          false
-        );     
+      ctx.arc(node.x, node.y, this.radius + 1, 0, circle, false);     
       ctx.stroke();
       window.requestAnimationFrame(this.clickAnimation);
       ctx.restore();
