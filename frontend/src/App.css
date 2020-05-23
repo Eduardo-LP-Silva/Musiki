@@ -102,9 +102,19 @@ body,
   margin-top: 1em;
 }
 
-.descriptionSection {
+.descriptionSection, .logs {
   font-weight: 200;
   color: white;
+}
+
+.logs {
+  font-size: 14px;
+  font-style: italic;
+  text-shadow: 4px 4px 2px rgba(0, 0, 0, 0.25);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin-left: 60px;
 }
 
 .descriptionSection .divDescription {
@@ -143,6 +153,18 @@ body,
   -moz-animation-duration: 0.5s;
   -o-animation-duration: 0.5s;
   animation-duration: 0.5s;
+}
+
+#warningIcon {
+  color: white;
+  height: 24px;
+  width: 24px;
+  padding-top: 0.4em;
+}
+
+.warning {
+  color: white;
+  margin-left: 0.5em;
 }
 
 @-webkit-keyframes fadeInDown {

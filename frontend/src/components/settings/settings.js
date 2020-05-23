@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
-import RangeSlider from 'react-bootstrap-range-slider';
-import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import './settings.css';
 
 class Settings extends Component {
@@ -25,22 +23,6 @@ class Settings extends Component {
                 <div id="filters">
                     {this.renderFilters()}
                 </div>
-                <Form.Group style={{ marginTop: "1.5em" }}>
-                    {this.props.selectedNode.type != null && this.props.selectedNode.type !== "none" ?
-                        <div>
-                            <Form.Label style={{ fontWeight: "bold" }}>
-                                Maximum Branch Number
-                            </Form.Label>
-                            <br />
-                            <RangeSlider
-                                min={1}
-                                max={50}
-                                variant="info"
-                                value={this.state.maxBranches}
-                                onChange={this.setMaxBranches}>
-                            </RangeSlider>
-                        </div> : ''}
-                </Form.Group>
             </Form>
         );
     }
@@ -100,7 +82,10 @@ class Settings extends Component {
                         name="filter" //name must be the same for radio buttons to work
                         type={this.props.selectedNode.type === 'none' ? 'radio' : 'checkbox'} //Initial search can only have one filter
                         value={this.state.filters[i]}
-                        onChange={this.changeFilter}/>
+                        onChange={this.changeFilter}
+                        checked={this.props.selectedNode.type === 'none' ? 
+                            this.props.initialSearchFilter === this.state.filters[i] : 
+                            this.props.selectedNode.activeFilters.includes(this.state.filters[i])}/>
                     <span className="filter-btn" style={{ backgroundColor : `hsl(${hue}, 90%, 61%)`}}></span>
                 </label>
             );
@@ -113,7 +98,7 @@ class Settings extends Component {
 
         return filters;
     }
-
+    
     changeFilter(event) {
         if(event.target.checked === true) {
             if(this.props.selectedNode.type === 'none')

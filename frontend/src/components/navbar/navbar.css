@@ -30,6 +30,16 @@
   padding: 0.5em 1em;
   border-radius: 2em;
   background: rgba(255, 255, 255, 0.5);
+  /*animation: shake 0.5s;*/
+  -webkit-transition: all 0.30s ease-in-out;
+  -moz-transition: all 0.30s ease-in-out;
+  -ms-transition: all 0.30s ease-in-out;
+  -o-transition: all 0.30s ease-in-out;
+  transition: all 0.30s ease-in-out;
+  transform: translate3d(0, 0, 0);
+  /*box-shadow: 0 0 5px rgb(255, 255, 255);
+  border: 1px solid white;*/
+  animation-iteration-count: 1;
 }
 
 #search-bar > .search-icon {
@@ -102,4 +112,22 @@
 
 #poweredWikipedia b {
   font-size: 12pt;
+}
+
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
 }

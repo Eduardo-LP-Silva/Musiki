@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import { Row, Col } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCog } from "@fortawesome/free-solid-svg-icons";
+import { faCog, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "./components/navbar/navbar";
 import Settings from "./components/settings/settings";
 import Graph from "./components/graph/graph";
+import { StageSpinner } from "react-spinners-kit";
 import "./App.css";
 
 const requests = require("./components/requests/requests");
@@ -17,9 +18,12 @@ class App extends Component {
       settings: 0,
       graphData: { nodes: [], links: [] },
       selectedNode: { type: "none", id: "", activeFilters: [] }, //when type = none, navbar is selected
-      initialSearchFilter: "Artist",
+      initialSearchFilter: "artist",
       groupIndex: 1,
       nodeInfo: undefined,
+      loading: false,
+      results: false,
+      warning: false
     };
 
     this.toggleSettings = this.toggleSettings.bind(this);
@@ -34,6 +38,21 @@ class App extends Component {
     return (
       <div id="content">
         <Navbar search={this.search} setSelectedNode={this.setSelectedNode} />
+        <Row className="align-items-center">
+          <Col
+            md={{ span: 3, offset: 5 }}
+            className="justify-content-center pl-6 mt-2"
+          >
+            <StageSpinner id="spinner" size={30} color="white" loading={this.state.loading} />
+            { this.state.loading ? 
+            <span className="logs">Searching, please wait</span> : ''}
+            { this.state.warning ?
+            <React.Fragment>
+            <FontAwesomeIcon id="warningIcon" icon={faExclamationCircle} />
+            <span className="warning"> Select a filter first</span>
+            </React.Fragment> : '' }
+          </Col>
+        </Row>
         <Row>
           <Col id="filterSection" md={2}>
             <Row className="settingsSection align-items-center">
@@ -69,12 +88,20 @@ class App extends Component {
           </Col>
         </Row>
         <Row className="align-items-center">
-          <Col md={{ span: 8, offset: 2}} className="descriptionSection justify-content-center pl-6">
-          { this.state.selectedNode.type !== "none" ?
-          <div>
-          <span className="divDescription"></span>
-          <span className="description">{this.state.selectedNode.id}</span>
-          </div> : ''}
+          <Col
+            md={{ span: 8, offset: 2 }}
+            className="descriptionSection justify-content-center pl-6"
+          >
+            {this.state.selectedNode.type !== "none" ? (
+              <div>
+                <span className="divDescription"></span>
+                <span className="description">
+                  {this.state.selectedNode.id}
+                </span>
+              </div>
+            ) : (
+              ""
+            )}
           </Col>
         </Row>
       </div>
@@ -88,13 +115,23 @@ class App extends Component {
   }
 
   search(searchString) {
-    requests.get('search', {filter: this.state.initialSearchFilter, queryStr: searchString}, (res, status) => {
-      console.log(res);
-      console.log(status);
+    const nodes = this.state.graphData.nodes;
+    const links = this.state.graphData.links;
+    
+    nodes.splice(0, nodes.length);
+    links.splice(0, links.length);
 
-      if (status === 200)
-        this.addNode(res.id, res.type);
-    });
+    this.setState({graphData: {nodes: nodes, links: links}});
+
+    requests.get(
+      "search",
+      { filter: this.state.initialSearchFilter, queryStr: searchString },
+      (res, status) => {
+        console.log(res);
+      	if (status === 200)
+        	this.addNode(res.id, res.type);
+      }
+    );
 
     //IF RESPONSE STATUS 400 -> Warning
     //IF RESPONSE STATUS 404 -> No Results Found
@@ -103,13 +140,12 @@ class App extends Component {
 
   addNode(id, type, filterName) {
     let newNode = { id: id, type: type };
-    
-    for(let i = 0; i < this.state.graphData.nodes.length; i++) {
-      if(this.state.graphData.nodes[i].id === newNode.id)
-        return;
+
+    for (let i = 0; i < this.state.graphData.nodes.length; i++) {
+      if (this.state.graphData.nodes[i].id === newNode.id) return;
     }
 
-    if(this.state.selectedNode.type !== "none")
+    if (this.state.selectedNode.type !== "none")
       newNode.parent = this.state.selectedNode;
 
     if (filterName !== undefined) {
@@ -127,9 +163,13 @@ class App extends Component {
   addLink(parentId, targetId) {
     let link = { source: parentId, target: targetId, value: 1 };
 
-    for(let i = 0; i < this.state.graphData.links.length; i++) {
-      if(this.state.graphData.links[i].source === parentId && this.state.graphData.links[i].target === targetId
-        || this.state.graphData.links[i].target === parentId && this.state.graphData.links[i].source === targetId)
+    for (let i = 0; i < this.state.graphData.links.length; i++) {
+      if (
+        (this.state.graphData.links[i].source === parentId &&
+          this.state.graphData.links[i].target === targetId) ||
+        (this.state.graphData.links[i].target === parentId &&
+          this.state.graphData.links[i].source === targetId)
+      )
         return;
     }
 
@@ -142,6 +182,9 @@ class App extends Component {
   }
 
   addNodeChildren(parentId, childId, childType, filterName) {
+    childId = childId.replace(/\([^)]+\)/g, '');
+    childId = childId.replace(/_/g, ' ');
+    
     this.addNode(childId, childType, filterName);
 
     this.addLink(parentId, childId);
@@ -149,7 +192,7 @@ class App extends Component {
 
   addFilterNodes(filter) {
     let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
-    
+
     for (let i = 0; i < filters.length; i++) {
       if (filters[i].name.toUpperCase() === filter.toUpperCase()) {
         const originalFilter = filter;
@@ -158,30 +201,38 @@ class App extends Component {
         console.log(filter);
 
         if (!filter.reverse) {
-          requests.get("values", {
-            entities: this.state.selectedNode.id,
-            properties: filter.property,
-          }, (result, status, state) => {
-            const { passedFilter, originalFilter } = state;
-            let bindings = result.results.bindings;
-            const sn = this.state.selectedNode;
-            let nodeChildren = sn.childrenNo === undefined ? 0 : sn.childrenNo;
+          requests.get(
+            "values",
+            {
+              entities: this.state.selectedNode.id,
+              properties: filter.property,
+            },
+            (result, status, state) => {
+              const { passedFilter, originalFilter } = state;
+              let bindings = result.results.bindings;
+              const sn = this.state.selectedNode;
+              let nodeChildren =
+                sn.childrenNo === undefined ? 0 : sn.childrenNo;
 
               for (const binding of bindings) {
                 let link =
                   binding[passedFilter.property.replace(":", "")]?.value;
 
                 if (link !== undefined) {
-                  this.addNodeChildren(this.state.selectedNode.id, link.substr(link.lastIndexOf("/") + 1), 
-                    originalFilter.slice(0, originalFilter.length - 1), passedFilter.name);
+                  this.addNodeChildren(
+                    this.state.selectedNode.id,
+                    link.substr(link.lastIndexOf("/") + 1),
+                    originalFilter.slice(0, originalFilter.length - 1),
+                    passedFilter.name
+                  );
                   nodeChildren++;
                 }
               }
 
               sn.childrenNo = nodeChildren;
-              this.setState({selectedNode: sn});
+              this.setState({ selectedNode: sn });
             },
-            {passedFilter: filter, originalFilter: originalFilter}
+            { passedFilter: filter, originalFilter: originalFilter }
           );
         } else {
           requests.get(
@@ -195,7 +246,8 @@ class App extends Component {
               let bindings = result.results.bindings;
               let added = [];
               const sn = this.state.selectedNode;
-              let nodeChildren = sn.childrenNo === undefined ? 0 : sn.childrenNo;
+              let nodeChildren =
+                sn.childrenNo === undefined ? 0 : sn.childrenNo;
 
               for (const binding of bindings) {
                 let entityName = binding["entities"].value;
@@ -203,20 +255,29 @@ class App extends Component {
                 let link =
                   binding[passedFilter.validationKey.replace(":", "")]?.value;
 
-                if (!added.includes(entityName) && link !== undefined 
-                  && link.toUpperCase().includes(passedFilter.validationValue.toUpperCase())) {
+                if (
+                  !added.includes(entityName) &&
+                  link !== undefined &&
+                  link
+                    .toUpperCase()
+                    .includes(passedFilter.validationValue.toUpperCase())
+                ) {
                   added.push(entityName);
 
-                  this.addNodeChildren(this.state.selectedNode.id, entityName, 
-                    originalFilter.slice(0, originalFilter.length - 1), passedFilter.name);
+                  this.addNodeChildren(
+                    this.state.selectedNode.id,
+                    entityName,
+                    originalFilter.slice(0, originalFilter.length - 1),
+                    passedFilter.name
+                  );
                   nodeChildren++;
                 }
               }
 
               sn.childrenNo = nodeChildren;
-              this.setState({selectedNode: sn});
+              this.setState({ selectedNode: sn });
             },
-            {passedFilter: filter, originalFilter: originalFilter}
+            { passedFilter: filter, originalFilter: originalFilter }
           );
         }
 
@@ -236,7 +297,10 @@ class App extends Component {
     for (let i = 0; i < links.length; i++) {
       let link = links[i];
 
-      if (link.source.id === selectedNode.id && link.target.filterName.toUpperCase() === filterName.toUpperCase()) {
+      if (
+        link.source.id === selectedNode.id &&
+        link.target.filterName.toUpperCase() === filterName.toUpperCase()
+      ) {
         this.removeNode(link.target.id);
 
         links.splice(i, 1);
@@ -246,7 +310,7 @@ class App extends Component {
     }
 
     sn.childrenNo = nodeChildren;
-    this.setState({selectedNode: sn});
+    this.setState({ selectedNode: sn });
 
     this.setState({
       graphData: {
