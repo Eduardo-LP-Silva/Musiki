@@ -25,22 +25,6 @@ class Settings extends Component {
                 <div id="filters">
                     {this.renderFilters()}
                 </div>
-                <Form.Group style={{ marginTop: "1.5em" }}>
-                    {this.props.selectedNode.type != null && this.props.selectedNode.type !== "none" ?
-                        <div>
-                            <Form.Label style={{ fontWeight: "bold" }}>
-                                Maximum Branch Number
-                            </Form.Label>
-                            <br />
-                            <RangeSlider
-                                min={1}
-                                max={50}
-                                variant="info"
-                                value={this.state.maxBranches}
-                                onChange={this.setMaxBranches}>
-                            </RangeSlider>
-                        </div> : ''}
-                </Form.Group>
             </Form>
         );
     }

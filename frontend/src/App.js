@@ -100,7 +100,10 @@ class App extends Component {
   }
 
   addNode(id, type, filterName) {
-    let newNode = { id: id, type: type };
+
+    console.log(id);
+
+    const newNode = { id: id, type: type };
     
     for(let i = 0; i < this.state.graphData.nodes.length; i++) {
       if(this.state.graphData.nodes[i].id === newNode.id)
@@ -140,6 +143,9 @@ class App extends Component {
   }
 
   addNodeChildren(parentId, childId, childType, filterName) {
+    childId = childId.replace(/\([^)]+\)/g, '');
+    childId = childId.replace(/_/g, ' ');
+    
     this.addNode(childId, childType, filterName);
 
     this.addLink(parentId, childId);

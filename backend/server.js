@@ -175,5 +175,5 @@ function parseInput(queryStr) {
 }
 
 function parseOutput(queryStr) {
-    return queryStr.replace(/_/g, ' ')
+    return queryStr.replace(/_/g, ' ');
 }
