@@ -180,7 +180,6 @@ class App extends Component {
                   && link.toUpperCase().includes(passedFilter.validationValue.toUpperCase())) {
                   added.push(entityName);
 
-                  // TODO: get type of child node
                   this.addNodeChildren(this.state.selectedNode.id, entityName, 
                     originalFilter.slice(0, originalFilter.length - 1), passedFilter.name);
                   nodeChildren++;
