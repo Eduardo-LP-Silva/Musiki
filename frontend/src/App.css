@@ -1,9 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap");
 
-html, body, #root {
+html,
+body,
+#root {
   width: 100%;
   height: 100vh;
-  background: rgb(66,167,245);
+  background: rgb(66, 167, 245);
   background: linear-gradient(180deg, #42a7f5, #8442f5);
   background-size: 400% 400%;
   overflow-x: hidden;
@@ -11,7 +13,6 @@ html, body, #root {
   -webkit-animation: AnimationName 60s ease infinite alternate;
   -moz-animation: AnimationName 60s ease infinite alternate;
   animation: AnimationName 60s ease infinite alternate;
-
 }
 
 /* width */
@@ -21,10 +22,9 @@ html, body, #root {
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background:transparent;
- 
+  background: transparent;
 }
- 
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.5);
@@ -37,19 +37,37 @@ html, body, #root {
 }
 
 @-webkit-keyframes AnimationName {
-  0%{background-position:56% 0%}
-  50%{background-position:45% 100%}
-  100%{background-position:56% 0%}
+  0% {
+    background-position: 56% 0%;
+  }
+  50% {
+    background-position: 45% 100%;
+  }
+  100% {
+    background-position: 56% 0%;
+  }
 }
 @-moz-keyframes AnimationName {
-  0%{background-position:56% 0%}
-  50%{background-position:45% 100%}
-  100%{background-position:56% 0%}
+  0% {
+    background-position: 56% 0%;
+  }
+  50% {
+    background-position: 45% 100%;
+  }
+  100% {
+    background-position: 56% 0%;
+  }
 }
 @keyframes AnimationName {
-  0%{background-position:56% 0%}
-  50%{background-position:45% 100%}
-  100%{background-position:56% 0%}
+  0% {
+    background-position: 56% 0%;
+  }
+  50% {
+    background-position: 45% 100%;
+  }
+  100% {
+    background-position: 56% 0%;
+  }
 }
 
 #content {
@@ -70,7 +88,7 @@ html, body, #root {
 }
 
 #settings-span {
-  color:transparent;
+  color: transparent;
   cursor: none;
   transition: all 0.2s ease;
 }
@@ -83,3 +101,97 @@ html, body, #root {
 #filterSection {
   margin-top: 1em;
 }
+
+.descriptionSection {
+  font-weight: 200;
+  color: white;
+}
+
+.descriptionSection .divDescription {
+  -webkit-box-shadow: 6px 0px 4px -1px rgba(0, 0, 0, 0.45);
+  -moz-box-shadow: 6px 0px 4px -1px rgba(0, 0, 0, 0.25);
+  box-shadow: 6px 0px 4px -1px rgba(0, 0, 0, 0.45);
+  border-left: 1px solid white;
+  margin-right: 0.7em;
+  -webkit-animation-name: fadeInDown;
+  -moz-animation-name: fadeInDown;
+  -o-animation-name: fadeInDown;
+  animation-name: fadeInDown;
+  -webkit-animation-fill-mode: both;
+  -moz-animation-fill-mode: both;
+  -o-animation-fill-mode: both;
+  animation-fill-mode: both;
+  -webkit-animation-duration: 0.5s;
+  -moz-animation-duration: 0.5s;
+  -o-animation-duration: 0.5s;
+  animation-duration: 0.5s;
+}
+
+.descriptionSection .description {
+  padding: 0.2em 0.35em;
+  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.1);
+  -webkit-animation-name: fadeInDown;
+  -moz-animation-name: fadeInDown;
+  -o-animation-name: fadeInDown;
+  animation-name: fadeInDown;
+  -webkit-animation-fill-mode: both;
+  -moz-animation-fill-mode: both;
+  -o-animation-fill-mode: both;
+  animation-fill-mode: both;
+  -webkit-animation-duration: 0.5s;
+  -moz-animation-duration: 0.5s;
+  -o-animation-duration: 0.5s;
+  animation-duration: 0.5s;
+}
+
+@-webkit-keyframes fadeInDown {
+  from {
+    opacity: 0;
+    -webkit-transform: translatey(-20px);
+    -moz-transform: translatey(-20px);
+    -o-transform: translatey(-20px);
+    transform: translatey(-20px);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: translatey(0);
+    -moz-transform: translatey(0);
+    -o-transform: translatey(0);
+    transform: translatey(0);
+  }
+}
+
+@-moz-keyframes fadeInDown {
+  from {
+    opacity: 0;
+    -webkit-transform: translatey(-20px);
+    -moz-transform: translatey(-20px);
+    -o-transform: translatey(-20px);
+    transform: translatey(-20px);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: translatey(0);
+    -moz-transform: translatey(0);
+    -o-transform: translatey(0);
+    transform: translatey(0);
+  }
+}
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    -webkit-transform: translatey(-20px);
+    -moz-transform: translatey(-20px);
+    -o-transform: translatey(-20px);
+    transform: translatey(-20px);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: translatey(0);
+    -moz-transform: translatey(0);
+    -o-transform: translatey(0);
+    transform: translatey(0);
+  }
+}
+

@@ -30,7 +30,7 @@ class Graph extends Component {
         linkColor={() => "rgba(255,255,255,0.7)"}
         linkLabel="link"
         width={window.innerWidth * 0.8}
-        height= {window.innerHeight * 0.75}
+        height= {window.innerHeight * 0.70}
         onNodeClick={this.onNodeClick}
         onBackgroundClick={this.onBackgroundClick}
         onNodeHover={this.onNodeHover}
