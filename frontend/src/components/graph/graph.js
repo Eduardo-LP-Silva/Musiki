@@ -43,12 +43,8 @@ class Graph extends Component {
     const label = node.id;
     const nodeSize = this.getNodeSize(node);
     const fontSize = Math.max(3, nodeSize / globalScale);
-    const commonRadius = 30/ globalScale;
     const size = node === (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
-    let rad = ctx.measureText(label).width;
-    //console.log("MAX RADIUS " + this.state.maxRadius);
-    //console.log("RAD " + rad);
-    let height; 
+    const textWidth = ctx.measureText(label).width;
 
     //Node design properties
     ctx.font = `${fontSize}px arial`;
@@ -58,28 +54,18 @@ class Graph extends Component {
     ctx.shadowOffsetX = "4";
     ctx.shadowOffsetY = "4";
 
-    /*
-    if(rad > this.state.maxRadius){
-      this.radius = commonRadius;
-      height = node === this.props.selectedNode ? node.y + this.radius + (16 / globalScale) : node.y + this.radius + (10 / globalScale);
-    }
-    else {
-      this.radius = ctx.measureText(label).width;
-      height = node.y;
-    } */
-
     ctx.beginPath();
     ctx.arc( node.x, node.y, nodeSize * size, 0, 2 * Math.PI, false);
     ctx.fill();
 
+    console.log(textWidth + "|" + nodeSize);
     ctx.fillStyle = "rgba(255,255,255,0.8)";
-
     ctx.shadowColor = "rgba(0, 0, 0, 0)";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(label, node.x, node.y + nodeSize, nodeSize * 3);
+    ctx.fillText(label, node.x, node.y + nodeSize);
+
     ctx.save();
-    
     
     //Click Animation
     this.clickAnimation(node, ctx, globalScale, nodeSize);
