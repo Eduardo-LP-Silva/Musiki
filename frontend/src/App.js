@@ -28,7 +28,6 @@ class App extends Component {
     this.setInitialSearchFilter = this.setInitialSearchFilter.bind(this);
     this.addFilterNodes = this.addFilterNodes.bind(this);
     this.removeFilterNodes = this.removeFilterNodes.bind(this);
-
   }
 
   render() {
@@ -102,6 +101,11 @@ class App extends Component {
 
   addNode(id, type, filterName) {
     let newNode = { id: id, type: type };
+    
+    for(let i = 0; i < this.state.graphData.nodes.length; i++) {
+      if(this.state.graphData.nodes[i].id === newNode.id)
+        return;
+    }
 
     if(this.state.selectedNode.type !== "none")
       newNode.parent = this.state.selectedNode;
@@ -120,6 +124,12 @@ class App extends Component {
 
   addLink(parentId, targetId) {
     let link = { source: parentId, target: targetId, value: 1 };
+
+    for(let i = 0; i < this.state.graphData.links.length; i++) {
+      if(this.state.graphData.links[i].source === parentId && this.state.graphData.links[i].target === targetId
+        || this.state.graphData.links[i].target === parentId && this.state.graphData.links[i].source === targetId)
+        return;
+    }
 
     this.setState({
       graphData: {
