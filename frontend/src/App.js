@@ -134,7 +134,7 @@ class App extends Component {
           requests.get("values", {
             entities: this.state.selectedNode.id,
             properties: filter.property,
-          }, (result, state) => {
+          }, (result, status, state) => {
             const { passedFilter, originalFilter } = state;
             let bindings = result.results.bindings;
             const sn = this.state.selectedNode;
@@ -163,7 +163,7 @@ class App extends Component {
               value: `${this.state.selectedNode.id},${filter.property}`,
               ofilter: filter.validationKey,
             },
-            (result, state) => {
+            (result, status, state) => {
               const { passedFilter, originalFilter } = state;
               let bindings = result.results.bindings;
               let added = [];
