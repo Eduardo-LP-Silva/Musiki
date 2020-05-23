@@ -44,7 +44,6 @@ class Graph extends Component {
     const nodeSize = this.getNodeSize(node);
     const fontSize = Math.max(3, nodeSize / globalScale);
     const size = node === (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
-    const textWidth = ctx.measureText(label).width;
 
     //Node design properties
     ctx.font = `${fontSize}px arial`;
@@ -58,7 +57,6 @@ class Graph extends Component {
     ctx.arc( node.x, node.y, nodeSize * size, 0, 2 * Math.PI, false);
     ctx.fill();
 
-    console.log(textWidth + "|" + nodeSize);
     ctx.fillStyle = "rgba(255,255,255,0.8)";
     ctx.shadowColor = "rgba(0, 0, 0, 0)";
     ctx.textAlign = "center";
@@ -73,13 +71,10 @@ class Graph extends Component {
   }
 
   getNodeSize(node) {
-    if(node.parent === undefined)
+    if(node.parent === undefined || node.parent.childrenNo < 5)
       return this.state.nodeRelSize;
-    else {
-      console.log(this.state.nodeRelSize / node.parent.childrenNo);
-      return Math.max(2, this.state.nodeRelSize * 5 / node.parent.childrenNo);
-    }
-      
+    else 
+        return Math.max(2, this.state.nodeRelSize * 5 / node.parent.childrenNo);      
   }
 
   clickAnimation(node, ctx, globalScale, nodeSize) {
@@ -112,9 +107,13 @@ class Graph extends Component {
 
   onNodeClick(node) {
     if (node && this.props.selectedNode !== node) {
-      if (!node.hasOwnProperty("activeFilters")) node.activeFilters = [];
+      if (!node.hasOwnProperty("activeFilters")) 
+        node.activeFilters = [];
+
+      this.props.setSelectedNode(node);
+      console.log(node);
     }
-    this.props.setSelectedNode(node);
+    
     //else maybe ?
   }
 

@@ -3,7 +3,7 @@ exports.nodeInfo = {
         validation: "MusicGroup",
         filters: [
             {
-                name: "members",
+                name: "artists",
                 property: "dbo:bandMember",
                 reverse: false,
             },
@@ -104,12 +104,12 @@ exports.nodeInfo = {
         validation: "album",
         filters: [
             {
-                name: "artist",
+                name: "artists",
                 property: "dbo:artist",
                 reverse: false
             },
             {
-                name: "genre",
+                name: "genres",
                 property: "dbo:genre",
                 reverse: false
             },
@@ -124,12 +124,12 @@ exports.nodeInfo = {
         validation: "Single",
         filters: [
             {
-                name: "artist",
+                name: "artists",
                 property: "dbo:artist",
                 reverse: false
             },
             {
-                name: "genre",
+                name: "genres",
                 property: "dbo:genre",
                 reverse: false
             },
@@ -139,7 +139,7 @@ exports.nodeInfo = {
         validation: "song",
         filters: [
             {
-                name: "genre",
+                name: "genres",
                 property: "dbo:genre",
                 reverse: false,
             },

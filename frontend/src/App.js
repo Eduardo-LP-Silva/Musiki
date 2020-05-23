@@ -122,9 +122,10 @@ class App extends Component {
 
   addFilterNodes(filter) {
     let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
-
+    
     for (let i = 0; i < filters.length; i++) {
       if (filters[i].name.toUpperCase() === filter.toUpperCase()) {
+        const originalFilter = filter;
         filter = filters[i];
 
         console.log(filter);
@@ -133,8 +134,8 @@ class App extends Component {
           requests.get("values", {
             entities: this.state.selectedNode.id,
             properties: filter.property,
-          }, (result, passedFilter) => {
-
+          }, (result, state) => {
+            const { passedFilter, originalFilter } = state;
             let bindings = result.results.bindings;
             const sn = this.state.selectedNode;
             let nodeChildren = sn.childrenNo === undefined ? 0 : sn.childrenNo;
@@ -144,8 +145,8 @@ class App extends Component {
                   binding[passedFilter.property.replace(":", "")]?.value;
 
                 if (link !== undefined) {
-                  this.addNodeChildren(this.state.selectedNode.id, link.substr(link.lastIndexOf("/") + 1), "none", 
-                    passedFilter.name);
+                  this.addNodeChildren(this.state.selectedNode.id, link.substr(link.lastIndexOf("/") + 1), 
+                    originalFilter.slice(0, originalFilter.length - 1), passedFilter.name);
                   nodeChildren++;
                 }
               }
@@ -153,7 +154,7 @@ class App extends Component {
               sn.childrenNo = nodeChildren;
               this.setState({selectedNode: sn});
             },
-            filter
+            {passedFilter: filter, originalFilter: originalFilter}
           );
         } else {
           requests.get(
@@ -162,7 +163,8 @@ class App extends Component {
               value: `${this.state.selectedNode.id},${filter.property}`,
               ofilter: filter.validationKey,
             },
-            (result, passedFilter) => {
+            (result, state) => {
+              const { passedFilter, originalFilter } = state;
               let bindings = result.results.bindings;
               let added = [];
               const sn = this.state.selectedNode;
@@ -179,7 +181,8 @@ class App extends Component {
                   added.push(entityName);
 
                   // TODO: get type of child node
-                  this.addNodeChildren(this.state.selectedNode.id, entityName, "none", passedFilter.name);
+                  this.addNodeChildren(this.state.selectedNode.id, entityName, 
+                    originalFilter.slice(0, originalFilter.length - 1), passedFilter.name);
                   nodeChildren++;
                 }
               }
@@ -187,7 +190,7 @@ class App extends Component {
               sn.childrenNo = nodeChildren;
               this.setState({selectedNode: sn});
             },
-            filter
+            {passedFilter: filter, originalFilter: originalFilter}
           );
         }
 
