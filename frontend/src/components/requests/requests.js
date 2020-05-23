@@ -4,6 +4,7 @@ const { env } = require('../../environments/env');
 exports.get = function get(endpoint, queryParams, callback, state) {
 
     let link = `${env.API_URL}/${endpoint}`;
+    let status;
 
     if (queryParams !== undefined) {
         link += "?" + Object.keys(queryParams)
@@ -14,14 +15,19 @@ exports.get = function get(endpoint, queryParams, callback, state) {
     fetch(link, {
         method: 'GET'
     })
-    .then(response => response.json())
+    .then(response => {
+        status = response.status;
+        return response.json();
+    })
     .then(data => {
-        callback(data, state); // JSON data parsed by `response.json()` call
+        callback(data, status, state); // JSON data parsed by `response.json()` call
      });
 }
 
 
-exports.post = function post(endpoint, body, callback) {
+exports.post = function post(endpoint, body, callback, state) {
+    
+    let status;
     
     fetch(`${env.API_URL}/${endpoint}/`, {
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -30,9 +36,12 @@ exports.post = function post(endpoint, body, callback) {
         },
         body: exports.searchParams(body) // body data type must match "Content-Type" header
     })
-    .then(response => response.json())
+    .then(response => {
+        status = response.status;
+        return response.json();
+    })
     .then(data => {
-        callback(data);
+        callback(data, status, state);
     });
 }
 
