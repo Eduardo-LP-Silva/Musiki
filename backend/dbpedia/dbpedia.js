@@ -7,7 +7,7 @@ const port = 5000;
 
 const format = "JSON";
 const pretty = 'NONE';
-const limit = 100;
+const limit = 1000;
 const offset = 0;
 const version = '1.0.0';
 const key = 1234;
