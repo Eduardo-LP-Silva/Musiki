@@ -85,37 +85,12 @@ class Settings extends Component {
 
         const filters = [];
 
-   /*     if(this.state.filters.length === 6){
-            document.getElementById('settings').style = "background-size: auto 65%";
-            document.getElementById('settings').style.backgroundPosition = "21% 65%";
-            
-        }
-        else if(this.state.filters.length ===  5) {
-            document.getElementById('settings').style.backgroundSize = "10% 45%";
-            document.getElementById('settings').style.backgroundPosition = "18% 40%";
-        }
-
-        else if(this.state.filters.length ===  4) {
-            document.getElementById('settings').style.backgroundSize = "10% 40%";
-            document.getElementById('settings').style.backgroundPosition = "18% 40%";
-        }
-
-        else if(this.state.filters.length ===  3) {
-            document.getElementById('settings').style.backgroundSize = "10% 30%";
-            document.getElementById('settings').style.backgroundPosition = "18% 40%";
-        }
-
-        else if(this.state.filters.length ===  2) {
-            document.getElementById('settings').style.backgroundSize = "10% 20%";
-            document.getElementById('settings').style.backgroundPosition = "18% 40%";
-        }*/
-
-
         if (this.state.filters.length > 0)
             filters.push(<span className="filterBanner" key="filters-banner">Search Filters</span>);
 
         for (let i = 0; i < this.state.filters.length; i++) {
             const filter = this.state.filters[i][0].toUpperCase() + this.state.filters[i].slice(1);
+            const hue = 206 + (i* (56/(this.state.filters.length)));
 
             filters.push(
                 <label className="filter-container" key={this.state.filters[i]}>
@@ -126,12 +101,14 @@ class Settings extends Component {
                         type={this.props.selectedNode.type === 'none' ? 'radio' : 'checkbox'} //Initial search can only have one filter
                         value={this.state.filters[i]}
                         onChange={this.changeFilter}/>
-                    <span className="filter-btn"></span>
+                    <span className="filter-btn" style={{ backgroundColor : `hsl(${hue}, 90%, 61%)`}}></span>
                 </label>
             );
 
-            if (i !== this.state.filters.length - 1)
-            filters.push(<div className="filter-vertical-div" key={`div#${i}`}></div>);
+            if (i !== this.state.filters.length - 1){
+                filters.push(<div className="filter-vertical-div" key={`div#${i}`} style={{ backgroundColor : `hsl(${hue}, 90%, 61%)`}}></div>);
+            }
+            
         }
 
         return filters;
