@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Row, Col } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCog, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import { faCog } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "./components/navbar/navbar";
 import Settings from "./components/settings/settings";
 import Graph from "./components/graph/graph";
@@ -20,10 +20,11 @@ class App extends Component {
       selectedNode: { type: "none", id: "", activeFilters: [] }, //when type = none, navbar is selected
       initialSearchFilter: "artist",
       groupIndex: 1,
+      abstract: null,
       nodeInfo: undefined,
       loading: false,
       results: false,
-      warning: false
+      warning: false,
     };
 
     this.toggleSettings = this.toggleSettings.bind(this);
@@ -32,6 +33,7 @@ class App extends Component {
     this.setInitialSearchFilter = this.setInitialSearchFilter.bind(this);
     this.addFilterNodes = this.addFilterNodes.bind(this);
     this.removeFilterNodes = this.removeFilterNodes.bind(this);
+    this.change = this.change.bind(this);
   }
 
   render() {
@@ -43,14 +45,17 @@ class App extends Component {
             md={{ span: 3, offset: 5 }}
             className="justify-content-center pl-6 mt-2"
           >
-            <StageSpinner id="spinner" size={30} color="white" loading={this.state.loading} />
-            { this.state.loading ? 
-            <span className="logs">Searching, please wait</span> : ''}
-            { this.state.warning ?
-            <React.Fragment>
-            <FontAwesomeIcon id="warningIcon" icon={faExclamationCircle} />
-            <span className="warning"> Select a filter first</span>
-            </React.Fragment> : '' }
+            <StageSpinner
+              id="spinner"
+              size={30}
+              color="white"
+              loading={this.state.loading}
+            />
+            {this.state.loading ? (
+              <span className="logs">Searching, please wait</span>
+            ) : (
+              ""
+            )}
           </Col>
         </Row>
         <Row>
@@ -92,16 +97,11 @@ class App extends Component {
             md={{ span: 8, offset: 2 }}
             className="descriptionSection justify-content-center pl-6"
           >
-            {this.state.selectedNode.type !== "none" ? (
-              <div>
-                <span className="divDescription"></span>
-                <span className="description">
-                  {this.state.selectedNode.id}
-                </span>
-              </div>
-            ) : (
-              ""
-            )}
+            {this.state.selectedNode.type !== "none" ? 
+              <div id="descriptionDiv">
+              <span className="description">{this.state.abstract}</span></div>
+             : 
+              ""}
           </Col>
         </Row>
       </div>
@@ -114,22 +114,34 @@ class App extends Component {
     });
   }
 
+  change(abstract) {
+    let minimizedAbs = abstract.substr(0, abstract.indexOf(".", 300));
+    minimizedAbs += ".";
+    this.setState({ abstract: minimizedAbs });
+  }
+
   search(searchString) {
     const nodes = this.state.graphData.nodes;
     const links = this.state.graphData.links;
-    
+
     nodes.splice(0, nodes.length);
     links.splice(0, links.length);
 
-    this.setState({graphData: {nodes: nodes, links: links}});
+    this.setState({ graphData: { nodes: nodes, links: links } });
 
     requests.get(
       "search",
       { filter: this.state.initialSearchFilter, queryStr: searchString },
       (res, status) => {
         console.log(res);
-      	if (status === 200)
-        	this.addNode(res.id, res.type);
+        
+        while(status !== 200){
+          console.log("HELLO");
+        }
+
+        if(status === 404) console.log("ERRO");
+
+        if (status === 200) this.addNode(res.id, res.type);
       }
     );
 
@@ -182,9 +194,9 @@ class App extends Component {
   }
 
   addNodeChildren(parentId, childId, childType, filterName) {
-    childId = childId.replace(/\([^)]+\)/g, '');
-    childId = childId.replace(/_/g, ' ');
-    
+    childId = childId.replace(/\([^)]+\)/g, "");
+    childId = childId.replace(/_/g, " ");
+
     this.addNode(childId, childType, filterName);
 
     this.addLink(parentId, childId);
@@ -392,6 +404,8 @@ class App extends Component {
   setSelectedNode(node) {
     this.setState({ selectedNode: node });
     console.log(this.state.graphData.nodes);
+
+    if (node.type !== "none") this.change(this.state.selectedNode.abstract);
   }
 
   setSelectedNodeFilters(filters) {
