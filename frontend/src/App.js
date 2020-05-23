@@ -28,6 +28,7 @@ class App extends Component {
     this.setInitialSearchFilter = this.setInitialSearchFilter.bind(this);
     this.addFilterNodes = this.addFilterNodes.bind(this);
     this.removeFilterNodes = this.removeFilterNodes.bind(this);
+
   }
 
   render() {
@@ -68,6 +69,15 @@ class App extends Component {
             />
           </Col>
         </Row>
+        <Row className="align-items-center">
+          <Col md={{ span: 8, offset: 2}} className="descriptionSection justify-content-center pl-6">
+          { this.state.selectedNode.type !== "none" ?
+          <div>
+          <span className="divDescription"></span>
+          <span className="description">{this.state.selectedNode.id}</span>
+          </div> : ''}
+          </Col>
+        </Row>
       </div>
     );
   }
@@ -83,6 +93,10 @@ class App extends Component {
       console.log(res);
       this.addNode(res.id, res.type);
     });
+
+    //IF RESPONSE STATUS 400 -> Warning
+    //IF RESPONSE STATUS 404 -> No Results Found
+    //WHILE RESPONSE != 200 -> Loading screen
   }
 
   addNode(id, type, filterName) {
