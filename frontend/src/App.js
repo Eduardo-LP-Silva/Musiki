@@ -68,6 +68,15 @@ class App extends Component {
             />
           </Col>
         </Row>
+        <Row className="align-items-center">
+          <Col md={{ span: 8, offset: 2}} className="descriptionSection justify-content-center pl-6">
+          { this.state.selectedNode.type !== "none" ?
+          <div>
+          <span className="divDescription"></span>
+          <span className="description">{this.state.selectedNode.id}</span>
+          </div> : ''}
+          </Col>
+        </Row>
       </div>
     );
   }
@@ -79,14 +88,24 @@ class App extends Component {
   }
 
   search(searchString) {
-    requests.get('search', {filter: this.state.initialSearchFilter, queryStr: searchString}, (res) => {
+    requests.get('search', {filter: this.state.initialSearchFilter, queryStr: searchString}, (res, status) => {
       console.log(res);
+      console.log(status);
       this.addNode(res.id, res.type);
     });
+
+    //IF RESPONSE STATUS 400 -> Warning
+    //IF RESPONSE STATUS 404 -> No Results Found
+    //WHILE RESPONSE != 200 -> Loading screen
   }
 
   addNode(id, type, filterName) {
     let newNode = { id: id, type: type };
+    
+    for(let i = 0; i < this.state.graphData.nodes.length; i++) {
+      if(this.state.graphData.nodes[i].id === newNode.id)
+        return;
+    }
 
     if(this.state.selectedNode.type !== "none")
       newNode.parent = this.state.selectedNode;
@@ -105,6 +124,12 @@ class App extends Component {
 
   addLink(parentId, targetId) {
     let link = { source: parentId, target: targetId, value: 1 };
+
+    for(let i = 0; i < this.state.graphData.links.length; i++) {
+      if(this.state.graphData.links[i].source === parentId && this.state.graphData.links[i].target === targetId
+        || this.state.graphData.links[i].target === parentId && this.state.graphData.links[i].source === targetId)
+        return;
+    }
 
     this.setState({
       graphData: {
@@ -180,7 +205,6 @@ class App extends Component {
                   && link.toUpperCase().includes(passedFilter.validationValue.toUpperCase())) {
                   added.push(entityName);
 
-                  // TODO: get type of child node
                   this.addNodeChildren(this.state.selectedNode.id, entityName, 
                     originalFilter.slice(0, originalFilter.length - 1), passedFilter.name);
                   nodeChildren++;
