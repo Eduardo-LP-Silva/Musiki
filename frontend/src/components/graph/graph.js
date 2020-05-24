@@ -11,7 +11,7 @@ class Graph extends Component {
     this.state = {
       hoveredNode: null,
       nodeRelSize: 10,
-      maxRadius: 30
+      maxRadius: 30,
     };
 
     this.onNodeClick = this.onNodeClick.bind(this);
@@ -27,12 +27,12 @@ class Graph extends Component {
       <ForceGraph2D
         graphData={this.props.graphData}
         nodeLabel="id"
-        nodeVal={node => this.getNodeSize(node) / this.state.nodeRelSize}
+        nodeVal={(node) => this.getNodeSize(node) / this.state.nodeRelSize}
         nodeRelSize={this.state.nodeRelSize}
         linkColor={() => "rgba(255,255,255,0.7)"}
         linkLabel="link"
         width={window.innerWidth * 0.8}
-        height= {window.innerHeight * 0.70}
+        height={window.innerHeight * 0.7}
         onNodeClick={this.onNodeClick}
         onBackgroundClick={this.onBackgroundClick}
         onNodeHover={this.onNodeHover}
@@ -45,18 +45,22 @@ class Graph extends Component {
     const label = node.id;
     const nodeSize = this.getNodeSize(node);
     const fontSize = Math.max(3, nodeSize / globalScale);
-    const size = node === (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
+    const size =
+      node === (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
 
     //Node design properties
     ctx.font = `${fontSize}px arial`;
-    ctx.fillStyle = node === (this.state.hoveredNode || this.props.selectedNode) ? "white" : "rgba(255,255,255, 1)";
+    ctx.fillStyle =
+      node === (this.state.hoveredNode || this.props.selectedNode)
+        ? "white"
+        : "rgba(255,255,255, 1)";
     ctx.shadowBlur = "1";
     ctx.shadowColor = "rgba(0, 0 ,0 , 0.25)";
     ctx.shadowOffsetX = "4";
     ctx.shadowOffsetY = "4";
 
     ctx.beginPath();
-    ctx.arc( node.x, node.y, nodeSize * size, 0, 2 * Math.PI, false);
+    ctx.arc(node.x, node.y, nodeSize * size, 0, 2 * Math.PI, false);
     ctx.fill();
 
     ctx.fillStyle = "rgba(255,255,255,0.8)";
@@ -66,41 +70,43 @@ class Graph extends Component {
     ctx.fillText(label, node.x, node.y + nodeSize);
 
     ctx.save();
-    
+
     //Click Animation
     this.clickAnimation(node, ctx, globalScale, nodeSize);
     window.requestAnimationFrame(this.clickAnimation);
   }
 
   getNodeSize(node) {
-    if(node.parent === undefined || node.parent.childrenNo < 5)
+    if (node.parent === undefined || node.parent.childrenNo < 5)
       return this.state.nodeRelSize;
-    else 
-        return Math.max(2, this.state.nodeRelSize * 5 / node.parent.childrenNo);      
+    else
+      return Math.max(2, (this.state.nodeRelSize * 5) / node.parent.childrenNo);
   }
 
   clickAnimation(node, ctx, globalScale, nodeSize) {
     var time = new Date();
     const circle = 2 * Math.PI;
-    let lineLength = (circle * nodeSize)/5;
-    let linesDistance = ((circle * nodeSize) - lineLength)/5;
+    let lineLength = (circle * nodeSize) / 5;
+    let linesDistance = (circle * nodeSize - lineLength) / 5;
 
     if (node === this.props.selectedNode) {
-
       ctx.strokeStyle = "white";
       ctx.shadowColor = "rgba(0, 0, 0, 0)";
       ctx.shadowBlur = "1";
       ctx.shadowColor = "rgba(0, 0 ,0 , 0.25)";
       ctx.shadowOffsetX = "4";
       ctx.shadowOffsetY = "4";
-      ctx.lineWidth = (3 / globalScale);
-     
+      ctx.lineWidth = 3 / globalScale;
+
       ctx.setLineDash([lineLength, linesDistance]);
       ctx.translate(node.x, node.y);
-      ctx.rotate((circle / 6) * time.getSeconds() + (circle / 6000) * time.getMilliseconds());
+      ctx.rotate(
+        (circle / 6) * time.getSeconds() +
+          (circle / 6000) * time.getMilliseconds()
+      );
       ctx.translate(-node.x, -node.y);
       ctx.beginPath();
-      ctx.arc(node.x, node.y, nodeSize + 1, 0, circle, false);     
+      ctx.arc(node.x, node.y, nodeSize + 1, 0, circle, false);
       ctx.stroke();
       window.requestAnimationFrame(this.clickAnimation);
       ctx.restore();
@@ -109,13 +115,16 @@ class Graph extends Component {
 
   onNodeClick(node) {
     if (node && this.props.selectedNode !== node) {
-      if (!node.hasOwnProperty("activeFilters")) 
-        node.activeFilters = [];
-        
-        requests.get("values", {
+      if (!node.hasOwnProperty("activeFilters")) node.activeFilters = [];
+
+      requests.get(
+        "values",
+        {
           entities: node.id,
           properties: "dbo:abstract",
-        }, (result, status, state) => {
+        },
+        
+        (result, status, state) => {
           if (status === 200) {
             let bindings = result.results.bindings;
 
@@ -132,12 +141,12 @@ class Graph extends Component {
 
             this.props.setSelectedNode(node);
           }
-        });
+        }
+      );
     }
   }
 
-  onBackgroundClick(){
-
+  onBackgroundClick() {
     let nullNode = { type: "none", id: "" };
 
     this.props.setSelectedNode(nullNode);

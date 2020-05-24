@@ -5,6 +5,7 @@ import { faCog } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "./components/navbar/navbar";
 import Settings from "./components/settings/settings";
 import Graph from "./components/graph/graph";
+import ghost from "./ghost.svg";
 import { StageSpinner } from "react-spinners-kit";
 import "./App.css";
 
@@ -23,8 +24,7 @@ class App extends Component {
       abstract: null,
       nodeInfo: undefined,
       loading: false,
-      results: false,
-      warning: false,
+      error: false,
     };
 
     this.toggleSettings = this.toggleSettings.bind(this);
@@ -40,23 +40,46 @@ class App extends Component {
     return (
       <div id="content">
         <Navbar search={this.search} setSelectedNode={this.setSelectedNode} />
-        <Row className="align-items-center">
-          <Col
-            md={{ span: 3, offset: 5 }}
-            className="justify-content-center pl-6 mt-2"
-          >
-            <StageSpinner
-              id="spinner"
-              size={30}
-              color="white"
-              loading={this.state.loading}
-            />
-            {this.state.loading ? (
-              <span className="logs">Searching, please wait</span>
-            ) : (
-              ""
-            )}
-          </Col>
+        <Row className="additionalSection align-items-center">
+          {this.state.loading ? (
+            <React.Fragment>
+              <Col className="justify-content-center">
+                <StageSpinner
+                  id="spinner"
+                  size={30}
+                  color="white"
+                  loading={this.state.loading}
+                />
+              </Col>
+              <Col xs={19}>
+                <span className="logs">Searching, please wait</span>
+              </Col>
+            </React.Fragment>
+          ) : (
+            ""
+          )}
+          {this.state.error ? (
+            <React.Fragment>
+              <Col>
+                <img
+                  style={{ float: "right" }}
+                  src={ghost}
+                  height={55}
+                  width={55}
+                />
+              </Col>
+              <Col xs={7}>
+                <span id="noResults">
+                  <p id="bold">Whoops, no matches!</p>
+                  <p>
+                    We couldn't find any search results. Search something else.
+                  </p>{" "}
+                </span>
+              </Col>
+            </React.Fragment>
+          ) : (
+            ""
+          )}
         </Row>
         <Row>
           <Col id="filterSection" md={2}>
@@ -69,7 +92,12 @@ class App extends Component {
                 />
               </Col>
               <Col md={10}>
-                <span id="settings-span">Settings</span>
+                <span
+                  id="settings-span"
+                  style={{ opacity: this.state.settings }}
+                >
+                  Settings
+                </span>
               </Col>
             </Row>
             <Settings
@@ -97,11 +125,13 @@ class App extends Component {
             md={{ span: 8, offset: 2 }}
             className="descriptionSection justify-content-center pl-6"
           >
-            {this.state.selectedNode.abstract !== undefined ? 
+            {this.state.selectedNode.abstract !== undefined ? (
               <div id="descriptionDiv">
-              <span className="description">{this.state.abstract}</span></div>
-             : 
-              ""}
+                <span className="description">{this.state.abstract}</span>
+              </div>
+            ) : (
+              ""
+            )}
           </Col>
         </Row>
       </div>
@@ -123,7 +153,7 @@ class App extends Component {
   search(searchString) {
     const nodes = this.state.graphData.nodes;
     const links = this.state.graphData.links;
-
+    this.state.loading = true;
     nodes.splice(0, nodes.length);
     links.splice(0, links.length);
 
@@ -134,30 +164,22 @@ class App extends Component {
       { filter: this.state.initialSearchFilter, queryStr: searchString },
       (res, status) => {
         console.log(res);
-        
-        while(status !== 200){
-          console.log("HELLO");
+
+        if (status === 200) {
+          this.state.loading = false;
+          this.addNode(res.id, res.type);
         }
-
-        if(status === 404) console.log("ERRO");
-
-        if (status === 200) this.addNode(res.id, res.type);
       }
     );
-
-    //IF RESPONSE STATUS 400 -> Warning
-    //IF RESPONSE STATUS 404 -> No Results Found
-    //WHILE RESPONSE != 200 -> Loading screen
   }
 
   addNode(id, type, filterName) {
     const parsedId = this.parseNodeId(id);
 
-    let newNode = { id: parsedId, type: type, searchId: id};
+    let newNode = { id: parsedId, type: type, searchId: id };
 
     for (let i = 0; i < this.state.graphData.nodes.length; i++) {
-      if (this.state.graphData.nodes[i].id === newNode.id) 
-        return;
+      if (this.state.graphData.nodes[i].id === newNode.id) return;
     }
 
     if (this.state.selectedNode.type !== "none")
@@ -367,7 +389,7 @@ class App extends Component {
     this.setState({ selectedNode: node });
     console.log(this.state.graphData.nodes);
 
-    if (node.type !== "none" && this.state.selectedNode.abstract !== undefined) 
+    if (node.type !== "none" && this.state.selectedNode.abstract !== undefined)
       this.changeAbstract(this.state.selectedNode.abstract);
   }
 
