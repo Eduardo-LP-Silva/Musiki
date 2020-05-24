@@ -62,6 +62,7 @@ class App extends Component {
             <React.Fragment>
               <Col>
                 <img
+                  alt="error"
                   style={{ float: "right" }}
                   src={ghost}
                   height={55}
@@ -135,7 +136,7 @@ class App extends Component {
            )}
            {this.state.selectedNode.image !== undefined ?
            <Col>
-           <img id="nodeImage" src={this.state.selectedNode.image} />
+           <img alt="node" id="nodeImage" src={this.state.selectedNode.image} />
            </Col> : ""
            }
         </Row>
@@ -158,7 +159,7 @@ class App extends Component {
   search(searchString) {
     const nodes = this.state.graphData.nodes;
     const links = this.state.graphData.links;
-    this.state.loading = true;
+    this.setState({loading: true});
     nodes.splice(0, nodes.length);
     links.splice(0, links.length);
 
@@ -171,7 +172,7 @@ class App extends Component {
         console.log(res);
 
         if (status === 200) {
-          this.state.loading = false;
+          this.setState({loading: false});
           this.addNode(res.id, res.type);
         }
       }
