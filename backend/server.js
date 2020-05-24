@@ -38,7 +38,8 @@ app.get('/search', async function(req, res) {
         const originalStr = parseOutput(queryStr);
 
         dbpedia.values(queryStr, undefined, (result) => {
-            
+
+            console.log("received");
 
             if (result.error !== undefined) {
 
@@ -70,23 +71,22 @@ app.get('/values', function(req, res) {
 
     entities = parseInput(entities);
 
-    res.status(200);
 
     if (entities != undefined) {
         dbpedia.values(entities, properties, (result) => {
 
-            if (result.error != undefined) {
+            if (result.error != undefined || result.results.bindings.length == 0) {
                 res.status(400);
-                res.send(result);
+                res.send({});
             }
-
-            else if (result.results.bindings.length > 0) {
+            else {
+                res.status(200);
                 res.send(result);
-                return;
             }
         });
     }
     else {
+        res.status(400);
         res.send({});
     }
 });
@@ -97,22 +97,22 @@ app.get('/entities', function(req, res) {
 
     value = parseInput(value);
 
-    res.status(200);
 
     if (value != undefined) {
         dbpedia.entities(value, filter, ofilter, (result) => {
 
-            if (result.error != undefined) {
+            if (result.error != undefined || result.results.bindings.length == 0) {
                 res.status(400);
-                res.send(result);
+                res.send({});
             }
             else {
+                res.status(200);
                 res.send(result);
-
             }
         });
     }
     else {
+        res.status(400);
         res.send({});
     }
 });
