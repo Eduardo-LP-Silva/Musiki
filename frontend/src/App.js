@@ -5,7 +5,7 @@ import { faCog } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "./components/navbar/navbar";
 import Settings from "./components/settings/settings";
 import Graph from "./components/graph/graph";
-import ghost from "./ghost.svg";
+import ghost from "./resources/icons/ghost.svg"
 import { StageSpinner } from "react-spinners-kit";
 import "./App.css";
 
@@ -121,18 +121,23 @@ class App extends Component {
           </Col>
         </Row>
         <Row className="align-items-center">
+        {this.state.selectedNode.abstract !== undefined ? (
           <Col
             md={{ span: 8, offset: 2 }}
             className="descriptionSection justify-content-center pl-6"
           >
-            {this.state.selectedNode.abstract !== undefined ? (
+           
               <div id="descriptionDiv">
                 <span className="description">{this.state.abstract}</span>
-              </div>
-            ) : (
+              </div> 
+          </Col>) : (
               ""
-            )}
-          </Col>
+           )}
+           {this.state.selectedNode.image !== undefined ?
+           <Col>
+           <img id="nodeImage" src={this.state.selectedNode.image} />
+           </Col> : ""
+           }
         </Row>
       </div>
     );
