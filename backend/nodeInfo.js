@@ -25,15 +25,7 @@ exports.nodeInfo = {
                 reverse: true,
                 validationKey: "rdf:type",
                 validationValue: "Single"
-            },
-            {
-                name: "songs",
-                property: "dbo:musicalArtist",
-                reverse: true,
-                validationKey: "rdfs:label",
-                validationValue: "song"
             }
-
         ]
     },
     "artist": {
@@ -50,13 +42,6 @@ exports.nodeInfo = {
                 reverse: true,
                 validationKey: "dbp:type",
                 validationValue: "album"
-            },
-            {
-                name: "songs",
-                property: "dbo:musicalArtist",
-                reverse: true,
-                validationKey: "rdfs:label",
-                validationValue: "song"
             },
             {
                 name: "bands",
@@ -78,6 +63,13 @@ exports.nodeInfo = {
                 validationValue: "MusicGroup"
             },
             {
+                name: "bands",
+                property: "dbo:genre",
+                reverse: true,
+                validationKey: "rdf:type",
+                validationValue: "MusicGroup"
+            },
+            {
                 name: "albums",
                 property: "dbo:genre",
                 reverse: true,
@@ -90,13 +82,6 @@ exports.nodeInfo = {
                 reverse: true,
                 validationKey: "rdf:type",
                 validationValue: "Single"
-            },
-            {
-                name: "songs",
-                property: "dbo:genre",
-                reverse: true,
-                validationKey: "rdfs:label",
-                validationValue: "song"
             }
         ]
     },
@@ -105,6 +90,11 @@ exports.nodeInfo = {
         filters: [
             {
                 name: "artists",
+                property: "dbo:artist",
+                reverse: false
+            },
+            {
+                name: "bands",
                 property: "dbo:artist",
                 reverse: false
             },
@@ -129,6 +119,11 @@ exports.nodeInfo = {
                 reverse: false
             },
             {
+                name: "bands",
+                property: "dbo:artist",
+                reverse: false
+            },
+            {
                 name: "genres",
                 property: "dbo:genre",
                 reverse: false
@@ -138,6 +133,16 @@ exports.nodeInfo = {
     "song": {
         validation: "song",
         filters: [
+            {
+                name: "artists",
+                property: "dbo:musicalArtist",
+                reverse: false
+            },
+            {
+                name: "bands",
+                property: "dbo:musicalBand",
+                reverse: false
+            },
             {
                 name: "genres",
                 property: "dbo:genre",

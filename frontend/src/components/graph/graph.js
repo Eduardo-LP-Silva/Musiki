@@ -113,7 +113,7 @@ class Graph extends Component {
         node.activeFilters = [];
         
         requests.get("values", {
-          entities: node.id,
+          entities: node.searchId,
           properties: "dbo:abstract",
         }, (result, status, state) => {
           if (status === 200) {
