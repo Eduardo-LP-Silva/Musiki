@@ -5,7 +5,7 @@ import { faCog } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "./components/navbar/navbar";
 import Settings from "./components/settings/settings";
 import Graph from "./components/graph/graph";
-import ghost from "./ghost.svg";
+import ghost from "./resources/icons/ghost.svg"
 import { StageSpinner } from "react-spinners-kit";
 import "./App.css";
 
