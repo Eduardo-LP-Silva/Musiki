@@ -39,15 +39,10 @@ app.get('/search', async function(req, res) {
 
         dbpedia.values(queryStr, undefined, (result) => {
 
-            console.log("received");
-
             if (result.error !== undefined) {
-
-                console.log(JSON.stringify(result.error));
                 res.status(400);
                 res.send(result);
             }
-
             else if(checkInitialNodeType(result.results.bindings, nodeInfo[filter].validation.toUpperCase())) {
                 res.status(200);
                 res.send(createNode(filter, originalStr));
@@ -71,13 +66,16 @@ app.get('/values', function(req, res) {
 
     entities = parseInput(entities);
 
-
     if (entities != undefined) {
         dbpedia.values(entities, properties, (result) => {
 
-            if (result.error != undefined || result.results.bindings.length == 0) {
+            if (result.error !== undefined) {
                 res.status(400);
-                res.send({});
+                res.send({result});
+            }
+            else if (result.results.bindings.length == 0){
+                res.status(400);
+                res.send({error: `No results for ${req.query.entities}`});
             }
             else {
                 res.status(200);
@@ -101,9 +99,13 @@ app.get('/entities', function(req, res) {
     if (value != undefined) {
         dbpedia.entities(value, filter, ofilter, (result) => {
 
-            if (result.error != undefined || result.results.bindings.length == 0) {
+            if (result.error !== undefined) {
                 res.status(400);
-                res.send({});
+                res.send(result);
+            }
+            else if (result.results.bindings.length == 0){
+                res.status(400);
+                res.send({error: `No results for ${req.query.value} were found.`});
             }
             else {
                 res.status(200);
