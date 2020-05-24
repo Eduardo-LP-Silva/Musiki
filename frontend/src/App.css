@@ -83,14 +83,12 @@ body,
   transition: all 0.2s ease;
 }
 
-.settingsSection:hover > #settings-span {
-  color: white !important;
-}
 
 #settings-span {
-  color: transparent;
+  color: white;
   cursor: none;
-  transition: all 0.2s ease;
+  opacity: 0;
+  font-weight: 200;
 }
 
 #settings-icon:hover {
@@ -111,15 +109,47 @@ body,
   font-size: 14px;
   font-style: italic;
   text-shadow: 4px 4px 2px rgba(0, 0, 0, 0.25);
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  margin-left: 60px;
+}
+
+#bold {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+#noResults {
+  margin-bottom: 5px;
+  font-size: 14px;
+  font-weight: 200;
+  color: white;
+  margin-left: 1em;
 }
 
 .descriptionSection {
   border-left: 1px solid white;
   margin-right: 0.7em;
+}
+
+.additionalSection {
+  position: absolute;
+  left: 37%;
+}
+
+#nodeImage {
+  border-radius: 10px;
+  height: 100px;
+  width: auto;
+  -webkit-animation-name: fadeInDown;
+  -moz-animation-name: fadeInDown;
+  -o-animation-name: fadeInDown;
+  animation-name: fadeInDown;
+  -webkit-animation-fill-mode: both;
+  -moz-animation-fill-mode: both;
+  -o-animation-fill-mode: both;
+  animation-fill-mode: both;
+  -webkit-animation-duration: 0.5s;
+  -moz-animation-duration: 0.5s;
+  -o-animation-duration: 0.5s;
+  animation-duration: 0.5s;
 }
 
 #descriptionDiv {
@@ -204,4 +234,3 @@ body,
     transform: translatey(0);
   }
 }
-
