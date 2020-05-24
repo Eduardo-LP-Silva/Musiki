@@ -94,8 +94,7 @@ app.get('/entities', function(req, res) {
     let {value, filter, ofilter} = req.query;
 
     value = parseInput(value);
-
-
+    
     if (value != undefined) {
         dbpedia.entities(value, filter, ofilter, (result) => {
 

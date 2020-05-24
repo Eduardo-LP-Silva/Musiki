@@ -17,7 +17,12 @@ exports.get = function get(endpoint, queryParams, callback, state) {
     })
     .then(response => {
         status = response.status;
-        return response.json();
+
+        if(status === 404)
+            return "Error";
+
+        else if(status === 200)
+            return response.json();
     })
     .then(data => {
         callback(data, status, state); // JSON data parsed by `response.json()` call

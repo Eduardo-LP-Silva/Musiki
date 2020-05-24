@@ -5,7 +5,7 @@ import { faCog } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "./components/navbar/navbar";
 import Settings from "./components/settings/settings";
 import Graph from "./components/graph/graph";
-import ghost from "./resources/icons/ghost.svg"
+import ghost from "./resources/icons/ghost.svg";
 import { StageSpinner } from "react-spinners-kit";
 import "./App.css";
 
@@ -122,23 +122,29 @@ class App extends Component {
           </Col>
         </Row>
         <Row className="align-items-center">
-        {this.state.selectedNode.abstract !== undefined ? (
-          <Col
-            md={{ span: 8, offset: 2 }}
-            className="descriptionSection justify-content-center pl-6"
-          >
-           
+          {this.state.selectedNode.abstract !== undefined ? (
+            <Col
+              md={{ span: 8, offset: 2 }}
+              className="descriptionSection justify-content-center pl-6"
+            >
               <div id="descriptionDiv">
                 <span className="description">{this.state.abstract}</span>
-              </div> 
-          </Col>) : (
-              ""
-           )}
-           {this.state.selectedNode.image !== undefined ?
-           <Col>
-           <img alt="node" id="nodeImage" src={this.state.selectedNode.image} />
-           </Col> : ""
-           }
+              </div>
+            </Col>
+          ) : (
+            ""
+          )}
+          {this.state.selectedNode.image !== undefined ? (
+            <Col>
+              <img
+                alt="node"
+                id="nodeImage"
+                src={this.state.selectedNode.image}
+              />
+            </Col>
+          ) : (
+            ""
+          )}
         </Row>
       </div>
     );
@@ -159,7 +165,8 @@ class App extends Component {
   search(searchString) {
     const nodes = this.state.graphData.nodes;
     const links = this.state.graphData.links;
-    this.setState({loading: true});
+    this.setState({ loading: true });
+    this.setState({ error: false});
     nodes.splice(0, nodes.length);
     links.splice(0, links.length);
 
@@ -172,8 +179,13 @@ class App extends Component {
         console.log(res);
 
         if (status === 200) {
-          this.setState({loading: false});
+          this.setState({ loading: false });
           this.addNode(res.id, res.type);
+        }
+
+        if (status === 404) {
+          this.setState({ loading: false});
+          this.setState({ error : true});
         }
       }
     );
@@ -233,6 +245,7 @@ class App extends Component {
 
   addFilterNodes(filter) {
     let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
+    this.setState({ error: false});
 
     for (let i = 0; i < filters.length; i++) {
       if (filters[i].name.toUpperCase() === filter.toUpperCase()) {
@@ -284,39 +297,48 @@ class App extends Component {
             },
             (result, status, state) => {
               const { passedFilter, originalFilter } = state;
-              let bindings = result.results.bindings;
-              let added = [];
-              const sn = this.state.selectedNode;
-              let nodeChildren =
-                sn.childrenNo === undefined ? 0 : sn.childrenNo;
 
-              for (const binding of bindings) {
-                let entityName = binding["entities"].value;
-                entityName = entityName.substr(entityName.lastIndexOf("/") + 1);
-                let link =
-                  binding[passedFilter.validationKey.replace(":", "")]?.value;
 
-                if (
-                  !added.includes(entityName) &&
-                  link !== undefined &&
-                  link
-                    .toUpperCase()
-                    .includes(passedFilter.validationValue.toUpperCase())
-                ) {
-                  added.push(entityName);
+              if (result === undefined || result.results === undefined) {
+                this.setState({ error: true});
 
-                  this.addNodeChildren(
-                    this.state.selectedNode.id,
-                    entityName,
-                    originalFilter.slice(0, originalFilter.length - 1),
-                    passedFilter.name
+              } else {
+                let bindings = result.results.bindings;
+                let added = [];
+                const sn = this.state.selectedNode;
+                let nodeChildren =
+                  sn.childrenNo === undefined ? 0 : sn.childrenNo;
+
+                for (const binding of bindings) {
+                  let entityName = binding["entities"].value;
+                  entityName = entityName.substr(
+                    entityName.lastIndexOf("/") + 1
                   );
-                  nodeChildren++;
-                }
-              }
+                  let link =
+                    binding[passedFilter.validationKey.replace(":", "")]?.value;
 
-              sn.childrenNo = nodeChildren;
-              this.setState({ selectedNode: sn });
+                  if (
+                    !added.includes(entityName) &&
+                    link !== undefined &&
+                    link
+                      .toUpperCase()
+                      .includes(passedFilter.validationValue.toUpperCase())
+                  ) {
+                    added.push(entityName);
+
+                    this.addNodeChildren(
+                      this.state.selectedNode.id,
+                      entityName,
+                      originalFilter.slice(0, originalFilter.length - 1),
+                      passedFilter.name
+                    );
+                    nodeChildren++;
+                  }
+                }
+
+                sn.childrenNo = nodeChildren;
+                this.setState({ selectedNode: sn });
+              }
             },
             { passedFilter: filter, originalFilter: originalFilter }
           );
@@ -328,13 +350,12 @@ class App extends Component {
   }
 
   removeFilterNodes(filter, origin) {
-
     // Variable depicting whether the function call is the entry point of the recursive call or not
     let topMostCall = false;
 
     let filterName = filter;
     let links = this.state.graphData.links;
-    
+
     if (origin === undefined) {
       topMostCall = true;
       origin = this.state.selectedNode;
@@ -347,15 +368,13 @@ class App extends Component {
 
       if (
         link.source.id === origin.id &&
-        (filterName === undefined || 
+        (filterName === undefined ||
           filterName === null ||
-        link.target.filterName.toUpperCase() === filterName.toUpperCase())
+          link.target.filterName.toUpperCase() === filterName.toUpperCase())
       ) {
-
-        if (links.find(x => x.source.id === link.target.id) !== undefined) {
-          this.removeFilterNodes(undefined, link.target)
-        }
-        else {
+        if (links.find((x) => x.source.id === link.target.id) !== undefined) {
+          this.removeFilterNodes(undefined, link.target);
+        } else {
           console.log("Didn't continue on " + link.target.id);
         }
         this.removeNode(link.target.id);
@@ -365,11 +384,9 @@ class App extends Component {
     }
 
     origin.childrenNo = nodeChildren;
-    if (topMostCall)
-      this.setState({ selectedNode: origin });
+    if (topMostCall) this.setState({ selectedNode: origin });
 
-    if (topMostCall)
-      this.removeUselessLinks();
+    if (topMostCall) this.removeUselessLinks();
   }
 
   removeNode(id) {
@@ -391,10 +408,9 @@ class App extends Component {
     }
   }
 
-  removeUselessLinks()
-  {
+  removeUselessLinks() {
     let links = this.state.graphData.links;
-    let nodeNames = this.state.graphData.nodes.map(x => x.id);
+    let nodeNames = this.state.graphData.nodes.map((x) => x.id);
 
     for (let i = 0; i < links.length; i++) {
       let link = links[i];

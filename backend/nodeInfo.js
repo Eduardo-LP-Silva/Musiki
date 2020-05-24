@@ -44,6 +44,13 @@ exports.nodeInfo = {
                 validationValue: "album"
             },
             {
+                name: "singles",
+                property: "dbo:artist",
+                reverse: true,
+                validationKey: "rdf:type",
+                validationValue: "Single"
+            },
+            {
                 name: "bands",
                 property: "dbo:bandMember",
                 reverse: true,

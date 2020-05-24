@@ -138,6 +138,7 @@ body,
   border-radius: 10px;
   height: 100px;
   width: auto;
+  max-width: 200px;
   -webkit-animation-name: fadeInDown;
   -moz-animation-name: fadeInDown;
   -o-animation-name: fadeInDown;
