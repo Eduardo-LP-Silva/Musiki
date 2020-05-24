@@ -49,7 +49,10 @@ class Graph extends Component {
     const fontSize = Math.max(3, nodeSize / globalScale);
     const size =
       node === (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
-    const height = node === this.props.selectedNode ? node.y + nodeSize + 5 : node.y + nodeSize;
+    const height =
+      node === this.props.selectedNode
+        ? node.y + nodeSize + 5
+        : node.y + nodeSize;
 
     //Node design properties
     ctx.font = `${fontSize}px arial`;
@@ -118,21 +121,25 @@ class Graph extends Component {
 
   getAbstract(node) {
     if (node && this.props.selectedNode !== node) {
-      if (!node.hasOwnProperty("activeFilters")) 
-        node.activeFilters = [];
-        
-        requests.get("values", {
+      if (!node.hasOwnProperty("activeFilters")) node.activeFilters = [];
+
+      requests.get(
+        "values",
+        {
           entities: node.searchId,
           properties: "dbo:abstract",
         },
-        
+
         (result, status, state) => {
           if (status === 200) {
             let bindings = result.results.bindings;
 
             for (const binding of bindings) {
               let value = binding["dboabstract"]?.value;
-              let lang =  binding["dboabstract"] !== undefined ? binding["dboabstract"]["xml:lang"] : undefined;
+              let lang =
+                binding["dboabstract"] !== undefined
+                  ? binding["dboabstract"]["xml:lang"]
+                  : undefined;
 
               if (value !== undefined && lang !== undefined && lang === "en") {
                 node.abstract = value;
@@ -148,8 +155,7 @@ class Graph extends Component {
     }
   }
 
-  getImage(node){
-
+  getImage(node) {
     if (node && this.props.selectedNode !== node) {
       if (!node.hasOwnProperty("activeFilters")) node.activeFilters = [];
 
@@ -159,33 +165,32 @@ class Graph extends Component {
           entities: node.id,
           properties: "dbo:thumbnail",
         },
-        
+
         (result, status, state) => {
           if (status === 200) {
             let bindings = result.results.bindings;
 
             for (const binding of bindings) {
               let img = binding["dbothumbnail"]?.value;
-            
-              if (img !== undefined ) {
+
+              if (img !== undefined) {
                 node.image = img;
                 break;
               }
             }
 
             this.props.setSelectedNode(node);
+          } else {
+            node.image = undefined;
           }
         }
       );
     }
-
   }
 
   onNodeClick(node) {
-
     this.getAbstract(node);
     this.getImage(node);
- 
   }
 
   onBackgroundClick() {

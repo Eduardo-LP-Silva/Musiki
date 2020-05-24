@@ -157,9 +157,10 @@ class App extends Component {
   }
 
   changeAbstract(abstract) {
-    let minimizedAbs = abstract.substr(0, abstract.indexOf(".", 300));
-    minimizedAbs += ".";
-    this.setState({ abstract: minimizedAbs });
+      let minimizedAbs = abstract.substr(0, abstract.indexOf(".", 300));
+      minimizedAbs += ".";
+      this.setState({ abstract: minimizedAbs });
+
   }
 
   search(searchString) {
@@ -262,6 +263,14 @@ class App extends Component {
               properties: filter.property,
             },
             (result, status, state) => {
+
+              console.log(result);
+
+              if (result === undefined || result.results === undefined || result.results.bindings === undefined || result.results.bindings.length < 1) {
+                this.setState({ error: true});
+                return;
+              } 
+
               const { passedFilter, originalFilter } = state;
               let bindings = result.results.bindings;
               const sn = this.state.selectedNode;
@@ -299,9 +308,10 @@ class App extends Component {
               const { passedFilter, originalFilter } = state;
 
 
-              if (result === undefined || result.results === undefined) {
+              if (result === undefined || result.results === undefined || result.results.bindings === undefined || result.results.bindings.length < 1) {
                 this.setState({ error: true});
-
+                
+                
               } else {
                 let bindings = result.results.bindings;
                 let added = [];
