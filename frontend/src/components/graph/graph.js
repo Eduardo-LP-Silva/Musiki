@@ -20,6 +20,8 @@ class Graph extends Component {
     this.clickAnimation = this.clickAnimation.bind(this);
     this.styleNodes = this.styleNodes.bind(this);
     this.getNodeSize = this.getNodeSize.bind(this);
+    this.getAbstract = this.getAbstract.bind(this);
+    this.getImage = this.getImage.bind(this);
   }
 
   render() {
@@ -47,6 +49,7 @@ class Graph extends Component {
     const fontSize = Math.max(3, nodeSize / globalScale);
     const size =
       node === (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
+    const height = node === this.props.selectedNode ? node.y + nodeSize + 5 : node.y + nodeSize;
 
     //Node design properties
     ctx.font = `${fontSize}px arial`;
@@ -67,7 +70,7 @@ class Graph extends Component {
     ctx.shadowColor = "rgba(0, 0, 0, 0)";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(label, node.x, node.y + nodeSize);
+    ctx.fillText(label, node.x, height);
 
     ctx.save();
 
@@ -113,7 +116,7 @@ class Graph extends Component {
     }
   }
 
-  onNodeClick(node) {
+  getAbstract(node) {
     if (node && this.props.selectedNode !== node) {
       if (!node.hasOwnProperty("activeFilters")) node.activeFilters = [];
 
@@ -144,6 +147,46 @@ class Graph extends Component {
         }
       );
     }
+  }
+
+  getImage(node){
+
+    if (node && this.props.selectedNode !== node) {
+      if (!node.hasOwnProperty("activeFilters")) node.activeFilters = [];
+
+      requests.get(
+        "values",
+        {
+          entities: node.id,
+          properties: "dbo:thumbnail",
+        },
+        
+        (result, status, state) => {
+          if (status === 200) {
+            let bindings = result.results.bindings;
+
+            for (const binding of bindings) {
+              let img = binding["dbothumbnail"]?.value;
+            
+              if (img !== undefined ) {
+                node.image = img;
+                break;
+              }
+            }
+
+            this.props.setSelectedNode(node);
+          }
+        }
+      );
+    }
+
+  }
+
+  onNodeClick(node) {
+
+    this.getAbstract(node);
+    this.getImage(node);
+ 
   }
 
   onBackgroundClick() {
