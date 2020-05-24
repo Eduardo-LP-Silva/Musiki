@@ -204,10 +204,10 @@ class App extends Component {
 
     for (let i = 0; i < this.state.graphData.links.length; i++) {
       if (
-        (this.state.graphData.links[i].source === parentId &&
-          this.state.graphData.links[i].target === targetId) ||
-        (this.state.graphData.links[i].target === parentId &&
-          this.state.graphData.links[i].source === targetId)
+        (this.state.graphData.links[i].source.id === parentId &&
+          this.state.graphData.links[i].target.id === targetId) ||
+        (this.state.graphData.links[i].target.id === parentId &&
+          this.state.graphData.links[i].source.id === targetId)
       )
         return;
     }
@@ -321,38 +321,49 @@ class App extends Component {
     }
   }
 
-  removeFilterNodes(filter) {
+  removeFilterNodes(filter, origin) {
+
+    // Variable depicting whether the function call is the entry point of the recursive call or not
+    let topMostCall = false;
+
     let filterName = filter;
     let links = this.state.graphData.links;
-    let selectedNode = this.state.selectedNode;
+    
+    if (origin === undefined) {
+      topMostCall = true;
+      origin = this.state.selectedNode;
+    }
 
-    const sn = this.state.selectedNode;
-    let nodeChildren = sn.childrenNo;
+    let nodeChildren = origin.childrenNo;
 
     for (let i = 0; i < links.length; i++) {
       let link = links[i];
 
       if (
-        link.source.id === selectedNode.id &&
-        link.target.filterName.toUpperCase() === filterName.toUpperCase()
+        link.source.id === origin.id &&
+        (filterName === undefined || 
+          filterName === null ||
+        link.target.filterName.toUpperCase() === filterName.toUpperCase())
       ) {
+
+        if (links.find(x => x.source.id === link.target.id) !== undefined) {
+          this.removeFilterNodes(undefined, link.target)
+        }
+        else {
+          console.log("Didn't continue on " + link.target.id);
+        }
         this.removeNode(link.target.id);
 
-        links.splice(i, 1);
-        i--;
         nodeChildren--;
       }
     }
 
-    sn.childrenNo = nodeChildren;
-    this.setState({ selectedNode: sn });
+    origin.childrenNo = nodeChildren;
+    if (topMostCall)
+      this.setState({ selectedNode: origin });
 
-    this.setState({
-      graphData: {
-        nodes: this.state.graphData.nodes,
-        links: links,
-      },
-    });
+    if (topMostCall)
+      this.removeUselessLinks();
   }
 
   removeNode(id) {
@@ -374,6 +385,24 @@ class App extends Component {
     }
   }
 
+  removeUselessLinks()
+  {
+    let links = this.state.graphData.links;
+    let nodeNames = this.state.graphData.nodes.map(x => x.id);
+
+    for (let i = 0; i < links.length; i++) {
+      let link = links[i];
+
+      if (
+        !nodeNames.includes(link.source.id) ||
+        !nodeNames.includes(link.target.id)
+      ) {
+        links.splice(i, 1);
+        i--;
+      }
+    }
+  }
+
   parseNodeId(nodeId) {
     nodeId = nodeId.replace(/\([^)]+\)/g, "");
     nodeId = nodeId.replace(/_/g, " ");
@@ -387,7 +416,6 @@ class App extends Component {
 
   setSelectedNode(node) {
     this.setState({ selectedNode: node });
-    console.log(this.state.graphData.nodes);
 
     if (node.type !== "none" && this.state.selectedNode.abstract !== undefined)
       this.changeAbstract(this.state.selectedNode.abstract);
