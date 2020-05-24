@@ -33,7 +33,7 @@ class App extends Component {
     this.setInitialSearchFilter = this.setInitialSearchFilter.bind(this);
     this.addFilterNodes = this.addFilterNodes.bind(this);
     this.removeFilterNodes = this.removeFilterNodes.bind(this);
-    this.change = this.change.bind(this);
+    this.changeAbstract = this.changeAbstract.bind(this);
   }
 
   render() {
@@ -97,7 +97,7 @@ class App extends Component {
             md={{ span: 8, offset: 2 }}
             className="descriptionSection justify-content-center pl-6"
           >
-            {this.state.selectedNode.type !== "none" ? 
+            {this.state.selectedNode.abstract !== undefined ? 
               <div id="descriptionDiv">
               <span className="description">{this.state.abstract}</span></div>
              : 
@@ -114,7 +114,7 @@ class App extends Component {
     });
   }
 
-  change(abstract) {
+  changeAbstract(abstract) {
     let minimizedAbs = abstract.substr(0, abstract.indexOf(".", 300));
     minimizedAbs += ".";
     this.setState({ abstract: minimizedAbs });
@@ -151,10 +151,13 @@ class App extends Component {
   }
 
   addNode(id, type, filterName) {
-    let newNode = { id: id, type: type };
+    const parsedId = this.parseNodeId(id);
+
+    let newNode = { id: parsedId, type: type, searchId: id};
 
     for (let i = 0; i < this.state.graphData.nodes.length; i++) {
-      if (this.state.graphData.nodes[i].id === newNode.id) return;
+      if (this.state.graphData.nodes[i].id === newNode.id) 
+        return;
     }
 
     if (this.state.selectedNode.type !== "none")
@@ -173,6 +176,8 @@ class App extends Component {
   }
 
   addLink(parentId, targetId) {
+    targetId = this.parseNodeId(targetId);
+
     let link = { source: parentId, target: targetId, value: 1 };
 
     for (let i = 0; i < this.state.graphData.links.length; i++) {
@@ -194,11 +199,7 @@ class App extends Component {
   }
 
   addNodeChildren(parentId, childId, childType, filterName) {
-    childId = childId.replace(/\([^)]+\)/g, "");
-    childId = childId.replace(/_/g, " ");
-
     this.addNode(childId, childType, filterName);
-
     this.addLink(parentId, childId);
   }
 
@@ -216,7 +217,7 @@ class App extends Component {
           requests.get(
             "values",
             {
-              entities: this.state.selectedNode.id,
+              entities: this.state.selectedNode.searchId,
               properties: filter.property,
             },
             (result, status, state) => {
@@ -250,7 +251,7 @@ class App extends Component {
           requests.get(
             "entities",
             {
-              value: `${this.state.selectedNode.id},${filter.property}`,
+              value: `${this.state.selectedNode.searchId},${filter.property}`,
               ofilter: filter.validationKey,
             },
             (result, status, state) => {
@@ -351,51 +352,12 @@ class App extends Component {
     }
   }
 
-  /*
-  addNodeFilter(filter) {
-    const filters = this.state.nodeFilters;
+  parseNodeId(nodeId) {
+    nodeId = nodeId.replace(/\([^)]+\)/g, "");
+    nodeId = nodeId.replace(/_/g, " ");
 
-    if (filters.has(this.state.selectedNode.id)) {
-      const selectedFilters = filters.get(this.state.selectedNode.id);
-
-      if (!selectedFilters.includes(filter)) {
-        selectedFilters.push(filter);
-        filters.set(this.state.selectedNode.id, selectedFilters);
-      } else {
-        console.log(
-          `The selected node ${this.state.selectedNode.id} already has ${filter} filter active!`
-        );
-        return;
-      }
-    } else filters.set(this.state.selectedNode.id, [filter]);
-
-    this.setState({ nodeFilters: filters });
-    console.log(this.state.nodeFilters);
-
-    this.addNodeFilterGraph(filter);
-  } */
-
-  /*
-  removeNodeFilter(filter) {
-    const filters = this.state.nodeFilters;
-
-    if (filters.has(this.state.selectedNode.id)) {
-      let selectedFilters = filters.get(this.state.selectedNode.id);
-
-      if (selectedFilters.includes(filter)) {
-        selectedFilters = selectedFilters.filter((f) => f !== filter);
-        filters.set(this.state.selectedNode.id, selectedFilters);
-        this.setState({ nodeFilters: filters });
-      } else
-        console.log(
-          `The selected node ${this.state.selectedNode.id} doesn't have ${filter} filter active!`
-        );
-    } else
-      console.log(
-        `The selected node ${this.state.selectedNode.id} doesn't have any filters active!`
-      );
-    console.log(this.state.nodeFilters);
-  } */
+    return nodeId;
+  }
 
   setInitialSearchFilter(filter) {
     this.setState({ initialSearchFilter: filter });
@@ -405,7 +367,8 @@ class App extends Component {
     this.setState({ selectedNode: node });
     console.log(this.state.graphData.nodes);
 
-    if (node.type !== "none") this.change(this.state.selectedNode.abstract);
+    if (node.type !== "none" && this.state.selectedNode.abstract !== undefined) 
+      this.changeAbstract(this.state.selectedNode.abstract);
   }
 
   setSelectedNodeFilters(filters) {

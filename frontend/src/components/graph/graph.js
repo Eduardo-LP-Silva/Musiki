@@ -121,20 +121,19 @@ class Graph extends Component {
 
             for (const binding of bindings) {
               let value = binding["dboabstract"]?.value;
-                let lang = binding["dboabstract"]["xml:lang"];
+              let lang =  binding["dboabstract"] !== undefined ? binding["dboabstract"]["xml:lang"] : undefined;
 
               if (value !== undefined && lang !== undefined && lang === "en") {
                 node.abstract = value;
                 console.log(value);
-                this.props.setSelectedNode(node);
                 break;
               }
             }
+
+            this.props.setSelectedNode(node);
           }
         });
     }
-    
-    //else maybe ?
   }
 
   onBackgroundClick(){
