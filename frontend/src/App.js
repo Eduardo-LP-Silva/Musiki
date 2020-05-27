@@ -450,7 +450,7 @@ class App extends Component {
         link.source.id === origin.id &&
         (filterName === undefined ||
           filterName === null ||
-          link.target.filterName.toUpperCase() === filterName.toUpperCase())
+          (link.target.filterName !== undefined && link.target.filterName.toUpperCase() === filterName.toUpperCase()))
       ) {
         if (links.find((x) => x.source.id === link.target.id) !== undefined) {
           this.removeFilterNodes(undefined, link.target);
