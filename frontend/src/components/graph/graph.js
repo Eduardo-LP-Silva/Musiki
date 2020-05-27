@@ -4,6 +4,9 @@ import "./graph.css";
 
 const requests = require("../requests/requests");
 
+/**
+ *  Represents the main Graph component
+ */
 class Graph extends Component {
   constructor(props) {
     super(props);
@@ -43,6 +46,9 @@ class Graph extends Component {
     );
   }
 
+  /**
+   *  Adds styling properties to the components
+   */
   styleNodes(node, ctx, globalScale) {
     const label = node.id;
     const nodeSize = this.getNodeSize(node);
@@ -82,6 +88,9 @@ class Graph extends Component {
     window.requestAnimationFrame(this.clickAnimation);
   }
 
+  /**
+   *  Calculates the size of the nodes
+   */
   getNodeSize(node) {
     if (node.parent === undefined || node.parent.childrenNo < 5)
       return this.state.nodeRelSize;
@@ -119,6 +128,9 @@ class Graph extends Component {
     }
   }
 
+  /**
+   *  Fetches the abstract of a DBpedia resource
+   */
   getAbstract(node) {
     if (node && this.props.selectedNode !== node) {
       if (!node.hasOwnProperty("activeFilters")) node.activeFilters = [];
@@ -154,6 +166,9 @@ class Graph extends Component {
     }
   }
 
+  /**
+   *  Fecthes the image of the currently selected node fropm DBpedia
+   */
   getImage(node) {
     if (node && this.props.selectedNode !== node) {
       if (!node.hasOwnProperty("activeFilters")) node.activeFilters = [];
@@ -187,17 +202,26 @@ class Graph extends Component {
     }
   }
 
+  /**
+   *  Gets the abstract and the image of the DBpedai resource
+   */
   onNodeClick(node) {
     this.getAbstract(node);
     this.getImage(node);
   }
 
+  /**
+   *  De-selects a node
+   */
   onBackgroundClick() {
     let nullNode = { type: "none", id: "" };
     
     this.props.setSelectedNode(nullNode);
   }
 
+  /**
+   *  Shows a hovered node
+   */
   onNodeHover(node) {
     if (node) {
       this.setState({ hoveredNode: node });

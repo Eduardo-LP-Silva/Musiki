@@ -1,12 +1,9 @@
 const { env } = require("../../environments/env");
 
-exports.get = function get(
-  endpoint,
-  queryParams,
-  callback,
-  state,
-  errorCallback
-) {
+/**
+ *  Simple GET request
+ */
+exports.get = function get(endpoint, queryParams, callback, state, errorCallback) {
   let link = `${env.API_URL}/${endpoint}`;
   let status;
 
@@ -39,6 +36,9 @@ exports.get = function get(
     });
 };
 
+/**
+ *  Simple POST request
+ */
 exports.post = function post(endpoint, body, callback, state, errorCallback) {
   let status;
 
@@ -62,7 +62,9 @@ exports.post = function post(endpoint, body, callback, state, errorCallback) {
     });
 };
 
-// Transform JSON to "x-www-form-urlencoded" format
+/**
+ *  Transform JSON to "x-www-form-urlencoded" format
+ */
 exports.searchParams = function searchParams(params) {
   return Object.keys(params)
     .map((key) => {

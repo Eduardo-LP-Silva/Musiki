@@ -13,9 +13,11 @@ const requests = require("./components/requests/requests");
 
 const childLimit = 30;
 
+
+/**
+ *  Main component of react
+ */
 class App extends Component {
-
-
   constructor(props) {
     super(props);
 
@@ -41,7 +43,9 @@ class App extends Component {
   }
 
   
-
+/**
+ *  Display components
+ */
   render() {
     return (
       <div id="content">
@@ -156,12 +160,18 @@ class App extends Component {
     );
   }
 
+  /**
+   *  Get nodeInfo object from back-end to identify nodes
+   */ 
   componentDidMount() {
     requests.get("nodeInfo", undefined, (result) => {
       this.setState({ nodeInfo: result });
     });
   }
 
+  /**
+   *  Change current selected node's abstracc
+   */ 
   changeAbstract(abstract) {
       let minimizedAbs = abstract.substr(0, abstract.indexOf(".", 300));
       minimizedAbs += ".";
@@ -169,6 +179,9 @@ class App extends Component {
 
   }
 
+  /**
+   *  Search for an entity from the search bar
+   */   
   search(searchString) {
     const nodes = this.state.graphData.nodes;
     const links = this.state.graphData.links;
@@ -196,6 +209,9 @@ class App extends Component {
     );
   }
 
+  /**
+   *  Adds a node to the graph
+   */ 
   addNode(id, type, filterName) {
     const parsedId = this.parseNodeId(id);
 
@@ -220,6 +236,9 @@ class App extends Component {
     });
   }
 
+  /**
+   *  Adds a link/edge to the graph
+   */ 
   addLink(parentId, targetId) {
     targetId = this.parseNodeId(targetId);
 
@@ -243,11 +262,17 @@ class App extends Component {
     });
   }
 
+  /**
+   *  Adds a child node to the graph
+   */ 
   addNodeChildren(parentId, childId, childType, filterName) {
     this.addNode(childId, childType, filterName);
     this.addLink(parentId, childId);
   }
 
+  /**
+   *  Add node children from selected filter
+   */ 
   addFilterNodes(filter) {
     let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
     this.setState({ error: false, loading: true});
@@ -393,11 +418,17 @@ class App extends Component {
       }
     }
   }
-
+ 
+  /**
+   *  Checks if child nodes where added
+   */ 
   addedNodes(previousChildrenNo, newChildrenNo) {
     return (previousChildrenNo === undefined && newChildrenNo > 0) || previousChildrenNo < newChildrenNo;
   }
 
+  /**
+   *  Removes a filter from a node
+   */   
   removeFilterNodes(filter, origin) {
     // Variable depicting whether the function call is the entry point of the recursive call or not
     let topMostCall = false;
@@ -440,7 +471,10 @@ class App extends Component {
     if(this.state.error)
       this.setState({error: false});
   }
-
+ 
+  /**
+   *  Removes a node from the graph
+   */ 
   removeNode(id) {
     let nodes = this.state.graphData.nodes;
 
@@ -460,6 +494,9 @@ class App extends Component {
     }
   }
 
+  /**
+   *  Remove links from or to non-existent nodes
+   */ 
   removeUselessLinks() {
     let links = this.state.graphData.links;
     let nodeNames = this.state.graphData.nodes.map((x) => x.id);
@@ -476,7 +513,10 @@ class App extends Component {
       }
     }
   }
-
+ 
+  /**
+   *  Parses the node's id
+   */ 
   parseNodeId(nodeId) {
     nodeId = nodeId.replace(/\([^)]+\)/g, "");
     nodeId = nodeId.replace(/_/g, " ");
@@ -484,10 +524,16 @@ class App extends Component {
     return nodeId;
   }
 
+  /**
+   *  Sets the inicial search's filter
+   */ 
   setInitialSearchFilter(filter) {
     this.setState({ initialSearchFilter: filter });
   }
 
+  /**
+   *  Sets state to update the selected node
+   */ 
   setSelectedNode(node) {
     this.setState({ selectedNode: node });
 
@@ -495,6 +541,9 @@ class App extends Component {
       this.changeAbstract(this.state.selectedNode.abstract);
   }
 
+  /**
+   *  Add filter to selectedNode object
+   */ 
   setSelectedNodeFilters(filters) {
     const sn = this.state.selectedNode;
 
@@ -503,6 +552,9 @@ class App extends Component {
     this.setState({ selectedNode: sn });
   }
 
+  /**
+   *  Toggles the settings sidebar
+   */ 
   toggleSettings() {
     this.setState({ settings: 1 - this.state.settings });
   }

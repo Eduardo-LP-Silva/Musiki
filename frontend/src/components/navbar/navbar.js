@@ -6,6 +6,9 @@ import { ReactComponent as Logo } from '../../resources/icons/music.svg';
 import { ReactComponent as Wikipedia } from '../../resources/icons/symbol.svg';
 import './navbar.css';
 
+/**
+ *  Represents the top navbar component
+ */
 class Navbar extends Component {
     constructor(props) {
         super(props);
@@ -34,16 +37,25 @@ class Navbar extends Component {
         );
     }
 
+    /**
+     *  Selects the search box
+     */
     selectNavbar() {
         this.props.setSelectedNode({type: "none", id: "navbar", activeFilters: []});
     }
-
+    
+    /**
+     *  Searches for the string in the search box
+     */
     search() {
         const searchString = document.querySelector('#search-bar > input').value;
 
         this.props.search(searchString);
     }
-
+   
+    /**
+     *  Checks for the enter key when writing
+     */
     checkEnter(event) {
 
         console.log(event);

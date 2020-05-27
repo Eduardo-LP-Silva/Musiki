@@ -14,8 +14,14 @@ const version = '1.0.0';
 const key = 1234;
 const oldVersion = false;
 
+/**
+ *  Base DBpedia HTTP endpoint 
+ */
 const endpoint = 'http://localhost:' + port + '/api/' + version + '/';
 
+/**
+ *  Spawns the DBpedia process
+ */
 exports.start = function start() {
 	
 	let dbpediaAPI = spawn(path.join(process.env.JAVA_9_PATH, 'java') || 'java', ['-jar', 'dbpedia-api-1.0.0.jar', '--server.port=' + port], {
@@ -38,6 +44,9 @@ exports.start = function start() {
 	startDBpediaCheck();
 }
 
+/**
+ *  Fetches a values request from DBpedia
+ */
 exports.values = async function values(entities, properties, callback) {
 
 	await waitForDBpedia();
@@ -82,6 +91,9 @@ exports.values = async function values(entities, properties, callback) {
 	});
 }
 
+/**
+ *  Fetches an entities request from DBpedia
+ */
 exports.entities = async function entities(value, filter, ofilter, callback) {
 	
 	await waitForDBpedia();
@@ -143,7 +155,9 @@ exports.entities = async function entities(value, filter, ofilter, callback) {
 	});
 }
 
-
+/**
+ *  Adds generic parameters
+ */
 function addGenericParameters(originalLink) {
 
 	originalLink += '&format=' + format;
@@ -156,18 +170,26 @@ function addGenericParameters(originalLink) {
 	return originalLink;
 }
 
-// Wait for DBpedia to be alive, polling every 100 ms
+/**
+ *  Waits for DBpedia to be alive, polling every 100 ms
+ */
 async function waitForDBpedia() {
 	while (!ready) {
 		await new Promise(r => setTimeout(r, 100));
 	}
 };
 
+/**
+ *  Starts checking for DBpedia
+ */
 function startDBpediaCheck() {
 	console.log("Waiting for DBpedia API...");
 	checkDBpedia();
 }
 
+/**
+ *  Checks if the DBpedia process is ready every 500ms
+ */
 async function checkDBpedia() {
 	const baselineDBpediaURL = endpoint + 'values';
 

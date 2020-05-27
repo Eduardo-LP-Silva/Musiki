@@ -1,3 +1,6 @@
+/**
+ *  Represents the different node types, filters and how to get them
+ */
 exports.nodeInfo = {
     "band": {
         validation: "MusicGroup",

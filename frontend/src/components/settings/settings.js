@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
 import './settings.css';
 
+/**
+ *  Represents the settings sidebar component
+ */ 
 class Settings extends Component {
     constructor(props) {
         super(props);
@@ -27,15 +30,24 @@ class Settings extends Component {
         );
     }
 
+  /**
+   *  Sets the filter when component has loaded
+   */ 
     componentDidMount() {
         this.setFilters();
     }
 
+    /**
+     *  Sets the filters when component updates
+     */
     componentDidUpdate(prevProps) {
         if (this.props.selectedNode.type !== prevProps.selectedNode.type)
             this.setFilters();
     }
 
+    /**
+     *  Updates the filters
+     */    
     setFilters() {
         if(this.props.selectedNode.type === 'none') {
             this.setState({filters: ['artist', 'band', 'genre', 'album', 'single', 'song']}); //Initial search filters
@@ -63,6 +75,9 @@ class Settings extends Component {
         }
     }
 
+    /**
+     *  Renders the filter's check box
+     */
     renderFilters() {
 
         const filters = [];
@@ -99,6 +114,9 @@ class Settings extends Component {
         return filters;
     }
     
+    /**
+     *  Edits a filter
+     */
     changeFilter(event) {
         if(event.target.checked === true) {
             if(this.props.selectedNode.type === 'none')
@@ -111,6 +129,9 @@ class Settings extends Component {
                 this.removeNodeFilter(event.target.id);
     }
 
+    /**
+     *  Adds a filter to the selected node
+     */
     addNodeFilter(filter) {
         const sn = this.props.selectedNode;
 
@@ -121,7 +142,10 @@ class Settings extends Component {
             this.props.addFilterNodes(filter);
         }
     }
-
+    
+    /**
+     *  Removes a filter from the selected node
+     */
     removeNodeFilter(filter) {
         const sn = this.props.selectedNode;
 
@@ -133,6 +157,9 @@ class Settings extends Component {
         }
     }
 
+    /**
+     *  Sets the maximum amount of branches
+     */
     setMaxBranches(event) {
         this.setState({ maxBranches: event.target.value });
     }

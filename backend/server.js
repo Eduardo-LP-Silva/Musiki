@@ -13,6 +13,9 @@ const dbpedia = require('./dbpedia/dbpedia');
 if (require('dotenv').config().error != undefined)
 	console.log("Failed to read .env!");
 
+/**
+ *  Starts the express.js API and the DBpedia process
+ */
 app.use(express.static(path.join(__dirname, 'build')));
 
 console.log("Waiting for express API...");
@@ -22,12 +25,17 @@ const server = app.listen(process.env.PORT || 8080, () => {
 });
 
 
-// Allow CORS
+/**
+ *  Allow CORS
+ */
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     next();
   });
 
+/**
+ *  Searches for an entity on DBpedia
+ */
 app.get('/search', async function(req, res) {
     const filter = req.query.filter.toLowerCase();
     let queryStr = req.query.queryStr;
@@ -67,7 +75,9 @@ app.get('/search', async function(req, res) {
     }
 });
   
-
+/**
+ *  Redirects a values request from DBpedia
+ */
 app.get('/values', function(req, res) {
 
     let {entities, properties} = req.query;
@@ -105,6 +115,9 @@ app.get('/values', function(req, res) {
     }
 });
 
+/**
+ *  Redirects an entities request from DBpedia
+ */
 app.get('/entities', function(req, res) {
 
     let {value, filter, ofilter} = req.query;
@@ -134,6 +147,9 @@ app.get('/entities', function(req, res) {
     }
 });
 
+/**
+ *  Exports node types and filters
+ */
 app.get('/nodeInfo', function(req, res) {
    
     res.status(200);
@@ -141,6 +157,9 @@ app.get('/nodeInfo', function(req, res) {
     res.send(nodeInfo);
 });
 
+/**
+ *  Checks the node for a specific type
+ */
 function checkInitialNodeType(bindings, validation) {
     let args = validation.split(",");
     // console.log("args.length = " + args.length);
@@ -171,6 +190,9 @@ function checkInitialNodeType(bindings, validation) {
     return false;
 }
 
+/**
+ *  Detects a node type
+ */
 function detectNodeType(bindings) {
 
     for (let binding of bindings) {
@@ -186,7 +208,9 @@ function detectNodeType(bindings) {
     return "null";
 }
 
-
+/**
+ *  Creates a node object
+ */
 function createNode(nodeType, name) {
     return {
         id: name,
@@ -194,6 +218,9 @@ function createNode(nodeType, name) {
     };
 }
 
+/**
+ *  Capitalizes first letter and replaces spaces with underscores
+ */
 function parseInput(queryStr) {
     if (queryStr !== "") {
         //DBpedia resources start with capital letters
@@ -205,6 +232,9 @@ function parseInput(queryStr) {
     return queryStr;
 }
 
+/**
+ *  Replaces underscores with spaces
+ */
 function parseOutput(queryStr) {
     return queryStr.replace(/_/g, ' ');
 }
