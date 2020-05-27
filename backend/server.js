@@ -8,17 +8,19 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 const nodeInfo = require('./nodeInfo').nodeInfo;
 
+const dbpedia = require('./dbpedia/dbpedia');
+
 if (require('dotenv').config().error != undefined)
 	console.log("Failed to read .env!");
 
 app.use(express.static(path.join(__dirname, 'build')));
 
+console.log("Waiting for express API...");
 const server = app.listen(process.env.PORT || 8080, () => {
-    console.log(`Express running → PORT ${server.address().port}`);
+    console.log(`Done! Express running → PORT ${server.address().port}`);
+    dbpedia.start();
 });
 
-const dbpedia = require('./dbpedia/dbpedia');
-dbpedia.start();
 
 // Allow CORS
 app.use((req, res, next) => {
@@ -32,7 +34,7 @@ app.get('/search', async function(req, res) {
 
     queryStr = parseInput(queryStr);
 
-    console.log(queryStr);
+    // console.log(queryStr);
 
     if(nodeInfo.hasOwnProperty(filter)) {
         const originalStr = parseOutput(queryStr);

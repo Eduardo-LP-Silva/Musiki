@@ -4,6 +4,7 @@ const axios = require ('axios');
 
 let dbpediaAPI;
 const port = 5000;
+let ready = false;
 
 const format = "JSON";
 const pretty = 'NONE';
@@ -32,9 +33,14 @@ exports.start = function start() {
 	dbpediaAPI.on('exit', function (code) {
 		console.log('child process exited with code ' + code.toString());
 	});
+
+	// Starts checking for dbpedia
+	startDBpediaCheck();
 }
 
-exports.values = function values(entities, properties, callback) {
+exports.values = async function values(entities, properties, callback) {
+
+	await waitForDBpedia();
 
 	let link = endpoint + 'values?';
 	link += 'entities=' + encodeURIComponent(entities);
@@ -76,8 +82,10 @@ exports.values = function values(entities, properties, callback) {
 	});
 }
 
-exports.entities = function entities(value, filter, ofilter, callback) {
+exports.entities = async function entities(value, filter, ofilter, callback) {
 	
+	await waitForDBpedia();
+
 	if (filter == undefined) {
 		filter = [];
 	}
@@ -146,4 +154,41 @@ function addGenericParameters(originalLink) {
 	originalLink += '&oldVersion=' + oldVersion;
 
 	return originalLink;
+}
+
+// Wait for DBpedia to be alive, polling every 100 ms
+async function waitForDBpedia() {
+	while (!ready) {
+		await new Promise(r => setTimeout(r, 100));
+	}
+};
+
+function startDBpediaCheck() {
+	console.log("Waiting for DBpedia API...");
+	checkDBpedia();
+}
+
+async function checkDBpedia() {
+	const baselineDBpediaURL = endpoint + 'values';
+
+	if (!ready) {
+		axios.get(baselineDBpediaURL, {
+			'Accept': 'application/json'
+		})
+		.catch(async function(error) {
+			// console.log('Failed to make GET request on ' + baselineDBpediaURL + ", retrying in 1 sec");
+
+			if (error.message.toUpperCase().includes("ECONNREFUSED")) {
+				await new Promise(resolve => setTimeout(resolve, 500));
+				checkDBpedia();
+			}
+			else if (error.message.toUpperCase().includes("STATUS CODE 400")) {
+				ready = true;
+				console.log("Done! Server is ready");
+			}
+			else {
+				console.log("Unknown error on checkDBpedia()");
+			}
+		});
+	}
 }
