@@ -12,6 +12,7 @@ class Navbar extends Component {
 
         this.selectNavbar = this.selectNavbar.bind(this);
         this.search = this.search.bind(this);
+        this.checkEnter = this.checkEnter.bind(this);
     }
 
     render() {
@@ -20,7 +21,7 @@ class Navbar extends Component {
                 <div id="search" >
                     <Logo className="Logo" height="50" width="50" />
                     <span id="musiki">Musiki</span>
-                    <Row id="search-bar" onClick={this.selectNavbar}>
+                    <Row id="search-bar" onClick={this.selectNavbar} onKeyDown={this.checkEnter}>
                         <FontAwesomeIcon onClick={this.search} className="search-icon" icon={faSearch}/>
                         <input type="text" placeholder="Search ..." required/>
                     </Row>
@@ -41,6 +42,15 @@ class Navbar extends Component {
         const searchString = document.querySelector('#search-bar > input').value;
 
         this.props.search(searchString);
+    }
+
+    checkEnter(event) {
+
+        console.log(event);
+
+        if (event.keyCode === 13) {
+            this.search();
+        }
     }
 
 }
