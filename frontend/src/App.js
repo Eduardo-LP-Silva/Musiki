@@ -246,7 +246,7 @@ class App extends Component {
 
   addFilterNodes(filter) {
     let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
-    this.setState({ error: false});
+    this.setState({ error: false, loading: true});
 
     for (let i = 0; i < filters.length; i++) {
       if (filters[i].name.toUpperCase() === filter.toUpperCase()) {
@@ -256,6 +256,7 @@ class App extends Component {
         console.log(filter);
 
         if (!filter.reverse) {
+
           requests.get(
             "values",
             {
@@ -293,9 +294,16 @@ class App extends Component {
               }
 
               sn.childrenNo = nodeChildren;
-              this.setState({ selectedNode: sn });
+              this.setState({ selectedNode: sn, loading: false });
+
+              if (status === 400) {
+                this.setState({ loading: false});
+                this.setState({ error : true});
+              }
             },
-            { passedFilter: filter, originalFilter: originalFilter }
+            { passedFilter: filter, originalFilter: originalFilter }, () => {
+              this.setState({ loading: false});
+            }
           );
         } else {
           requests.get(
@@ -346,11 +354,17 @@ class App extends Component {
                   }
                 }
 
+                if (status === 400) {
+                  this.setState({ loading: false});
+                  this.setState({ error : true});
+                }
                 sn.childrenNo = nodeChildren;
-                this.setState({ selectedNode: sn });
+                this.setState({ selectedNode: sn , loading: false});
               }
             },
-            { passedFilter: filter, originalFilter: originalFilter }
+            { passedFilter: filter, originalFilter: originalFilter }, () => {
+              this.setState({ loading: false});
+            }
           );
         }
 
