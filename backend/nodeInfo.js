@@ -29,7 +29,7 @@ exports.nodeInfo = {
         ]
     },
     "artist": {
-        validation: "Artist",
+        validation: "Artist,NaturalPerson",
         filters: [
             {
                 name: "genres",
