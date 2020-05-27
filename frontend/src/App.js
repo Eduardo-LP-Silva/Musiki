@@ -177,8 +177,6 @@ class App extends Component {
       "search",
       { filter: this.state.initialSearchFilter, queryStr: searchString },
       (res, status) => {
-        console.log(res);
-
         if (status === 200) {
           this.setState({ loading: false });
           this.addNode(res.id, res.type);
@@ -253,8 +251,6 @@ class App extends Component {
         const originalFilter = filter;
         filter = filters[i];
 
-        console.log(filter);
-
         if (!filter.reverse) {
           requests.get(
             "values",
@@ -264,9 +260,8 @@ class App extends Component {
             },
             (result, status, state) => {
 
-              console.log(result);
-
-              if (result === undefined || result.results === undefined || result.results.bindings === undefined || result.results.bindings.length < 1) {
+              if (result === undefined || result.results === undefined || result.results.bindings === undefined 
+                || result.results.bindings.length < 1) {
                 this.setState({ error: true});
                 return;
               } 
@@ -292,8 +287,12 @@ class App extends Component {
                 }
               }
 
-              sn.childrenNo = nodeChildren;
-              this.setState({ selectedNode: sn });
+              if(!this.addedNodes(sn.childrenNo, nodeChildren))
+                this.setState({ error: true});
+              else {
+                sn.childrenNo = nodeChildren;
+                this.setState({ selectedNode: sn });
+              }
             },
             { passedFilter: filter, originalFilter: originalFilter }
           );
@@ -307,11 +306,9 @@ class App extends Component {
             (result, status, state) => {
               const { passedFilter, originalFilter } = state;
 
-
-              if (result === undefined || result.results === undefined || result.results.bindings === undefined || result.results.bindings.length < 1) {
+              if (result === undefined || result.results === undefined || result.results.bindings === undefined 
+                || result.results.bindings.length < 1) {
                 this.setState({ error: true});
-                
-                
               } else {
                 let bindings = result.results.bindings;
                 let added = [];
@@ -346,8 +343,12 @@ class App extends Component {
                   }
                 }
 
-                sn.childrenNo = nodeChildren;
-                this.setState({ selectedNode: sn });
+                if(!this.addedNodes(sn.childrenNo, nodeChildren))
+                  this.setState({ error: true});
+                else {
+                  sn.childrenNo = nodeChildren;
+                  this.setState({ selectedNode: sn });
+                }
               }
             },
             { passedFilter: filter, originalFilter: originalFilter }
@@ -357,6 +358,10 @@ class App extends Component {
         return;
       }
     }
+  }
+
+  addedNodes(previousChildrenNo, newChildrenNo) {
+    return previousChildrenNo === undefined && newChildrenNo > 0 || previousChildrenNo < newChildrenNo;
   }
 
   removeFilterNodes(filter, origin) {
@@ -397,6 +402,9 @@ class App extends Component {
     if (topMostCall) this.setState({ selectedNode: origin });
 
     if (topMostCall) this.removeUselessLinks();
+
+    if(this.state.error)
+      this.setState({error: false});
   }
 
   removeNode(id) {

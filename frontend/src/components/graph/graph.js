@@ -143,7 +143,6 @@ class Graph extends Component {
 
               if (value !== undefined && lang !== undefined && lang === "en") {
                 node.abstract = value;
-                console.log(value);
                 break;
               }
             }

@@ -73,9 +73,11 @@ app.get('/values', function(req, res) {
                 res.status(400);
                 res.send({result});
             }
-            else if (result.results.bindings.length == 0){
-                res.status(400);
-                res.send({error: `No results for ${req.query.entities}`});
+            else 
+                if (result.results === undefined || result.results.bindings === undefined || 
+                    result.results.bindings.length == 0){
+                    res.status(404);
+                    res.send({error: `No results for ${req.query.entities}`});
             }
             else {
                 res.status(200);
