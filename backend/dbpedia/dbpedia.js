@@ -8,7 +8,7 @@ let ready = false;
 
 const format = "JSON";
 const pretty = 'NONE';
-const limit = 1000;
+const limit = 10000;
 const offset = 0;
 const version = '1.0.0';
 const key = 1234;

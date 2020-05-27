@@ -11,7 +11,11 @@ import "./App.css";
 
 const requests = require("./components/requests/requests");
 
+const childLimit = 30;
+
 class App extends Component {
+
+
   constructor(props) {
     super(props);
 
@@ -35,6 +39,8 @@ class App extends Component {
     this.removeFilterNodes = this.removeFilterNodes.bind(this);
     this.changeAbstract = this.changeAbstract.bind(this);
   }
+
+  
 
   render() {
     return (
@@ -292,15 +298,20 @@ class App extends Component {
                   );
                   nodeChildren++;
                 }
+
+                if (nodeChildren === childLimit)
+                  break;
               }
 
-              if(!this.addedNodes(sn.childrenNo, nodeChildren))
+              if(nodeChildren !== childLimit && !this.addedNodes(sn.childrenNo, nodeChildren))
                 this.setState({ error: true});
               else {
                 sn.childrenNo = nodeChildren;
                 this.setState({ selectedNode: sn });
               }
-              
+            
+              this.setState({ loading: false});
+
             },
             { passedFilter: filter, originalFilter: originalFilter }, () => {
               this.setState({ loading: false});
@@ -357,15 +368,19 @@ class App extends Component {
                     );
                     nodeChildren++;
                   }
+
+                  if (nodeChildren === childLimit)
+                    break;
                 }
 
-                if(!this.addedNodes(sn.childrenNo, nodeChildren))
+                if(nodeChildren !== childLimit && !this.addedNodes(sn.childrenNo, nodeChildren))
                   this.setState({ error: true});
                 else {
                   sn.childrenNo = nodeChildren;
                   this.setState({ selectedNode: sn });
                 }
-                
+
+                this.setState({ loading: false});
               }
             },
             { passedFilter: filter, originalFilter: originalFilter }, () => {
@@ -380,7 +395,7 @@ class App extends Component {
   }
 
   addedNodes(previousChildrenNo, newChildrenNo) {
-    return previousChildrenNo === undefined && newChildrenNo > 0 || previousChildrenNo < newChildrenNo;
+    return (previousChildrenNo === undefined && newChildrenNo > 0) || previousChildrenNo < newChildrenNo;
   }
 
   removeFilterNodes(filter, origin) {
