@@ -194,7 +194,7 @@ class Graph extends Component {
 
   onBackgroundClick() {
     let nullNode = { type: "none", id: "" };
-
+    
     this.props.setSelectedNode(nullNode);
   }
 
