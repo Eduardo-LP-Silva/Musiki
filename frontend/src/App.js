@@ -261,6 +261,12 @@ class App extends Component {
             },
             (result, status, state) => {
 
+              if (status === 400) {
+                this.setState({ loading: false});
+                this.setState({ error : true});
+                return;
+              }
+
               if (result === undefined || result.results === undefined || result.results.bindings === undefined 
                 || result.results.bindings.length < 1) {
                 this.setState({ error: true});
@@ -294,10 +300,7 @@ class App extends Component {
                 sn.childrenNo = nodeChildren;
                 this.setState({ selectedNode: sn });
               }
-              if (status === 400) {
-                this.setState({ loading: false});
-                this.setState({ error : true});
-              }
+              
             },
             { passedFilter: filter, originalFilter: originalFilter }, () => {
               this.setState({ loading: false});
@@ -312,6 +315,12 @@ class App extends Component {
             },
             (result, status, state) => {
               const { passedFilter, originalFilter } = state;
+
+              if (status === 400) {
+                this.setState({ loading: false});
+                this.setState({ error : true});
+                return;
+              }
 
               if (result === undefined || result.results === undefined || result.results.bindings === undefined 
                 || result.results.bindings.length < 1) {
@@ -356,10 +365,7 @@ class App extends Component {
                   sn.childrenNo = nodeChildren;
                   this.setState({ selectedNode: sn });
                 }
-                if (status === 400) {
-                  this.setState({ loading: false});
-                  this.setState({ error : true});
-                }
+                
               }
             },
             { passedFilter: filter, originalFilter: originalFilter }, () => {
