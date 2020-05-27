@@ -32,9 +32,15 @@ app.get('/search', async function(req, res) {
     const filter = req.query.filter.toLowerCase();
     let queryStr = req.query.queryStr;
 
+    if (queryStr === undefined || queryStr === "") {
+        res.status(404);
+        res.send(`No results for ${queryStr} of type ${filter} were found.`);
+        return;
+    }
+
     queryStr = parseInput(queryStr);
 
-    // console.log(queryStr);
+
 
     if(nodeInfo.hasOwnProperty(filter)) {
         const originalStr = parseOutput(queryStr);
@@ -65,6 +71,12 @@ app.get('/search', async function(req, res) {
 app.get('/values', function(req, res) {
 
     let {entities, properties} = req.query;
+
+    if (entities === undefined || entities === "") {
+        res.status(404);
+        res.send({error: `No results for ${entities}`});
+        return;
+    }
 
     entities = parseInput(entities);
 
@@ -183,10 +195,12 @@ function createNode(nodeType, name) {
 }
 
 function parseInput(queryStr) {
-    //DBpedia resources start with capital letters
-    queryStr = queryStr[0].toUpperCase() + queryStr.slice(1);
-    //DBpedia resources have _ instead of spaces
-    queryStr = queryStr.replace(/\s/g, '_');
+    if (queryStr !== "") {
+        //DBpedia resources start with capital letters
+        queryStr = queryStr[0].toUpperCase() + queryStr.slice(1);
+        //DBpedia resources have _ instead of spaces
+        queryStr = queryStr.replace(/\s/g, '_');
+    }
 
     return queryStr;
 }
