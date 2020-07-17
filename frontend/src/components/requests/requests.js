@@ -1,10 +1,8 @@
-const { env } = require("../../environments/env");
-
 /**
  *  Simple GET request
  */
 exports.get = function get(endpoint, queryParams, callback, state, errorCallback) {
-  let link = `${env.API_URL}/${endpoint}`;
+  let link = `${process.env.REACT_APP_API_URL}/${endpoint}`;
   let status;
 
   if (queryParams !== undefined) {
@@ -42,7 +40,7 @@ exports.get = function get(endpoint, queryParams, callback, state, errorCallback
 exports.post = function post(endpoint, body, callback, state, errorCallback) {
   let status;
 
-  fetch(`${env.API_URL}/${endpoint}/`, {
+  fetch(`${process.env.REACT_APP_API_URL}/${endpoint}/`, {
     method: "POST", // *GET, POST, PUT, DELETE, etc.
     headers: {
       "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",

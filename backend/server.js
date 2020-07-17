@@ -2,12 +2,12 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
-var bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
+
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 const nodeInfo = require('./nodeInfo').nodeInfo;
-
 const dbpedia = require('./dbpedia/dbpedia');
 
 if (require('dotenv').config().error != undefined)
@@ -19,11 +19,11 @@ if (require('dotenv').config().error != undefined)
 app.use(express.static(path.join(__dirname, 'build')));
 
 console.log("Waiting for express API...");
+
 const server = app.listen(process.env.PORT || 8080, () => {
     console.log(`Done! Express running → PORT ${server.address().port}`);
     dbpedia.start();
 });
-
 
 /**
  *  Allow CORS
@@ -31,7 +31,7 @@ const server = app.listen(process.env.PORT || 8080, () => {
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     next();
-  });
+});
 
 /**
  *  Searches for an entity on DBpedia
@@ -47,8 +47,6 @@ app.get('/search', async function(req, res) {
     }
 
     queryStr = parseInput(queryStr);
-
-
 
     if(nodeInfo.hasOwnProperty(filter)) {
         const originalStr = parseOutput(queryStr);
