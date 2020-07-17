@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { ForceGraph2D } from "react-force-graph";
 import "./graph.css";
 
-const requests = require("../requests/requests");
+const requests = require("../../requests");
 
 /**
  *  Represents the main Graph component

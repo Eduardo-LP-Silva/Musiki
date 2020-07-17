@@ -57,9 +57,6 @@ class Navbar extends Component {
      *  Checks for the enter key when writing
      */
     checkEnter(event) {
-
-        console.log(event);
-
         if (event.keyCode === 13) {
             this.search();
         }

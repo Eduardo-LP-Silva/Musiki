@@ -9,7 +9,7 @@ import ghost from "./resources/icons/ghost.svg";
 import { StageSpinner } from "react-spinners-kit";
 import "./App.css";
 
-const requests = require("./components/requests/requests");
+const requests = require("./requests");
 
 const childLimit = 30;
 
@@ -147,7 +147,7 @@ class App extends Component {
           {this.state.selectedNode.image !== undefined ? (
             <Col>
               <img
-                alt="node"
+                alt=""
                 id="nodeImage"
                 src={this.state.selectedNode.image}
               />
@@ -173,10 +173,14 @@ class App extends Component {
    *  Change current selected node's abstracc
    */ 
   changeAbstract(abstract) {
-      let minimizedAbs = abstract.substr(0, abstract.indexOf(".", 300));
-      minimizedAbs += ".";
-      this.setState({ abstract: minimizedAbs });
+      let periodIndex = abstract.indexOf(".", abstract.length < 300 ? abstract.length - 1 : 300), minimizedAbs;
 
+      if(periodIndex === -1)
+        minimizedAbs = abstract + ".";
+      else
+        minimizedAbs = abstract.substr(0, periodIndex + 1);
+
+      this.setState({ abstract: minimizedAbs });
   }
 
   /**

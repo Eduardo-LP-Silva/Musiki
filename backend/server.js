@@ -160,28 +160,22 @@ app.get('/nodeInfo', function(req, res) {
  */
 function checkInitialNodeType(bindings, validation) {
     let args = validation.split(",");
-    // console.log("args.length = " + args.length);
     
     for (let binding of bindings) {
         const value = binding['values'].value.toUpperCase();
 
-        // console.log("value = " + value);
+        if (args.length == 0) {
+            return true;
+        }
 
         for (let i = 0; i < args.length; i++) {
-
             const validationKeyword = args[i];
 
             if(value.includes(validationKeyword)) {
-
                 // console.log("validationKeyword = " + validationKeyword + ", value = " + value);
-
                 args.splice(i, 1);
                 break;
             }
-        }
-
-        if (args.length == 0) {
-            return true;
         }
     }
 
