@@ -116,14 +116,7 @@ exports.entities = async function entities(value, filter, ofilter, callback) {
 		ofilter = [];
 	}
 	else if (!Array.isArray(ofilter)) {
-		try {
-			if (Array.isArray(JSON.parse(ofilter))) {
-				ofilter = JSON.parse(ofilter);	
-			}
-		}
-		catch (e) {  // Treat ofilter as string
-			ofilter = [ofilter];
-		}
+		ofilter = ofilter.split(',');
 	}
 
 	let link = endpoint + 'entities?';

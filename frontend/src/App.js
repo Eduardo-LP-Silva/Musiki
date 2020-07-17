@@ -377,29 +377,29 @@ class App extends Component {
                   entityName = entityName.substr(
                     entityName.lastIndexOf("/") + 1
                   );
-                  let link =
-                    binding[passedFilter.validationKey.replace(":", "")]?.value;
 
-                  if (
-                    !added.includes(entityName) &&
-                    link !== undefined &&
-                    link
-                      .toUpperCase()
-                      .includes(passedFilter.validationValue.toUpperCase())
-                  ) {
-                    added.push(entityName);
+                  const filters = passedFilter.validationKey.split(',');
 
-                    this.addNodeChildren(
-                      this.state.selectedNode.id,
-                      entityName,
-                      originalFilter.slice(0, originalFilter.length - 1),
-                      passedFilter.name
-                    );
-                    nodeChildren++;
+                  for(filter of filters) {
+                    let link = binding[filter.replace(":", "")]?.value;
+
+                    if (!added.includes(entityName) && link !== undefined &&
+                      link.toUpperCase().includes(passedFilter.validationValue.toUpperCase())
+                    ) {
+                      added.push(entityName);
+  
+                      this.addNodeChildren(
+                        this.state.selectedNode.id,
+                        entityName,
+                        originalFilter.slice(0, originalFilter.length - 1),
+                        passedFilter.name
+                      );
+                      nodeChildren++;
+                    }
+  
+                    if (nodeChildren === childLimit)
+                      break;
                   }
-
-                  if (nodeChildren === childLimit)
-                    break;
                 }
 
                 if(nodeChildren !== childLimit && !this.addedNodes(sn.childrenNo, nodeChildren))
