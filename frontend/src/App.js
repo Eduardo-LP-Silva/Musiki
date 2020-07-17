@@ -380,8 +380,8 @@ class App extends Component {
 
                   const filters = passedFilter.validationKey.split(',');
 
-                  for(filter of filters) {
-                    let link = binding[filter.replace(":", "")]?.value;
+                  for(let filterKey of filters) {
+                    let link = binding[filterKey.replace(":", "")]?.value;
 
                     if (!added.includes(entityName) && link !== undefined &&
                       link.toUpperCase().includes(passedFilter.validationValue.toUpperCase())
