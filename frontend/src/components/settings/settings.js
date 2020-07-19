@@ -62,16 +62,17 @@ class Settings extends Component {
             return;
         }
         
-        if (this.props.nodeInfo !== undefined) {
-            if (this.props.nodeInfo.hasOwnProperty(this.props.selectedNode.type)) {
-                this.setState({ filters: this.props.nodeInfo[this.props.selectedNode.type] 
-                    ? this.props.nodeInfo[this.props.selectedNode.type].filters.map(x => x.name) : [] });
+        if (this.props.nodeFilters !== null) {
+            if (this.props.nodeFilters.hasOwnProperty(this.props.selectedNode.type)) {
+                this.setState({ filters: this.props.nodeFilters[this.props.selectedNode.type]});
                 
                 this.state.filters.forEach(filter => {
                     if(this.props.selectedNode.activeFilters.includes(filter))
                         document.getElementById(filter).checked = true;
-                });                    
-            }               
+                });  
+            }
+            else
+                this.setState({filters: []});               
         }
     }
 

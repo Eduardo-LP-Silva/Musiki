@@ -9,6 +9,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 const nodeInfo = require('./nodeInfo').nodeInfo;
 const dbpedia = require('./dbpedia/dbpedia');
+const { type } = require('os');
 
 if (require('dotenv').config().error != undefined)
 	console.log("Failed to read .env!");
@@ -149,10 +150,27 @@ app.get('/entities', function(req, res) {
  *  Exports node types and filters
  */
 app.get('/nodeInfo', function(req, res) {
-   
     res.status(200);
-   
     res.send(nodeInfo);
+});
+
+/**
+ * Retrieves each node type filters
+ */
+app.get('/filters', function(req, res) {
+    let classes = {};
+
+    for(const [type, info] of Object.entries(nodeInfo)) {
+        let filters = [];
+
+        for(const filter of info.filters)
+            filters.push(filter.name);
+
+        classes[type] = filters;
+    }
+
+    res.status(200);
+    res.send(JSON.stringify(classes));
 });
 
 /**

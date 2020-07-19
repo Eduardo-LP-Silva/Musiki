@@ -28,6 +28,7 @@ class App extends Component {
       initialSearchFilter: "artist",
       groupIndex: 1,
       abstract: null,
+      nodeFilters: null,
       nodeInfo: undefined,
       loading: false,
       error: false,
@@ -114,7 +115,7 @@ class App extends Component {
             <Settings
               selectedNode={this.state.selectedNode}
               opacity={this.state.settings}
-              nodeInfo={this.state.nodeInfo}
+              nodeFilters={this.state.nodeFilters}
               initialSearchFilter={this.state.initialSearchFilter}
               setInitialSearchFilter={this.setInitialSearchFilter}
               setSelectedNode={this.setSelectedNode}
@@ -164,6 +165,10 @@ class App extends Component {
    *  Get nodeInfo object from back-end to identify nodes
    */ 
   componentDidMount() {
+    requests.get('filters', undefined, (result) => {
+      console.log(result);
+      this.setState({nodeFilters: result});
+    });
     requests.get("nodeInfo", undefined, (result) => {
       this.setState({ nodeInfo: result });
     });
