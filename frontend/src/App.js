@@ -10,9 +10,7 @@ import { StageSpinner } from "react-spinners-kit";
 import "./App.css";
 
 const requests = require("./requests");
-
 const childLimit = 30;
-
 
 /**
  *  Main component of react
@@ -22,7 +20,7 @@ class App extends Component {
     super(props);
 
     this.state = {
-      settings: 0,
+      settings: 1,
       graphData: { nodes: [], links: [] },
       selectedNode: { type: "none", id: "", activeFilters: [] }, //when type = none, navbar is selected
       initialSearchFilter: "artist",
@@ -43,7 +41,6 @@ class App extends Component {
     this.changeAbstract = this.changeAbstract.bind(this);
   }
 
-  
 /**
  *  Display components
  */
@@ -166,7 +163,6 @@ class App extends Component {
    */ 
   componentDidMount() {
     requests.get('filters', undefined, (result) => {
-      console.log(result);
       this.setState({nodeFilters: result});
     });
     requests.get("nodeInfo", undefined, (result) => {
@@ -194,11 +190,11 @@ class App extends Component {
   search(searchString) {
     const nodes = this.state.graphData.nodes;
     const links = this.state.graphData.links;
+
     this.setState({ loading: true });
     this.setState({ error: false});
     nodes.splice(0, nodes.length);
     links.splice(0, links.length);
-
     this.setState({ graphData: { nodes: nodes, links: links } });
 
     requests.get(
@@ -223,7 +219,6 @@ class App extends Component {
    */ 
   addNode(id, type, filterName) {
     const parsedId = this.parseNodeId(id);
-
     let newNode = { id: parsedId, type: type, searchId: id };
 
     for (let i = 0; i < this.state.graphData.nodes.length; i++) {
@@ -284,6 +279,7 @@ class App extends Component {
    */ 
   addFilterNodes(filter) {
     let filters = this.state.nodeInfo[this.state.selectedNode.type].filters;
+
     this.setState({ error: false, loading: true});
 
     for (let i = 0; i < filters.length; i++) {
@@ -441,7 +437,6 @@ class App extends Component {
   removeFilterNodes(filter, origin) {
     // Variable depicting whether the function call is the entry point of the recursive call or not
     let topMostCall = false;
-
     let filterName = filter;
     let links = this.state.graphData.links;
 
@@ -455,28 +450,27 @@ class App extends Component {
     for (let i = 0; i < links.length; i++) {
       let link = links[i];
 
-      if (
-        link.source.id === origin.id &&
-        (filterName === undefined ||
-          filterName === null ||
-          (link.target.filterName !== undefined && link.target.filterName.toUpperCase() === filterName.toUpperCase()))
-      ) {
+      if (link.source.id === origin.id 
+        && (filterName === undefined || filterName === null || (link.target.filterName !== undefined 
+          && link.target.filterName.toUpperCase() === filterName.toUpperCase()))) {
         if (links.find((x) => x.source.id === link.target.id) !== undefined) {
           this.removeFilterNodes(undefined, link.target);
         } else {
           console.log("Didn't continue on " + link.target.id);
         }
-        this.removeNode(link.target.id);
 
+        this.removeNode(link.target.id);
         nodeChildren--;
       }
     }
 
     origin.childrenNo = nodeChildren;
-    if (topMostCall) this.setState({ selectedNode: origin });
 
-    if (topMostCall) this.removeUselessLinks();
-
+    if (topMostCall) {
+      this.setState({ selectedNode: origin });
+      this.removeUselessLinks();
+    }
+    
     if(this.state.error)
       this.setState({error: false});
   }
@@ -513,10 +507,7 @@ class App extends Component {
     for (let i = 0; i < links.length; i++) {
       let link = links[i];
 
-      if (
-        !nodeNames.includes(link.source.id) ||
-        !nodeNames.includes(link.target.id)
-      ) {
+      if (!nodeNames.includes(link.source.id) || !nodeNames.includes(link.target.id)) {
         links.splice(i, 1);
         i--;
       }

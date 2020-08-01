@@ -53,19 +53,42 @@ class Graph extends Component {
     const label = node.id;
     const nodeSize = this.getNodeSize(node);
     const fontSize = Math.max(3, nodeSize / globalScale);
-    const size =
-      node === (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
-    const height =
-      node === this.props.selectedNode
-        ? node.y + nodeSize + 5
-        : node.y + nodeSize;
+    const size = node === (this.state.hoveredNode || this.props.selectedNode) ? 0.75 : 0.7;
+    const height = node === this.props.selectedNode ? node.y + nodeSize + 5 : node.y + nodeSize;
 
     //Node design properties
     ctx.font = `${fontSize}px arial`;
-    ctx.fillStyle =
-      node === (this.state.hoveredNode || this.props.selectedNode)
-        ? "white"
-        : "rgba(255,255,255, 1)";
+
+    switch(node.type) {
+      case 'artist':
+        ctx.fillStyle = 'rgba(247, 45, 45, 1)';
+        break;
+
+      case 'band':
+        ctx.fillStyle = 'rgba(255, 170, 79, 1)';
+        break;
+
+      case 'genre':
+          ctx.fillStyle = 'rgba(168, 252, 98, 1)';
+          break;
+
+      case 'album':
+        ctx.fillStyle = 'rgba(106, 0, 255, 1)';
+        break;
+
+      case 'single':
+        ctx.fillStyle = 'rgba(156, 51, 255, 1)';
+        break;
+
+      case 'song':
+        ctx.fillStyle = 'rgba(209, 40, 172, 1)';
+        break;
+
+      default:
+        ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+    }
+
+    //ctx.fillStyle = node === (this.state.hoveredNode || this.props.selectedNode) ? "white" : "rgba(255,255,255, 1)";
     ctx.shadowBlur = "1";
     ctx.shadowColor = "rgba(0, 0 ,0 , 0.25)";
     ctx.shadowOffsetX = "4";
@@ -80,7 +103,6 @@ class Graph extends Component {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(label, node.x, height);
-
     ctx.save();
 
     //Click Animation

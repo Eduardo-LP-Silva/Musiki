@@ -88,7 +88,42 @@ class Settings extends Component {
 
         for (let i = 0; i < this.state.filters.length; i++) {
             const filter = this.state.filters[i][0].toUpperCase() + this.state.filters[i].slice(1);
-            const hue = 206 + (i* (56/(this.state.filters.length)));
+            let color;
+
+            switch(this.state.filters[i]) {
+                case 'artist':
+                case 'artists':
+                    color = 'rgba(247, 45, 45, 1)';
+                    break;
+                
+                case 'band':
+                case 'bands':
+                    color = 'rgba(255, 170, 79, 1)';
+                    break;
+
+                case 'genre':
+                case 'genres':
+                    color = 'rgba(168, 252, 98, 1)';
+                    break;
+
+                case 'album':
+                case 'albums':
+                    color = 'rgba(106, 0, 255, 1)';
+                    break;
+
+                case 'single':
+                case 'singles':
+                    color = 'rgba(156, 51, 255, 1)';
+                    break;
+
+                case 'song':
+                case 'songs':
+                    color = 'rgba(209, 40, 172, 1)';
+                    break;
+
+                default:
+                    color = 'rgba(255, 255, 255, 1)';
+            }
 
             filters.push(
                 <label className="filter-container" key={this.state.filters[i]}>
@@ -102,12 +137,12 @@ class Settings extends Component {
                         checked={this.props.selectedNode.type === 'none' ? 
                             this.props.initialSearchFilter === this.state.filters[i] : 
                             this.props.selectedNode.activeFilters.includes(this.state.filters[i])}/>
-                    <span className="filter-btn" style={{ backgroundColor : `hsl(${hue}, 90%, 61%)`}}></span>
+                    <span className="filter-btn" style={{ backgroundColor : color}}></span>
                 </label>
             );
 
             if (i !== this.state.filters.length - 1){
-                filters.push(<div className="filter-vertical-div" key={`div#${i}`} style={{ backgroundColor : `hsl(${hue}, 90%, 61%)`}}></div>);
+                filters.push(<div className="filter-vertical-div" key={`div#${i}`} style={{ backgroundColor : color}}></div>);
             }
             
         }
