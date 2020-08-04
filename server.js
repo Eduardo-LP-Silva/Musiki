@@ -10,9 +10,6 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 const nodeInfo = require('./nodeInfo').nodeInfo;
 const dbpedia = require('./dbpedia/dbpedia');
 
-if (require('dotenv').config().error != undefined)
-	console.log("Failed to read .env!");
-
 /**
  *  Starts the express.js API and the DBpedia process
  */

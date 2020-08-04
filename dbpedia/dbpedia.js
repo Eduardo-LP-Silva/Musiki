@@ -24,7 +24,7 @@ const endpoint = 'http://localhost:' + port + '/api/' + version + '/';
  */
 exports.start = function start() {
 	
-	let dbpediaAPI = spawn(path.join(process.env.JAVA_9_PATH, 'java') || 'java', ['-jar', 'dbpedia-api-1.0.0.jar', '--server.port=' + port], {
+	let dbpediaAPI = spawn('java', ['-jar', 'dbpedia-api-1.0.0.jar', '--server.port=' + port], {
 		cwd: __dirname
 	});
 
