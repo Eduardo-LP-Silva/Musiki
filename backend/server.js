@@ -9,7 +9,6 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 const nodeInfo = require('./nodeInfo').nodeInfo;
 const dbpedia = require('./dbpedia/dbpedia');
-const { type } = require('os');
 
 if (require('dotenv').config().error != undefined)
 	console.log("Failed to read .env!");
@@ -17,7 +16,7 @@ if (require('dotenv').config().error != undefined)
 /**
  *  Starts the express.js API and the DBpedia process
  */
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 console.log("Waiting for express API...");
 
@@ -172,6 +171,11 @@ app.get('/filters', function(req, res) {
     res.status(200);
     res.send(JSON.stringify(classes));
 });
+
+app.get('*', (req,res) =>{
+    res.sendFile(path.join(__dirname+'/client/build/index.html'));
+});
+
 
 /**
  *  Checks the node for a specific type

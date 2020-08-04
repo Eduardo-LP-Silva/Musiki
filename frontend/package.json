@@ -12,7 +12,6 @@
     "@testing-library/user-event": "^7.1.2",
     "bootstrap": "^4.4.1",
     "d3-force": "^2.0.1",
-    "env-cmd": "^10.1.0",
     "react": "^16.13.1",
     "react-bootstrap": "^1.0.1",
     "react-bootstrap-range-slider": "^0.3.2",
@@ -24,8 +23,8 @@
     "react-spinners-kit": "^1.9.1"
   },
   "scripts": {
-    "start": "env-cmd -f .env.development react-scripts start",
-    "build": "env-cmd -f .env.production react-scripts build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
