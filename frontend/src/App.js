@@ -327,13 +327,13 @@ class App extends Component {
                     passedFilter.name
                   );
                   nodeChildren++;
-                }
 
-                if (nodeChildren === childLimit)
-                  break;
+                  if (nodeChildren >= childLimit)
+                    break;
+                }
               }
 
-              if(nodeChildren !== childLimit && !this.addedNodes(sn.childrenNo, nodeChildren))
+              if(nodeChildren < childLimit && !this.addedNodes(sn.childrenNo, nodeChildren))
                 this.setState({ error: true});
               else {
                 sn.childrenNo = nodeChildren;
@@ -375,18 +375,15 @@ class App extends Component {
 
                 for (const binding of bindings) {
                   let entityName = binding["entities"].value;
-                  entityName = entityName.substr(
-                    entityName.lastIndexOf("/") + 1
-                  );
+                  entityName = entityName.substr(entityName.lastIndexOf("/") + 1);
 
                   const filters = passedFilter.validationKey.split(',');
 
-                  for(let filterKey of filters) {
+                  for(const filterKey of filters) {
                     let link = binding[filterKey.replace(":", "")]?.value;
 
                     if (!added.includes(entityName) && link !== undefined &&
-                      link.toUpperCase().includes(passedFilter.validationValue.toUpperCase())
-                    ) {
+                      link.toUpperCase().includes(passedFilter.validationValue.toUpperCase())) {
                       added.push(entityName);
   
                       this.addNodeChildren(
@@ -396,14 +393,15 @@ class App extends Component {
                         passedFilter.name
                       );
                       nodeChildren++;
+                      break;                      
                     }
-  
-                    if (nodeChildren === childLimit)
-                      break;
                   }
+
+                  if (nodeChildren >= childLimit)
+                    break;
                 }
 
-                if(nodeChildren !== childLimit && !this.addedNodes(sn.childrenNo, nodeChildren))
+                if(nodeChildren < childLimit && !this.addedNodes(sn.childrenNo, nodeChildren))
                   this.setState({ error: true});
                 else {
                   sn.childrenNo = nodeChildren;
@@ -539,6 +537,9 @@ class App extends Component {
 
     if (node.type !== "none" && this.state.selectedNode.abstract !== undefined)
       this.changeAbstract(this.state.selectedNode.abstract);
+
+    if(this.state.error)
+      this.setState({error: false});
   }
 
   /**
