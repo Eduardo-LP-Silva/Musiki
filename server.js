@@ -16,7 +16,7 @@ if (require('dotenv').config().error != undefined)
 /**
  *  Starts the express.js API and the DBpedia process
  */
-app.use(express.static(path.join(__dirname, 'client/build')));
+app.use(express.static(path.join(__dirname, 'frontend/build')));
 
 console.log("Waiting for express API...");
 
@@ -173,7 +173,7 @@ app.get('/filters', function(req, res) {
 });
 
 app.get('*', (req,res) =>{
-    res.sendFile(path.join(__dirname+'/client/build/index.html'));
+    res.sendFile(path.join(__dirname+'/frontend/build/index.html'));
 });
 
 
