@@ -12,6 +12,7 @@
     -moz-box-shadow: 10px 10px 0px 0px rgba(207,205,205,1);
     box-shadow: 10px 10px 0px 0px rgba(207,205,205,1);
     transition: opacity 0.2s ease;
+    min-width: 150px;
 }
 
 #filters > :first-child {
