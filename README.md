@@ -2,7 +2,7 @@
 Musiki is a web app that allows a user to search for music related topics and visualize them in a graph. Further information can then be obtained regarding a certain topic by enabling specific filters.
 
 ## Overview
-The initial search is conducted, appropriately enough, through the search bar, with the help of one of the available filters. If successfull, a single node will appear, which can then be selected. If available, a brieft description and picture are displayed regarding the node's topic.
+The initial search is conducted, appropriately enough, through the search bar, with the help of one of the available filters. If successful, a single node will appear, which can then be selected. If available, a brief description and picture are displayed regarding the node's topic.
 
 ![image](https://user-images.githubusercontent.com/32617691/89716403-97087800-d9a4-11ea-8308-8249e197c39e.png)
 
