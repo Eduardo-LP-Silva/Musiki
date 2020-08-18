@@ -1,6 +1,8 @@
 # Musiki
 Musiki is a web app that allows a user to search for music related topics and visualize them in a graph. Further information can then be obtained regarding a certain topic by enabling specific filters.
 
+[Live Demo](https://musiki.herokuapp.com/)
+
 ## Overview
 The initial search is conducted, appropriately enough, through the search bar, with the help of one of the available filters. If successful, a single node will appear, which can then be selected. If available, a brief description and picture are displayed regarding the node's topic.
 
@@ -24,5 +26,3 @@ npm start
 
 Take note that for the main features of the application to work the server must be up and connected
 to the dbpedia API (a message will be printed in the console when it is ready).
-
-[Live Demo](https://musiki.herokuapp.com/)
