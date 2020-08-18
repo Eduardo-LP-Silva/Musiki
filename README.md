@@ -24,3 +24,5 @@ npm start
 
 Take note that for the main features of the application to work the server must be up and connected
 to the dbpedia API (a message will be printed in the console when it is ready).
+
+[Live Demo](https://musiki.herokuapp.com/)
